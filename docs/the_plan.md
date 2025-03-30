@@ -86,9 +86,7 @@ Frontend options:
     - [Go's builtin template package](https://pkg.go.dev/html/template)
     - [Templ](https://templ.guide/)
   - Something javascript-y like [Svelte](https://svelte.dev/) or [React](https://react.dev/)
-- Styling Options
-  - Vanilla CSS
-  - [Tailwind](https://tailwindcss.com/)
+- Styling: Tailwind (decided) ✅
 
 #### Infrastructure
 We'd like to keep costs as low as possible while in development.
@@ -100,11 +98,7 @@ Server options:
   - Some sort of cloud function option like AWS Lambda
 
 Persistence options:
-  - MySQL (looks like Railway would have good options if we went with them)
-  - Postgres (same, Railway has good options)
-  - SQLite (could use something like [Turso](https://turso.tech/))
-  - AWS DynamoDB or some other NoSQL
-  - AWS S3
+  - SQLite, [Turso](https://turso.tech/)) as an initial deployment option ✅
 
 #### Other Stuff
 
