@@ -75,6 +75,11 @@ Server options:
 - Go: this is pretty much already decided as we're both comfortable with Go. Are there others we
 should consider?
 
+Assuming Go, more options:
+  - Router options:
+    - stdlib: it now supports [path parameters and method specification](https://pkg.go.dev/net/http#hdr-Patterns-ServeMux) for routes. Would this suffice, or do we need to reach for a third party library?
+    - [fiber](https://gofiber.io/)
+
 Frontend options:
 - Markup options
   - HTMX from the server
@@ -100,3 +105,11 @@ Persistence options:
   - SQLite (could use something like [Turso](https://turso.tech/))
   - AWS DynamoDB or some other NoSQL
   - AWS S3
+
+#### Other Stuff
+
+Authentication:
+  - OAuth2 with an identity provider like Google
+    - I don't really know what this takes, but should be possible
+  - Identity as a service, like [Auth0](https://auth0.com/)
+    - Might have more bells and whistles than we need
