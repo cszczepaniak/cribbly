@@ -48,7 +48,7 @@ func (s Service) Get(ctx context.Context, ids ...string) ([]Player, error) {
 	rows, err := s.b.SelectFrom(table.Named("Players")).
 		Columns("ID", "Name").
 		Where(
-			filter.In("Players", ids...),
+			filter.In("ID", ids...),
 		).
 		QueryContext(ctx, s.db)
 	if err != nil {
