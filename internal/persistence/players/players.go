@@ -30,11 +30,11 @@ func NewService(db *sql.DB) Service {
 
 func (s Service) Init(ctx context.Context) error {
 	stmt, err := s.b.CreateTable("Players").
+		IfNotExists().
 		Columns(
 			column.VarChar("ID", 32).PrimaryKey(),
 			column.VarChar("Name", 255),
 		).
-		IfNotExists().
 		Build()
 	if err != nil {
 		return err
