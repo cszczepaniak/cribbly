@@ -29,18 +29,13 @@ func NewService(db *sql.DB) Service {
 }
 
 func (s Service) Init(ctx context.Context) error {
-	stmt, err := s.b.CreateTable("Players").
+	_, err := s.b.CreateTable("Players").
 		IfNotExists().
 		Columns(
 			column.VarChar("ID", 32).PrimaryKey(),
 			column.VarChar("Name", 255),
 		).
-		Build()
-	if err != nil {
-		return err
-	}
-
-	_, err = s.db.ExecContext(ctx, stmt)
+		Exec(s.db)
 	return err
 }
 

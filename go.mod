@@ -3,7 +3,7 @@ module github.com/cszczepaniak/cribbly
 go 1.24.2
 
 require (
-	github.com/cszczepaniak/go-sqlbuilder v0.0.2-alpha
+	github.com/cszczepaniak/go-sqlbuilder v0.0.3
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/stretchr/testify v1.10.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d

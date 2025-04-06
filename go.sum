@@ -4,6 +4,8 @@ github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NA
 github.com/coder/websocket v1.8.12/go.mod h1:LNVeNrXQZfe5qhS9ALED3uA+l5pPqvwXg3CKoDBB2gs=
 github.com/cszczepaniak/go-sqlbuilder v0.0.2-alpha h1:R+5/BLf0ctAgiQUGTQ63tQvgpBJEHSp8G6O+GhaaN60=
 github.com/cszczepaniak/go-sqlbuilder v0.0.2-alpha/go.mod h1:0Ra9IJ9B2OLeASCUpKPvLXH6hvJiaeEsl6OqXsGWMts=
+github.com/cszczepaniak/go-sqlbuilder v0.0.3 h1:HINgRxO9ir+BsuVu7bIvGNzL5VUbvNQEEnqCOY9/wj0=
+github.com/cszczepaniak/go-sqlbuilder v0.0.3/go.mod h1:0Ra9IJ9B2OLeASCUpKPvLXH6hvJiaeEsl6OqXsGWMts=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/mattn/go-sqlite3 v1.14.17 h1:mCRHCLDUBXgpKAqIKsaAaAsrAlbkeomtRFKXh2L6YIM=
