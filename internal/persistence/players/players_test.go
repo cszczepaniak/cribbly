@@ -9,7 +9,7 @@ import (
 )
 
 func TestPlayerService(t *testing.T) {
-	db := sqlite.NewInMemory(t)
+	db := sqlite.NewInMemoryForTest(t)
 	s := NewService(db)
 
 	require.NoError(t, s.Init(t.Context()))
