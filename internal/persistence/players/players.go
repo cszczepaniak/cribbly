@@ -9,6 +9,7 @@ import (
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
+	"github.com/google/uuid"
 )
 
 type Player struct {
@@ -79,7 +80,9 @@ func (s Service) GetOne(ctx context.Context, id string) (Player, error) {
 	return players[0], nil
 }
 
-func (s Service) Create(ctx context.Context, id, name string) error {
+func (s Service) Create(ctx context.Context, name string) (string, error) {
+	id := uuid.NewString()
+
 	_, err := s.b.InsertIntoTable("Players").
 		Fields(
 			"ID", "Name",
@@ -89,5 +92,9 @@ func (s Service) Create(ctx context.Context, id, name string) error {
 			name,
 		).
 		ExecContext(ctx, s.db)
-	return err
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }
