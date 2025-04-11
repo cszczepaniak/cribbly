@@ -7,7 +7,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
 )
 
-func Setup() http.Handler {
+func Setup(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /", components.Handle(index.Index))
