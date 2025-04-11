@@ -40,6 +40,34 @@ func (s Service) Init(ctx context.Context) error {
 	return err
 }
 
+func (s Service) GetAll(ctx context.Context) ([]Player, error) {
+	rows, err := s.b.SelectFrom(table.Named("Players")).
+		Columns("ID", "Name").
+		QueryContext(ctx, s.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	players := make([]Player, 0)
+	for rows.Next() {
+		var p Player
+		err := rows.Scan(&p.ID, &p.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		players = append(players, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
+}
+
 func (s Service) Get(ctx context.Context, ids ...string) ([]Player, error) {
 	rows, err := s.b.SelectFrom(table.Named("Players")).
 		Columns("ID", "Name").
