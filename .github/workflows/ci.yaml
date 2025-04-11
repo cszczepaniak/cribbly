@@ -17,6 +17,17 @@ jobs:
 
       - name: Run Tests
         run: go test -v ./...
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+
+      - run: go build
   verify-generated:
     runs-on: ubuntu-latest
     name: Verify Generated Code
