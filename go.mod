@@ -3,6 +3,7 @@ module github.com/cszczepaniak/cribbly
 go 1.24.2
 
 require (
+	github.com/a-h/htmlformat v0.0.0-20250209131833-673be874c677
 	github.com/a-h/templ v0.3.857
 	github.com/cszczepaniak/go-sqlbuilder v0.0.3
 	github.com/mattn/go-sqlite3 v1.14.17
