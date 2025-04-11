@@ -17,3 +17,21 @@ jobs:
 
       - name: Run Tests
         run: go test -v ./...
+  verify-generated:
+    runs-on: ubuntu-latest
+    name: Verify Generated Code
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - name: Verify Generated Code
+        run: |
+          go tool templ generate
+          DIFF=$(git diff)
+          if [[ -n "$DIFF" ]]; then
+            echo "The following diff was detected when regenerating code. Regenerate locally and commit the changes!"
+            git diff
+            exit 1
+          fi
