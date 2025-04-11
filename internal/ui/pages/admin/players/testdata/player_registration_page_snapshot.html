@@ -1,0 +1,22 @@
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cribbly</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4">
+  </script>
+ </head>
+ <body>
+  <h1>Player Registration</h1>
+  <p>Add New Player</p>
+  <form action="/admin/players" method="POST" hx-post="/admin/players" hx-target="#player-list" hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful) this.reset()">
+   <label>Player Name</label>
+   <input name="name">
+   <input type="submit" value="Add">
+  </form>
+  <ul id="player-list">
+   <li>Mario</li>
+   <li>Luigi</li>
+  </ul>
+ </body>
+</html>
