@@ -17,6 +17,7 @@ func Setup(cfg Config) http.Handler {
 		PlayerService: cfg.PlayerService,
 	}
 	mux.Handle("GET /admin/players", components.Handle(ph.RegistrationPage))
+	mux.Handle("POST /admin/players", components.Handle(ph.PostPlayer))
 
 	return mux
 }

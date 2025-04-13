@@ -1,11 +1,16 @@
 package players
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/a-h/templ"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
+)
+
+const (
+	nameFormKey = "name"
 )
 
 type PlayersHandler struct {
@@ -14,6 +19,20 @@ type PlayersHandler struct {
 
 func (h PlayersHandler) RegistrationPage(r *http.Request) (templ.Component, error) {
 	return h.renderAllPlayers(r, playerRegistrationPage)
+}
+
+func (h PlayersHandler) PostPlayer(r *http.Request) (templ.Component, error) {
+	name := r.FormValue(nameFormKey)
+	if name == "" {
+		return nil, errors.New("name must be provided")
+	}
+
+	_, err := h.PlayerService.Create(r.Context(), name)
+	if err != nil {
+		return nil, err
+	}
+
+	return h.renderAllPlayers(r, playerList)
 }
 
 func (h PlayersHandler) renderAllPlayers(
