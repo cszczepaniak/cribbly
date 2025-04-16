@@ -43,7 +43,7 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script src=\"https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js\"></script> <p>Hello, Cribbly!</p><ul id=\"items\"><li>Item 1</li><li>Item 2</li><li>Item 3</li><li>Item 4</li></ul><script>\n\t\tvar el = document.getElementById('items');\n\t\tvar s = Sortable.create(el, {\n\t\tanimation: 1000,\n\t\t});\n\t\tconsole.log(s);\n\t\tsetTimeout(() => {\n\t\tconsole.log(\"timed out\");\n\t\t\tvar order = s.toArray();\n\t\t\torder.pop();\n\t\t\tconsole.log(order);\n\t\t\ts.sort(order.reverse(), true); // apply\n\t\t}, 1000)\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script src=\"https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js\"></script> <p>Hello, Cribbly!</p><ul id=\"items\"><li>Item 1</li><li>Item 2</li><li>Item 3</li><li>Item 4</li></ul><script>\n\t\tvar el = document.getElementById('items');\n\t\tvar s = Sortable.create(el, {\n\t\tanimation: 1000,\n\t\tdisabled: true,\n\t\t});\n\t\tconsole.log(s);\n\t\tsetTimeout(() => {\n\t\tconsole.log(\"timed out\");\n\t\t\tvar order = s.toArray();\n\t\t\torder.pop();\n\t\t\tconsole.log(order);\n\t\t\ts.sort(order.reverse(), true); // apply\n\t\t}, 1000)\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

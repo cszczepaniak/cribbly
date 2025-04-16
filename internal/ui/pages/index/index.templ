@@ -16,6 +16,7 @@ templ index() {
 		var el = document.getElementById('items');
 		var s = Sortable.create(el, {
 		animation: 1000,
+		disabled: true,
 		});
 		console.log(s);
 		setTimeout(() => {
