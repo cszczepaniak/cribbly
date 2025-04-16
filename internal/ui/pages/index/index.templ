@@ -4,6 +4,27 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components"
 
 templ index() {
 	@components.Shell() {
+		<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 		<p>Hello, Cribbly!</p>
+		<ul id="items">
+			<li>Item 1</li>
+			<li>Item 2</li>
+			<li>Item 3</li>
+			<li>Item 4</li>
+		</ul>
+		<script>
+		var el = document.getElementById('items');
+		var s = Sortable.create(el, {
+		animation: 1000,
+		});
+		console.log(s);
+		setTimeout(() => {
+		console.log("timed out");
+			var order = s.toArray();
+			order.pop();
+			console.log(order);
+			s.sort(order.reverse(), true); // apply
+		}, 1000)
+		</script>
 	}
 }
