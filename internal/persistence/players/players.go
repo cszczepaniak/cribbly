@@ -9,6 +9,7 @@ import (
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
+	"github.com/google/uuid"
 )
 
 type Player struct {
@@ -37,6 +38,34 @@ func (s Service) Init(ctx context.Context) error {
 		).
 		Exec(s.db)
 	return err
+}
+
+func (s Service) GetAll(ctx context.Context) ([]Player, error) {
+	rows, err := s.b.SelectFrom(table.Named("Players")).
+		Columns("ID", "Name").
+		QueryContext(ctx, s.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	players := make([]Player, 0)
+	for rows.Next() {
+		var p Player
+		err := rows.Scan(&p.ID, &p.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		players = append(players, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
 }
 
 func (s Service) Get(ctx context.Context, ids ...string) ([]Player, error) {
@@ -79,7 +108,9 @@ func (s Service) GetOne(ctx context.Context, id string) (Player, error) {
 	return players[0], nil
 }
 
-func (s Service) Create(ctx context.Context, id, name string) error {
+func (s Service) Create(ctx context.Context, name string) (string, error) {
+	id := uuid.NewString()
+
 	_, err := s.b.InsertIntoTable("Players").
 		Fields(
 			"ID", "Name",
@@ -89,5 +120,9 @@ func (s Service) Create(ctx context.Context, id, name string) error {
 			name,
 		).
 		ExecContext(ctx, s.db)
-	return err
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }

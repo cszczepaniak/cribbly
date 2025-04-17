@@ -6,6 +6,7 @@ require (
 	github.com/a-h/htmlformat v0.0.0-20250209131833-673be874c677
 	github.com/a-h/templ v0.3.857
 	github.com/cszczepaniak/go-sqlbuilder v0.0.3
+	github.com/google/uuid v1.6.0
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/stretchr/testify v1.10.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d

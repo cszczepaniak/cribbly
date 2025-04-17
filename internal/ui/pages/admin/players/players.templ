@@ -1,0 +1,31 @@
+package players
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+
+templ playerRegistrationPage(players []string) {
+	@components.Shell() {
+		<h1>Player Registration</h1>
+		<p>Add New Player</p>
+		<form
+			action="/admin/players"
+			method="POST"
+			hx-post="/admin/players"
+			hx-target="#player-list"
+			hx-swap="outerHTML"
+			hx-on::after-request="if(event.detail.successful) this.reset()"
+		>
+			<label>Player Name</label>
+			<input name={ nameFormKey }/>
+			<input type="submit" value="Add"/>
+		</form>
+		@playerList(players)
+	}
+}
+
+templ playerList(players []string) {
+	<ul id="player-list">
+		for _, p := range players {
+			<li>{ p }</li>
+		}
+	</ul>
+}
