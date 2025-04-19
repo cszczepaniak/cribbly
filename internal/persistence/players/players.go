@@ -33,7 +33,7 @@ func (s Service) Init(ctx context.Context) error {
 	_, err := s.b.CreateTable("Players").
 		IfNotExists().
 		Columns(
-			column.VarChar("ID", 32).PrimaryKey(),
+			column.VarChar("ID", 36).PrimaryKey(),
 			column.VarChar("Name", 255),
 		).
 		Exec(s.db)
