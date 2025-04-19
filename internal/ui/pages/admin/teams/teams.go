@@ -12,8 +12,9 @@ import (
 )
 
 type teamsData struct {
-	teams              []team
-	currentlyEditingID string
+	teams            []team
+	currentlyEditing team
+	isEditing        bool
 }
 
 type team struct {
@@ -34,10 +35,30 @@ var teams = []team{{
 	}},
 }}
 
+func getTeam(id string) (team, int) {
+	teamIdx := slices.IndexFunc(teams, func(t team) bool {
+		return t.id == id
+	})
+
+	if teamIdx == -1 {
+		return team{}, -1
+	}
+
+	return teams[teamIdx], teamIdx
+}
+
 func Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+	var editing team
+	var isEditing bool
+	if id := r.URL.Query().Get("edit"); id != "" {
+		editing, _ = getTeam(id)
+		isEditing = true
+	}
+
 	data := teamsData{
-		teams:              teams,
-		currentlyEditingID: r.URL.Query().Get("edit"),
+		teams:            teams,
+		currentlyEditing: editing,
+		isEditing:        isEditing,
 	}
 	return index(data), nil
 }
@@ -53,10 +74,26 @@ func Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 
 func Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	id := r.PathValue("id")
-	teamIdx := slices.IndexFunc(teams, func(t team) bool {
-		return t.id == id
-	})
-	team := teams[teamIdx]
+	team, teamIdx := getTeam(id)
+
+	playerToDelete := r.FormValue("delete")
+	if playerToDelete != "" {
+		idx := slices.IndexFunc(team.players, func(p players.Player) bool {
+			return p.ID == playerToDelete
+		})
+		if idx != -1 {
+			team.players = slices.Delete(team.players, idx, idx+1)
+		}
+
+		teams[teamIdx] = team
+
+		// If we're deleting a player, we'll keep the modal open (by not redirecting).
+		return index(teamsData{
+			teams:            teams,
+			currentlyEditing: team,
+			isEditing:        true,
+		}), nil
+	}
 
 	newName := r.FormValue("name")
 	if newName != "" {

@@ -27,20 +27,31 @@ templ index(data teamsData) {
 					</a>
 				}
 			</ul>
-			if data.currentlyEditingID != "" {
-				@editTeamForm(data.currentlyEditingID)
+			if data.isEditing {
+				@editTeamForm(data.currentlyEditing)
 			}
 		</main>
 	}
 }
 
-templ editTeamForm(id string) {
+templ editTeamForm(team team) {
 	<dialog open>
 		<p>Edit Team</p>
 		<form method="dialog">
 			<label>Team Name</label>
 			<input name="name"/>
-			<button hx-put={ "/admin/teams/" + id } hx-target="#teams" hx-swap="outerHTML">Save</button>
+			<button hx-put={ "/admin/teams/" + team.id } hx-target="#teams" hx-swap="outerHTML">Save</button>
+			<p>Players:</p>
+			<ul>
+				for _, p := range team.players {
+					<li>{ p.Name }</li>
+					<button
+						hx-put={ "/admin/teams/" + team.id + "?delete=" + p.ID }
+						hx-target="#teams"
+						hx-swap="outerHTML"
+					>Delete</button>
+				}
+			</ul>
 		</form>
 	</dialog>
 }
