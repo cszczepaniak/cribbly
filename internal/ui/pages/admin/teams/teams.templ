@@ -2,7 +2,15 @@ package teams
 
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 
-templ index(data teamsData) {
+templ index(teams []team) {
+	@fullIndexPage(teams, editTeamData{}, false)
+}
+
+templ indexEditing(teams []team, editData editTeamData) {
+	@fullIndexPage(teams, editData, true)
+}
+
+templ fullIndexPage(teams []team, editData editTeamData, isEditing bool) {
 	@components.Shell() {
 		<main id="teams">
 			<h1>Team Registration</h1>
@@ -20,38 +28,47 @@ templ index(data teamsData) {
 				<input type="submit" value="Add"/>
 			</form>
 			<ul>
-				for _, team := range data.teams {
+				for _, team := range teams {
 					<li>Team: { team.name }</li>
 					<a href={ templ.SafeURL("/admin/teams?edit=" + team.id) }>
 						<button>Edit</button>
 					</a>
 				}
 			</ul>
-			if data.isEditing {
-				@editTeamForm(data.currentlyEditing)
+			if isEditing {
+				@editTeamForm(editData)
 			}
 		</main>
 	}
 }
 
-templ editTeamForm(team team) {
+templ editTeamForm(data editTeamData) {
 	<dialog open>
 		<p>Edit Team</p>
 		<form method="dialog">
 			<label>Team Name</label>
 			<input name="name"/>
-			<button hx-put={ "/admin/teams/" + team.id } hx-target="#teams" hx-swap="outerHTML">Save</button>
+			<button hx-put={ "/admin/teams/" + data.team.id } hx-target="#teams" hx-swap="outerHTML">Save</button>
 			<p>Players:</p>
 			<ul>
-				for _, p := range team.players {
+				for _, p := range data.team.players {
 					<li>{ p.Name }</li>
 					<button
-						hx-put={ "/admin/teams/" + team.id + "?delete=" + p.ID }
+						hx-put={ "/admin/teams/" + data.team.id + "?delete=" + p.ID }
 						hx-target="#teams"
 						hx-swap="outerHTML"
 					>Delete</button>
 				}
 			</ul>
+			<p>Available Players:</p>
+			<ul>
+				for _, p := range data.availablePlayers {
+					<li>{ p.Name }</li>
+				}
+			</ul>
 		</form>
+		<a href="/admin/teams">
+			<button>Close</button>
+		</a>
 	</dialog>
 }

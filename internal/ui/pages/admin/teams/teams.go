@@ -12,9 +12,12 @@ import (
 )
 
 type teamsData struct {
-	teams            []team
-	currentlyEditing team
-	isEditing        bool
+	teams []team
+}
+
+type editTeamData struct {
+	team             team
+	availablePlayers []players.Player
 }
 
 type team struct {
@@ -59,12 +62,23 @@ func (h TeamsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Compo
 		isEditing = true
 	}
 
-	data := teamsData{
-		teams:            teams,
-		currentlyEditing: editing,
-		isEditing:        isEditing,
+	// If the team is being edited, we'll need to load the list of available players as well.
+	if isEditing {
+		availablePlayers, err := h.PlayerService.GetFreeAgents(r.Context())
+		if err != nil {
+			return nil, err
+		}
+
+		return indexEditing(
+			teams,
+			editTeamData{
+				team:             editing,
+				availablePlayers: availablePlayers,
+			},
+		), nil
 	}
-	return index(data), nil
+
+	return index(teams), nil
 }
 
 func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -73,7 +87,7 @@ func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Comp
 		name: cmp.Or(r.FormValue("name"), "Unnamed Team"),
 	}
 	teams = append(teams, team)
-	return index(teamsData{teams: teams}), nil
+	return index(teams), nil
 }
 
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -91,12 +105,19 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Compon
 
 		teams[teamIdx] = team
 
+		availablePlayers, err := h.PlayerService.GetFreeAgents(r.Context())
+		if err != nil {
+			return nil, err
+		}
+
 		// If we're deleting a player, we'll keep the modal open (by not redirecting).
-		return index(teamsData{
-			teams:            teams,
-			currentlyEditing: team,
-			isEditing:        true,
-		}), nil
+		return indexEditing(
+			teams,
+			editTeamData{
+				team:             team,
+				availablePlayers: availablePlayers,
+			},
+		), nil
 	}
 
 	newName := r.FormValue("name")
