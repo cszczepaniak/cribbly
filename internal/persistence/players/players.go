@@ -35,6 +35,7 @@ func (s Service) Init(ctx context.Context) error {
 		Columns(
 			column.VarChar("ID", 36).PrimaryKey(),
 			column.VarChar("Name", 255),
+			column.VarChar("TeamID", 36).DefaultNull(),
 		).
 		Exec(s.db)
 	return err
