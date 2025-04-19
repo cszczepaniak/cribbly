@@ -11,10 +11,10 @@ import (
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-func NewInMemory(t testing.TB) *sql.DB {
+func NewInMemoryForTest(t testing.TB) *sql.DB {
 	t.Helper()
 
-	db, err := sql.Open("libsql", "file::memory:")
+	db, err := NewInMemory()
 	require.NoError(t, err)
 
 	return db

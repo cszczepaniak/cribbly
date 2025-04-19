@@ -9,28 +9,46 @@ import (
 )
 
 func TestPlayerService(t *testing.T) {
-	db := sqlite.NewInMemory(t)
+	db := sqlite.NewInMemoryForTest(t)
 	s := NewService(db)
 
 	require.NoError(t, s.Init(t.Context()))
 
-	require.NoError(t, s.Create(t.Context(), "id1", "Mario Mario"))
-	require.NoError(t, s.Create(t.Context(), "id2", "Luigi"))
-	require.NoError(t, s.Create(t.Context(), "id3", "Waluigi"))
+	id1, err := s.Create(t.Context(), "Mario Mario")
+	require.NoError(t, err)
+	id2, err := s.Create(t.Context(), "Luigi")
+	require.NoError(t, err)
+	id3, err := s.Create(t.Context(), "Waluigi")
+	require.NoError(t, err)
 
-	players, err := s.Get(t.Context(), "id1", "id2", "id3")
+	players, err := s.Get(t.Context(), id1, id2)
 	require.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
 		[]Player{{
-			ID:   "id1",
+			ID:   id1,
 			Name: "Mario Mario",
 		}, {
-			ID:   "id2",
+			ID:   id2,
+			Name: "Luigi",
+		}},
+		players,
+	)
+
+	players, err = s.GetAll(t.Context())
+	require.NoError(t, err)
+
+	assert.ElementsMatch(
+		t,
+		[]Player{{
+			ID:   id1,
+			Name: "Mario Mario",
+		}, {
+			ID:   id2,
 			Name: "Luigi",
 		}, {
-			ID:   "id3",
+			ID:   id3,
 			Name: "Waluigi",
 		}},
 		players,
