@@ -6,6 +6,6 @@ import (
 	"github.com/a-h/templ"
 )
 
-func Index(*http.Request) (templ.Component, error) {
+func Index(http.ResponseWriter, *http.Request) (templ.Component, error) {
 	return adminPage(), nil
 }

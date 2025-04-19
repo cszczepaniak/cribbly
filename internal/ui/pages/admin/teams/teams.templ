@@ -1,0 +1,46 @@
+package teams
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+
+templ index(data teamsData) {
+	@components.Shell() {
+		<main id="teams">
+			<h1>Team Registration</h1>
+			<p>Add New Team</p>
+			<form
+				action="/admin/teams"
+				method="POST"
+				hx-post="/admin/teams"
+				hx-on::after-request="if(event.detail.successful) this.reset()"
+				hx-target="#teams"
+				hx-swap="outerHTML"
+			>
+				<label>Team Name</label>
+				<input name="name"/>
+				<input type="submit" value="Add"/>
+			</form>
+			<ul>
+				for _, team := range data.teams {
+					<li>Team: { team.name }</li>
+					<a href={ templ.SafeURL("/admin/teams?edit=" + team.id) }>
+						<button>Edit</button>
+					</a>
+				}
+			</ul>
+			if data.currentlyEditingID != "" {
+				@editTeamForm(data.currentlyEditingID)
+			}
+		</main>
+	}
+}
+
+templ editTeamForm(id string) {
+	<dialog open>
+		<p>Edit Team</p>
+		<form method="dialog">
+			<label>Team Name</label>
+			<input name="name"/>
+			<button hx-put={ "/admin/teams/" + id } hx-target="#teams" hx-swap="outerHTML">Save</button>
+		</form>
+	</dialog>
+}

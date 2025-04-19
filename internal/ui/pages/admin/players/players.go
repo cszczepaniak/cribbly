@@ -17,11 +17,11 @@ type PlayersHandler struct {
 	PlayerService players.Service
 }
 
-func (h PlayersHandler) RegistrationPage(r *http.Request) (templ.Component, error) {
+func (h PlayersHandler) RegistrationPage(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	return h.renderAllPlayers(r, playerRegistrationPage)
 }
 
-func (h PlayersHandler) PostPlayer(r *http.Request) (templ.Component, error) {
+func (h PlayersHandler) PostPlayer(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	name := r.FormValue(nameFormKey)
 	if name == "" {
 		return nil, errors.New("name must be provided")
