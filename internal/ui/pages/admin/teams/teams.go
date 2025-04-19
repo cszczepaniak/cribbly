@@ -47,7 +47,11 @@ func getTeam(id string) (team, int) {
 	return teams[teamIdx], teamIdx
 }
 
-func Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+type TeamsHandler struct {
+	PlayerService players.Service
+}
+
+func (h TeamsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	var editing team
 	var isEditing bool
 	if id := r.URL.Query().Get("edit"); id != "" {
@@ -63,7 +67,7 @@ func Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	return index(data), nil
 }
 
-func Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	team := team{
 		id:   uuid.NewString(),
 		name: cmp.Or(r.FormValue("name"), "Unnamed Team"),
@@ -72,7 +76,7 @@ func Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	return index(teamsData{teams: teams}), nil
 }
 
-func Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
+func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
 	id := r.PathValue("id")
 	team, teamIdx := getTeam(id)
 
