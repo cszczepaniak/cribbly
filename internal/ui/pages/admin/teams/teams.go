@@ -1,134 +1,128 @@
 package teams
 
 import (
-	"cmp"
+	"context"
 	"net/http"
-	"slices"
 
 	"github.com/a-h/templ"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
+	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/hx"
-	"github.com/google/uuid"
 )
 
 type teamsData struct {
-	teams []team
+	teams []teams.Team
 }
 
-type editTeamData struct {
-	team             team
-	availablePlayers []players.Player
-}
-
-type team struct {
-	id      string
-	name    string
+type teamData struct {
+	team    teams.Team
 	players []players.Player
 }
 
-var teams = []team{{
-	id:   uuid.NewString(),
-	name: "super mario bros",
-	players: []players.Player{{
-		ID:   uuid.NewString(),
-		Name: "mario",
-	}, {
-		ID:   uuid.NewString(),
-		Name: "luigi",
-	}},
-}}
-
-func getTeam(id string) (team, int) {
-	teamIdx := slices.IndexFunc(teams, func(t team) bool {
-		return t.id == id
-	})
-
-	if teamIdx == -1 {
-		return team{}, -1
-	}
-
-	return teams[teamIdx], teamIdx
+type editTeamData struct {
+	teamData
+	availablePlayers []players.Player
 }
 
 type TeamsHandler struct {
 	PlayerService players.Service
+	TeamService   teams.Service
 }
 
 func (h TeamsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	var editing team
-	var isEditing bool
 	if id := r.URL.Query().Get("edit"); id != "" {
-		editing, _ = getTeam(id)
-		isEditing = true
+		return h.renderIndexWithEditForm(r.Context(), id)
 	}
 
-	// If the team is being edited, we'll need to load the list of available players as well.
-	if isEditing {
-		availablePlayers, err := h.PlayerService.GetFreeAgents(r.Context())
-		if err != nil {
-			return nil, err
-		}
-
-		return indexEditing(
-			teams,
-			editTeamData{
-				team:             editing,
-				availablePlayers: availablePlayers,
-			},
-		), nil
-	}
-
-	return index(teams), nil
+	return h.renderIndex(r.Context())
 }
 
 func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	team := team{
-		id:   uuid.NewString(),
-		name: cmp.Or(r.FormValue("name"), "Unnamed Team"),
+	_, err := h.TeamService.Create(r.Context())
+	if err != nil {
+		return nil, err
 	}
-	teams = append(teams, team)
-	return index(teams), nil
+
+	return h.renderIndex(r.Context())
 }
 
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	id := r.PathValue("id")
-	team, teamIdx := getTeam(id)
+	teamID := r.PathValue("id")
 
-	playerToDelete := r.FormValue("delete")
+	playerToDelete := r.FormValue("unassignPlayer")
 	if playerToDelete != "" {
-		idx := slices.IndexFunc(team.players, func(p players.Player) bool {
-			return p.ID == playerToDelete
-		})
-		if idx != -1 {
-			team.players = slices.Delete(team.players, idx, idx+1)
-		}
-
-		teams[teamIdx] = team
-
-		availablePlayers, err := h.PlayerService.GetFreeAgents(r.Context())
+		err := h.PlayerService.UnassignFromTeam(r.Context(), playerToDelete)
 		if err != nil {
 			return nil, err
 		}
 
-		// If we're deleting a player, we'll keep the modal open (by not redirecting).
-		return indexEditing(
-			teams,
-			editTeamData{
-				team:             team,
-				availablePlayers: availablePlayers,
-			},
-		), nil
+		// If we're unassigning a player, we'll keep the modal open (by not redirecting).
+		return h.renderIndexWithEditForm(r.Context(), teamID)
+	}
+
+	playerToAssign := r.FormValue("assignPlayer")
+	if playerToAssign != "" {
+		// TODO: validate that we're not adding too many players to the team.
+		err := h.PlayerService.AssignToTeam(r.Context(), playerToAssign, teamID)
+		if err != nil {
+			return nil, err
+		}
+
+		// If we're assigning a player, we'll keep the modal open (by not redirecting).
+		return h.renderIndexWithEditForm(r.Context(), teamID)
 	}
 
 	newName := r.FormValue("name")
 	if newName != "" {
-		team.name = newName
+		err := h.TeamService.Rename(r.Context(), teamID, newName)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	teams[teamIdx] = team
 
 	hx.RedirectTo(w, "/admin/teams")
 
 	// Since we're redirecting, the index will get loaded and we don't need to return a component.
 	return nil, nil
+}
+
+func (h TeamsHandler) renderIndex(ctx context.Context) (templ.Component, error) {
+	teams, err := h.TeamService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return index(teams), nil
+}
+
+func (h TeamsHandler) renderIndexWithEditForm(ctx context.Context, teamID string) (templ.Component, error) {
+	// TODO: we could also simply find the team from the list of all teams we query below instead of
+	// making another query to the DB.
+	team, err := h.TeamService.Get(ctx, teamID)
+	if err != nil {
+		return nil, err
+	}
+
+	allTeams, err := h.TeamService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	playersOnThisTeam, err := h.PlayerService.GetForTeam(ctx, teamID)
+	if err != nil {
+		return nil, err
+	}
+
+	availablePlayers, err := h.PlayerService.GetFreeAgents(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return indexEditing(allTeams, editTeamData{
+		teamData: teamData{
+			team:    team,
+			players: playersOnThisTeam,
+		},
+		availablePlayers: availablePlayers,
+	}), nil
 }
