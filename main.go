@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,13 +16,22 @@ import (
 )
 
 func main() {
+	dbSource := flag.String("db", "file", "The source to use for the sqlite database. Valid options are 'memory' or 'file'.")
+	flag.Parse()
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt)
 	defer cancel()
 
-	// TODO: for now we just always set up an in-memory sqlite instance. We could add configuration
-	// to control this, i.e. to use a file for more persistent local development or our prod
-	// database.
-	db, err := sqlite.NewInMemory()
+	var db *sql.DB
+	var err error
+	switch *dbSource {
+	case "file":
+		db, err = sqlite.NewFromFile("data/db.sqlite")
+	case "memory":
+		db, err = sqlite.NewInMemory()
+	default:
+		err = fmt.Errorf("unknown -db value: %q", *dbSource)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
