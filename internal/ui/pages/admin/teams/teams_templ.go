@@ -104,7 +104,7 @@ func fullIndexPage(teams []teams.Team, editData editTeamData, isEditing bool) te
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"teams\"><h1>Team Registration</h1><p>Add New Team</p><form hx-post=\"/admin/teams\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" hx-target=\"#teams\" hx-swap=\"outerHTML\"><label>Team Name</label> <input name=\"name\"> <input type=\"submit\" value=\"Add\"></form><ul>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"teams\"><h1>Team Registration</h1><p>Add New Team</p><button hx-post=\"/admin/teams\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" hx-target=\"#teams\" hx-swap=\"outerHTML\">Add</button><ul>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -116,7 +116,7 @@ func fullIndexPage(teams []teams.Team, editData editTeamData, isEditing bool) te
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(team.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 33, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 31, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -188,7 +188,7 @@ func editTeamForm(data editTeamData) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("/admin/teams/" + data.team.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 52, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 50, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -206,7 +206,7 @@ func editTeamForm(data editTeamData) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 56, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 54, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func editTeamForm(data editTeamData) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("/admin/teams/" + data.team.ID + "?unassignPlayer=" + p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 58, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 56, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -242,7 +242,7 @@ func editTeamForm(data editTeamData) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 67, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 65, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -255,7 +255,7 @@ func editTeamForm(data editTeamData) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("/admin/teams/" + data.team.ID + "?assignPlayer=" + p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 69, Col: 71}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 67, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
