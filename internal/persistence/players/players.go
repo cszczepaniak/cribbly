@@ -121,6 +121,14 @@ func (s Service) AssignToTeam(ctx context.Context, playerID, teamID string) erro
 	return nil
 }
 
+func (s Service) UnassignFromTeam(ctx context.Context, id string) error {
+	_, err := s.b.UpdateTable("Players").
+		SetFieldToNull("TeamID").
+		Where(filter.Equals("ID", id)).
+		ExecContext(ctx, s.db)
+	return err
+}
+
 func (s Service) Create(ctx context.Context, name string) (string, error) {
 	id := uuid.NewString()
 
