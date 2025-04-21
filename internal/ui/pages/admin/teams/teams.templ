@@ -16,8 +16,6 @@ templ fullIndexPage(teams []team, editData editTeamData, isEditing bool) {
 			<h1>Team Registration</h1>
 			<p>Add New Team</p>
 			<form
-				action="/admin/teams"
-				method="POST"
 				hx-post="/admin/teams"
 				hx-on::after-request="if(event.detail.successful) this.reset()"
 				hx-target="#teams"
