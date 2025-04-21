@@ -25,6 +25,7 @@ func Setup(cfg Config) http.Handler {
 
 	th := teams.TeamsHandler{
 		PlayerService: cfg.PlayerService,
+		TeamService:   cfg.TeamService,
 	}
 	mux.Handle("GET /admin/teams", components.Handle(th.Index))
 	mux.Handle("POST /admin/teams", components.Handle(th.Create))
