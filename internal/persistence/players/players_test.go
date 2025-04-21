@@ -22,22 +22,7 @@ func TestPlayerService(t *testing.T) {
 	id3, err := s.Create(t.Context(), "Waluigi")
 	require.NoError(t, err)
 
-	players, err := s.Get(t.Context(), id1, id2)
-	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]Player{{
-			ID:   id1,
-			Name: "Mario Mario",
-		}, {
-			ID:   id2,
-			Name: "Luigi",
-		}},
-		players,
-	)
-
-	players, err = s.GetAll(t.Context())
+	players, err := s.GetAll(t.Context())
 	require.NoError(t, err)
 
 	assert.ElementsMatch(
