@@ -85,23 +85,35 @@ func TestAssigningPlayers(t *testing.T) {
 	mario := players[0]
 	teamID := uuid.NewString()
 
-	err = s.AssignToTeam(t.Context(), mario, teamID)
+	err = s.AssignToTeam(t.Context(), mario.ID, teamID)
 	require.NoError(t, err)
 
 	// Now mario is on a team, so we should only see luigi as a free agent.
 	players, err = s.GetFreeAgents(t.Context())
 	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]Player{{
+	require.Len(t, players, 1)
+	assert.Equal(t,
+		Player{
 			ID:   id2,
 			Name: "Luigi",
-		}},
-		players,
+		},
+		players[0],
+	)
+
+	// We should also see mario on the team
+	players, err = s.GetForTeam(t.Context(), teamID)
+	require.NoError(t, err)
+	require.Len(t, players, 1)
+	assert.Equal(t,
+		Player{
+			ID:     id1,
+			Name:   "Mario Mario",
+			TeamID: teamID,
+		},
+		players[0],
 	)
 
 	// Assigning mario again is an error!
-	err = s.AssignToTeam(t.Context(), mario, teamID)
+	err = s.AssignToTeam(t.Context(), mario.ID, teamID)
 	assert.ErrorIs(t, err, ErrPlayerAlreadyOnATeam)
 }
