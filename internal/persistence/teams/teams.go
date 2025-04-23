@@ -57,6 +57,13 @@ func (s Service) Create(ctx context.Context) (Team, error) {
 	return team, nil
 }
 
+func (s Service) Delete(ctx context.Context, id string) error {
+	_, err := s.b.DeleteFromTable("Teams").
+		Where(filter.Equals("ID", id)).
+		ExecContext(ctx, s.db)
+	return err
+}
+
 func (s Service) Rename(ctx context.Context, id, newName string) error {
 	_, err := s.b.UpdateTable("Teams").
 		SetFieldTo("Name", newName).
