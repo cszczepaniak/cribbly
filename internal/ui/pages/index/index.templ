@@ -12,20 +12,21 @@ templ index() {
 			<li>Item 3</li>
 			<li>Item 4</li>
 		</ul>
-		<script>
-		var el = document.getElementById('items');
-		var s = Sortable.create(el, {
-		animation: 500,
-		disabled: true,
-		});
-		console.log(s);
-		setTimeout(() => {
-		console.log("timed out");
-			var order = s.toArray();
-			order.pop();
-			console.log(order);
-			s.sort(order.reverse(), true); // apply
-		}, 1000)
-		</script>
+		<button hx-get="/list" hx-target="#items" hx-swap="outerHTML">Click</button>
+		// <script>
+		// var el = document.getElementById('items');
+		// var s = Sortable.create(el, {
+		// animation: 500,
+		// disabled: true,
+		// });
+		// console.log(s);
+		// setTimeout(() => {
+		// console.log("timed out");
+		// 	var order = s.toArray();
+		// 	order.pop();
+		// 	console.log(order);
+		// 	s.sort(order.reverse(), true); // apply
+		// }, 1000)
+		// </script>
 	}
 }
