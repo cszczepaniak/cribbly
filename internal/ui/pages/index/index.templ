@@ -4,15 +4,45 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components"
 
 templ index() {
 	@components.Shell() {
+		<style>
+		   @keyframes fade-in {
+			 from { opacity: 0; }
+		   }
+
+		   @keyframes fade-out {
+			 to { opacity: 0; }
+		   }
+
+		   @keyframes slide-from-right {
+			 from { transform: translateX(90px); }
+		   }
+
+		   @keyframes slide-to-left {
+			 to { transform: translateX(-90px); }
+		   }
+
+		   .slide-it {
+			 view-transition-name: slide-it;
+		   }
+
+		   ::view-transition-old(slide-it) {
+			 animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+			 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+		   }
+		   ::view-transition-new(slide-it) {
+			 animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+			 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+		   }
+		</style>
 		<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 		<p>Hello, Cribbly!</p>
-		<ul id="items">
+		<ul class="slide-it" id="items">
 			<li>Item 1</li>
 			<li>Item 2</li>
 			<li>Item 3</li>
 			<li>Item 4</li>
 		</ul>
-		<button hx-get="/list" hx-target="#items" hx-swap="outerHTML">Click</button>
+		<button hx-get="/list" hx-target="#items" hx-swap="outerHTML transition:true">Click</button>
 		// <script>
 		// var el = document.getElementById('items');
 		// var s = Sortable.create(el, {

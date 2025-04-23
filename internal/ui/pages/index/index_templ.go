@@ -43,7 +43,7 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script src=\"https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js\"></script> <p>Hello, Cribbly!</p><ul id=\"items\"><li>Item 1</li><li>Item 2</li><li>Item 3</li><li>Item 4</li></ul><button hx-get=\"/list\" hx-target=\"#items\" hx-swap=\"outerHTML\">Click</button>              ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t   @keyframes fade-in {\n\t\t\t from { opacity: 0; }\n\t\t   }\n\n\t\t   @keyframes fade-out {\n\t\t\t to { opacity: 0; }\n\t\t   }\n\n\t\t   @keyframes slide-from-right {\n\t\t\t from { transform: translateX(90px); }\n\t\t   }\n\n\t\t   @keyframes slide-to-left {\n\t\t\t to { transform: translateX(-90px); }\n\t\t   }\n\n\t\t   .slide-it {\n\t\t\t view-transition-name: slide-it;\n\t\t   }\n\n\t\t   ::view-transition-old(slide-it) {\n\t\t\t animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,\n\t\t\t 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;\n\t\t   }\n\t\t   ::view-transition-new(slide-it) {\n\t\t\t animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,\n\t\t\t 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;\n\t\t   }\n\t\t</style> <script src=\"https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js\"></script> <p>Hello, Cribbly!</p><ul class=\"slide-it\" id=\"items\"><li>Item 1</li><li>Item 2</li><li>Item 3</li><li>Item 4</li></ul><button hx-get=\"/list\" hx-target=\"#items\" hx-swap=\"outerHTML transition:true\">Click</button>              ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
