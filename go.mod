@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/a-h/htmlformat v0.0.0-20250209131833-673be874c677
 	github.com/a-h/templ v0.3.857
-	github.com/cszczepaniak/go-sqlbuilder v0.0.3
+	github.com/cszczepaniak/go-sqlbuilder v0.0.7
 	github.com/google/uuid v1.6.0
 	github.com/ncruces/go-sqlite3 v0.25.0
 	github.com/stretchr/testify v1.10.0
