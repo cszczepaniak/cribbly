@@ -74,23 +74,6 @@ func (s Service) GetForTeam(ctx context.Context, teamID string) ([]Player, error
 	)
 }
 
-func (s Service) Get(ctx context.Context, ids ...string) ([]Player, error) {
-	return scanPlayers(
-		s.selectPlayers().
-			Where(filter.In("ID", ids...)).
-			QueryContext(ctx, s.db),
-	)
-}
-
-func (s Service) GetOne(ctx context.Context, id string) (Player, error) {
-	players, err := s.Get(ctx, id)
-	if err != nil {
-		return Player{}, err
-	}
-
-	return players[0], nil
-}
-
 // AssignToTeam assigns the given player to the given team.
 func (s Service) AssignToTeam(ctx context.Context, playerID, teamID string) error {
 	res, err := s.b.UpdateTable("Players").

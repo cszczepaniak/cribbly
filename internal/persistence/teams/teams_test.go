@@ -1,6 +1,7 @@
 package teams
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
@@ -34,6 +35,14 @@ func TestTeamsService(t *testing.T) {
 	team, err = s.Get(t.Context(), team3.ID)
 	require.NoError(t, err)
 	assert.Equal(t, team3, team)
+
+	require.NoError(t, s.Delete(t.Context(), team2.ID))
+
+	teams, err = s.GetAll(t.Context())
+	assert.ElementsMatch(t, []Team{team1, team3}, teams)
+
+	team, err = s.Get(t.Context(), team2.ID)
+	assert.ErrorIs(t, err, sql.ErrNoRows)
 }
 
 func TestTeamsService_Rename(t *testing.T) {
