@@ -1,0 +1,78 @@
+package teams
+
+import (
+	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
+)
+
+templ index(teams []teams.Team) {
+	@fullIndexPage(teams, editTeamData{}, false)
+}
+
+templ indexEditing(teams []teams.Team, editData editTeamData) {
+	@fullIndexPage(teams, editData, true)
+}
+
+templ fullIndexPage(teams []teams.Team, editData editTeamData, isEditing bool) {
+	@components.Shell() {
+		<main id="teams">
+			<h1>Team Registration</h1>
+			<p>Add New Team</p>
+			<button
+				hx-post="/admin/teams"
+				hx-on::after-request="if(event.detail.successful) this.reset()"
+				hx-target="#teams"
+				hx-swap="outerHTML"
+			>
+				Add
+			</button>
+			<ul>
+				for _, team := range teams {
+					<li>Team: { team.Name }</li>
+					<a href={ templ.SafeURL("/admin/teams?edit=" + team.ID) }>
+						<button>Edit</button>
+					</a>
+				}
+			</ul>
+			if isEditing {
+				@editTeamForm(editData)
+			}
+		</main>
+	}
+}
+
+templ editTeamForm(data editTeamData) {
+	<dialog open>
+		<p>Edit Team</p>
+		<form method="dialog">
+			<label>Team Name</label>
+			<input name="name"/>
+			<button hx-put={ "/admin/teams/" + data.team.ID } hx-target="#teams" hx-swap="outerHTML">Save</button>
+			<p>Players:</p>
+			<ul>
+				for _, p := range data.players {
+					<li>{ p.Name }</li>
+					<button
+						hx-put={ "/admin/teams/" + data.team.ID + "?unassignPlayer=" + p.ID }
+						hx-target="#teams"
+						hx-swap="outerHTML"
+					>Unassign</button>
+				}
+			</ul>
+			<p>Available Players:</p>
+			<ul>
+				for _, p := range data.availablePlayers {
+					<li>{ p.Name }</li>
+					<button
+						hx-put={ "/admin/teams/" + data.team.ID + "?assignPlayer=" + p.ID }
+						hx-target="#teams"
+						hx-swap="outerHTML"
+					>Assign</button>
+				}
+			</ul>
+		</form>
+		<a href="/admin/teams">
+			<button>Close</button>
+		</a>
+	</dialog>
+}

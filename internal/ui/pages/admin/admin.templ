@@ -1,0 +1,11 @@
+package admin
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+
+templ adminPage() {
+	@components.Shell() {
+		<h1>Welcome, Admin</h1>
+		<a href="/admin/players">Players</a>
+		<a href="/admin/teams">Teams</a>
+	}
+}
