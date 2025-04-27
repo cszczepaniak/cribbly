@@ -12,6 +12,7 @@ func Setup() http.Handler {
 
 	mux.Handle("GET /", components.Handle(index.Index))
 	mux.Handle("GET /list", components.Handle(index.Vals))
+	mux.Handle("GET /sse", index.SSE())
 
 	return mux
 }

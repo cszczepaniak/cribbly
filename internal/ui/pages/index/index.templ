@@ -8,7 +8,13 @@ import (
 templ index() {
 	@components.Shell() {
 		<p>Hello, Cribbly!</p>
-		<ul id="items">
+		<ul
+			id="items"
+			hx-swap="transition:true"
+			hx-ext="sse"
+			sse-connect="/sse"
+			sse-swap="values"
+		>
 			@items([]string{"a", "b", "c", "d"})
 		</ul>
 		<button hx-get="/list" hx-target="#items" hx-swap="transition:true">Click</button>
