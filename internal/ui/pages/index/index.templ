@@ -1,66 +1,26 @@
 package index
 
-import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import (
+	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
+)
 
 templ index() {
 	@components.Shell() {
-		<style>
-		   @keyframes fade-in {
-			 from { opacity: 0; }
-		   }
-
-		   @keyframes fade-out {
-			 to { opacity: 0; }
-		   }
-
-		   @keyframes slide-from-right {
-			 from { transform: translateX(90px); }
-		   }
-
-		   @keyframes slide-to-left {
-			 to { transform: translateX(-90px); }
-		   }
-
-		   .slide-it {
-			 view-transition-name: slide-it;
-		   }
-
-		   ::view-transition-old(slide-it) {
-			 animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
-			 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
-		   }
-		   ::view-transition-new(slide-it) {
-			 animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
-			 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
-		   }
-
-		   .smooth {
-			transition: all 1s ease-in-out;
-		   }
-		</style>
-		<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 		<p>Hello, Cribbly!</p>
 		<ul id="items">
-			<li class="smooth" id="item1">item1</li>
-			<li class="smooth" id="item2">item2</li>
-			<li class="smooth" id="item3">item3</li>
-			<li class="smooth" id="item4">item4</li>
+			@items([]string{"a", "b", "c", "d"})
 		</ul>
-		<button hx-get="/list" hx-target="#items" hx-swap="outerHTML transition:true">Click</button>
-		// <script>
-		// var el = document.getElementById('items');
-		// var s = Sortable.create(el, {
-		// animation: 500,
-		// disabled: true,
-		// });
-		// console.log(s);
-		// setTimeout(() => {
-		// console.log("timed out");
-		// 	var order = s.toArray();
-		// 	order.pop();
-		// 	console.log(order);
-		// 	s.sort(order.reverse(), true); // apply
-		// }, 1000)
-		// </script>
+		<button hx-get="/list" hx-target="#items" hx-swap="transition:true">Click</button>
+	}
+}
+
+templ items(vals []string) {
+	for i, val := range vals {
+		<li
+			id={ fmt.Sprintf("item%d", i) }
+			style={ fmt.Sprintf("view-transition-name:item_%v",
+			val) }
+		>{ val }</li>
 	}
 }

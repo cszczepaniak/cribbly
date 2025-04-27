@@ -8,7 +8,10 @@ package index
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import (
+	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
+)
 
 func index() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -43,7 +46,15 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t   @keyframes fade-in {\n\t\t\t from { opacity: 0; }\n\t\t   }\n\n\t\t   @keyframes fade-out {\n\t\t\t to { opacity: 0; }\n\t\t   }\n\n\t\t   @keyframes slide-from-right {\n\t\t\t from { transform: translateX(90px); }\n\t\t   }\n\n\t\t   @keyframes slide-to-left {\n\t\t\t to { transform: translateX(-90px); }\n\t\t   }\n\n\t\t   .slide-it {\n\t\t\t view-transition-name: slide-it;\n\t\t   }\n\n\t\t   ::view-transition-old(slide-it) {\n\t\t\t animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,\n\t\t\t 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;\n\t\t   }\n\t\t   ::view-transition-new(slide-it) {\n\t\t\t animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,\n\t\t\t 600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;\n\t\t   }\n\n\t\t   .smooth {\n\t\t\ttransition: all 1s ease-in-out;\n\t\t   }\n\t\t</style> <script src=\"https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js\"></script> <p>Hello, Cribbly!</p><ul id=\"items\"><li class=\"smooth\" id=\"item1\">item1</li><li class=\"smooth\" id=\"item2\">item2</li><li class=\"smooth\" id=\"item3\">item3</li><li class=\"smooth\" id=\"item4\">item4</li></ul><button hx-get=\"/list\" hx-target=\"#items\" hx-swap=\"outerHTML transition:true\">Click</button>              ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<p>Hello, Cribbly!</p><ul id=\"items\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = items([]string{"a", "b", "c", "d"}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</ul><button hx-get=\"/list\" hx-target=\"#items\" hx-swap=\"transition:true\">Click</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -52,6 +63,77 @@ func index() templ.Component {
 		templ_7745c5c3_Err = components.Shell().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func items(vals []string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		for i, val := range vals {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<li id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("item%d", i))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 21, Col: 32}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" style=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("view-transition-name:item_%v",
+				val))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 23, Col: 7}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(val)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 24, Col: 8}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})
