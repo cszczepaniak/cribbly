@@ -7,14 +7,17 @@ import (
 
 templ index() {
 	@components.Shell() {
+		<script>
+			const evtSource = new EventSource("/sse");
+			evtSource.addEventListener("values", (event) => {
+				const ul = document.getElementById("items");
+				document.startViewTransition(() => {
+					ul.innerHTML = event.data;
+				});
+			})
+		</script>
 		<p>Hello, Cribbly!</p>
-		<ul
-			id="items"
-			hx-swap="transition:true"
-			hx-ext="sse"
-			sse-connect="/sse"
-			sse-swap="values"
-		>
+		<ul id="items">
 			@items([]string{"a", "b", "c", "d"})
 		</ul>
 		<button hx-get="/list" hx-target="#items" hx-swap="transition:true">Click</button>
