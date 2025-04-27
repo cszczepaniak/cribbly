@@ -16,6 +16,11 @@ templ index() {
 				});
 			})
 		</script>
+		<style>
+		::view-transition-group(*) {
+			animation-duration: 600ms;
+		}
+		</style>
 		<p>Hello, Cribbly!</p>
 		<ul id="items">
 			@items([]string{"a", "b", "c", "d"})

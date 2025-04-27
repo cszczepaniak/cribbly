@@ -46,7 +46,7 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\tconst evtSource = new EventSource(\"/sse\");\n\t\t\tevtSource.addEventListener(\"values\", (event) => {\n\t\t\t\tconst ul = document.getElementById(\"items\");\n\t\t\t\tdocument.startViewTransition(() => {\n\t\t\t\t\tul.innerHTML = event.data;\n\t\t\t\t});\n\t\t\t})\n\t\t</script> <p>Hello, Cribbly!</p><ul id=\"items\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\tconst evtSource = new EventSource(\"/sse\");\n\t\t\tevtSource.addEventListener(\"values\", (event) => {\n\t\t\t\tconst ul = document.getElementById(\"items\");\n\t\t\t\tdocument.startViewTransition(() => {\n\t\t\t\t\tul.innerHTML = event.data;\n\t\t\t\t});\n\t\t\t})\n\t\t</script> <style>\n\t\t::view-transition-group(*) {\n\t\tanimation-duration: 500ms;\n\t\t}\n\t\t</style> <p>Hello, Cribbly!</p><ul id=\"items\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -97,7 +97,7 @@ func items(vals []string) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("item%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 30, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 35, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -111,7 +111,7 @@ func items(vals []string) templ.Component {
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("view-transition-name:item_%v",
 				val))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 32, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 37, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -124,7 +124,7 @@ func items(vals []string) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(val)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 33, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/index/index.templ`, Line: 38, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
