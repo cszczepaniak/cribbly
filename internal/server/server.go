@@ -5,6 +5,7 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
@@ -30,6 +31,14 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("GET /admin/teams", components.Handle(th.Index))
 	mux.Handle("POST /admin/teams", components.Handle(th.Create))
 	mux.Handle("PUT /admin/teams/{id}", components.Handle(th.Save))
+
+	dh := divisions.DivisionsHandler{
+		TeamService:     cfg.TeamService,
+		DivisionService: cfg.DivisionService,
+	}
+	mux.Handle("GET /admin/divisions", components.Handle(dh.Index))
+	mux.Handle("POST /admin/divisions", components.Handle(dh.Create))
+	mux.Handle("PUT /admin/divisions/{id}", components.Handle(dh.Save))
 
 	return mux
 }

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -49,9 +50,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	divisionService := divisions.NewService(db)
+	err = divisionService.Init(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cfg := server.Config{
-		PlayerService: playerService,
-		TeamService:   teamService,
+		PlayerService:   playerService,
+		TeamService:     teamService,
+		DivisionService: divisionService,
 	}
 
 	s := server.Setup(cfg)
