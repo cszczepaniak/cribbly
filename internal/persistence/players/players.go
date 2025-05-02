@@ -157,5 +157,4 @@ func scanPlayers(rows *sql.Rows, err error) ([]Player, error) {
 	}
 
 	return players, nil
-
 }
