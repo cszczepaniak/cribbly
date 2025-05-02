@@ -1,0 +1,78 @@
+package divisions
+
+import (
+	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
+)
+
+templ index(divisions []divisions.Division) {
+	@fullIndexPage(divisions, editDivisionData{}, false)
+}
+
+templ indexEditing(divisions []divisions.Division, editData editDivisionData) {
+	@fullIndexPage(divisions, editData, true)
+}
+
+templ fullIndexPage(divisions []divisions.Division, editData editDivisionData, isEditing bool) {
+	@components.Shell() {
+		<main id="divisions">
+			<h1>Division Registration</h1>
+			<p>Add New Division</p>
+			<button
+				hx-post="/admin/divisions"
+				hx-on::after-request="if(event.detail.successful) this.reset()"
+				hx-target="#divisions"
+				hx-swap="outerHTML"
+			>
+				Add
+			</button>
+			<ul>
+				for _, division := range divisions {
+					<li>Division: { division.Name }</li>
+					<a href={ templ.SafeURL("/admin/divisions?edit=" + division.ID) }>
+						<button>Edit</button>
+					</a>
+				}
+			</ul>
+			if isEditing {
+				@editDivisionForm(editData)
+			}
+		</main>
+	}
+}
+
+templ editDivisionForm(data editDivisionData) {
+	<dialog open>
+		<p>Edit Division</p>
+		<form method="dialog">
+			<label>Division Name</label>
+			<input name="name"/>
+			<button hx-put={ "/admin/divisions/" + data.division.ID } hx-target="#divisions" hx-swap="outerHTML">Save</button>
+			<p>Players:</p>
+			<ul>
+				for _, p := range data.teams {
+					<li>{ p.Name }</li>
+					<button
+						hx-put={ "/admin/divisions/" + data.division.ID + "?unassignTeam=" + p.ID }
+						hx-target="#divisions"
+						hx-swap="outerHTML"
+					>Unassign</button>
+				}
+			</ul>
+			<p>Available Players:</p>
+			<ul>
+				for _, p := range data.availableTeams {
+					<li>{ p.Name }</li>
+					<button
+						hx-put={ "/admin/divisions/" + data.division.ID + "?assignTeam=" + p.ID }
+						hx-target="#divisions"
+						hx-swap="outerHTML"
+					>Assign</button>
+				}
+			</ul>
+		</form>
+		<a href="/admin/divisions">
+			<button>Close</button>
+		</a>
+	</dialog>
+}
