@@ -100,30 +100,10 @@ func (s Service) Get(ctx context.Context, id string) (Team, error) {
 }
 
 func (s Service) GetAll(ctx context.Context) ([]Team, error) {
-	rows, err := s.b.SelectFrom(table.Named("Teams")).
-		Columns("ID", "Name").
-		QueryContext(ctx, s.db)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var teams []Team
-	for rows.Next() {
-		var t Team
-		err := rows.Scan(&t.ID, &t.Name)
-		if err != nil {
-			return nil, err
-		}
-
-		teams = append(teams, t)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return teams, nil
+	return scanTeams(
+		s.selectTeams().
+			QueryContext(ctx, s.db),
+	)
 }
 
 // GetWithoutDivision returns all teams that are not assigned to a division.
