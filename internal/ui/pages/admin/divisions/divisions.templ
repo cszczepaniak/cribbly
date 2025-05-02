@@ -48,7 +48,7 @@ templ editDivisionForm(data editDivisionData) {
 			<label>Division Name</label>
 			<input name="name"/>
 			<button hx-put={ "/admin/divisions/" + data.division.ID } hx-target="#divisions" hx-swap="outerHTML">Save</button>
-			<p>Players:</p>
+			<p>Teams:</p>
 			<ul>
 				for _, p := range data.teams {
 					<li>{ p.Name }</li>
@@ -59,7 +59,7 @@ templ editDivisionForm(data editDivisionData) {
 					>Unassign</button>
 				}
 			</ul>
-			<p>Available Players:</p>
+			<p>Available Teams:</p>
 			<ul>
 				for _, p := range data.availableTeams {
 					<li>{ p.Name }</li>
