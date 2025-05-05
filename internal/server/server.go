@@ -30,6 +30,7 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("GET /admin/teams", components.Handle(th.Index))
 	mux.Handle("POST /admin/teams", components.Handle(th.Create))
 	mux.Handle("PUT /admin/teams/{id}", components.Handle(th.Save))
+	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
 
 	return mux
 }

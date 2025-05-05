@@ -1,0 +1,1 @@
+go tool templ generate --watch --cmd "go run main.go" --proxy "http://localhost:8080"
