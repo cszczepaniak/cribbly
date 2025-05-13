@@ -43,24 +43,28 @@ func playerRegistrationPage(players []string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Player Registration</h1><p>Add New Player</p><form action=\"/admin/players\" method=\"POST\" hx-post=\"/admin/players\" hx-target=\"#player-list\" hx-swap=\"outerHTML\" hx-on::after-request=\"if(event.detail.successful) this.reset()\"><label>Player Name</label> <input name=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"min-h-full\"><header class=\"bg-white shadow-sm\"><div class=\"mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8\"><h1 class=\"text-3xl font-bold tracking-tight text-gray-900\">Player Registration</h1></div></header></div><form action=\"/admin/players\" method=\"POST\" hx-post=\"/admin/players\" hx-target=\"#player-list\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) this.reset()\"><label class=\"block text-sm font-medium text-gray-700 mb-1\">Player Name</label> <input class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(nameFormKey)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 18, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 23, Col: 212}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> <input type=\"submit\" value=\"Add\"></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> <input type=\"submit\" class=\"px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500\" value=\"Add\"></form><div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle\"><table class=\"min-w-full border-separate border-spacing-0\"><thead><tr><th scope=\"col\" class=\"sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8\">Name</th></tr></thead> <tbody id=\"player-list\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = playerList(players).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</tbody></table></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -95,32 +99,24 @@ func playerList(players []string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<ul id=\"player-list\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		for _, p := range players {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<tr><td class=\"border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 28, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 50, Col: 126}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</li>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</ul>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
 		}
 		return nil
 	})
