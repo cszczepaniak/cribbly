@@ -16,7 +16,7 @@
    </header>
   </div>
   <form action="/admin/players" method="POST" hx-post="/admin/players" hx-target="#player-list" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()">
-   <label class="block text-sm font-medium text-gray-700 mb-1">Player Name</label> 
+   <label class="block text-sm font-medium text-gray-700 mb-1">Player Name</label>
    <input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4" name="name">
    <input type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value="Add">
   </form>
@@ -45,6 +45,3 @@
   </div>
  </body>
 </html>
-
-<html lang=\"en\">\n <head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Cribbly</title>\n  <script src=\"https://unpkg.com/htmx.org@2.0.4\"></script>\n  <link href=\"/public/output.css\" rel=\"stylesheet\">\n </head>\n <body>\n  <div class=\"min-h-full\">\n   <header class=\"bg-white shadow-sm\">\n    <div class=\"mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8\">\n     <h1 class=\"text-3xl font-bold tracking-tight text-gray-900\">Player Registration</h1>\n    </div>\n   </header>\n  </div>\n  <form action=\"/admin/players\" method=\"POST\" hx-post=\"/admin/players\" hx-target=\"#player-list\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) this.reset()\">\n   <label class=\"block text-sm font-medium text-gray-700 mb-1\">Player Name</label> \n   <input class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-
-<html lang=\"en\">\n <head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Cribbly</title>\n  <script src=\"https://unpkg.com/htmx.org@2.0.4\">\n  </script>\n  <link href=\"/public/output.css\" rel=\"stylesheet\">\n </head>\n <body>\n  <div class=\"min-h-full\">\n   <header class=\"bg-white shadow-sm\">\n    <div class=\"mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8\">\n     <h1 class=\"text-3xl font-bold tracking-tight text-gray-900\">Player Registration</h1>\n    </div>\n   </header>\n  </div>\n  <form action=\"/admin/players\" method=\"POST\" hx-post=\"/admin/players\" hx-target=\"#player-list\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) this.reset()\">\n   <label class=\"block text-sm font-medium text-gray-700 mb-1\">Player Name</label>\n   <input class=\"w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ri
