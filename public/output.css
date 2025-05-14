@@ -210,6 +210,9 @@
   }
 }
 @layer utilities {
+  .pointer-events-none {
+    pointer-events: none;
+  }
   .absolute {
     position: absolute;
   }
@@ -359,6 +362,9 @@
   }
   .transform-gpu {
     transform: translateZ(0) var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+  }
+  .cursor-none {
+    cursor: none;
   }
   .resize {
     resize: both;
@@ -681,6 +687,20 @@
     transition-property: opacity;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .hover\:cursor-auto {
+    &:hover {
+      @media (hover: hover) {
+        cursor: auto;
+      }
+    }
+  }
+  .hover\:cursor-none {
+    &:hover {
+      @media (hover: hover) {
+        cursor: none;
+      }
+    }
   }
   .hover\:cursor-pointer {
     &:hover {

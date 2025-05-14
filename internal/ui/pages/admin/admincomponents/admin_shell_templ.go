@@ -113,7 +113,7 @@ func adminNavs(selected Route) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if selected == targ {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"bg-slate-500 text-white font-semibold px-8 py-2\" disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"pointer-events-none bg-slate-500 text-white font-semibold px-8 py-2\" disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
