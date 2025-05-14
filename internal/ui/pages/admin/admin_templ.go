@@ -43,7 +43,7 @@ func adminPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Welcome, Admin</h1><a href=\"/admin/players\">Players</a> <a href=\"/admin/teams\">Teams</a> <a href=\"/admin/divisions\">Divisions</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"min-h-full\"><header class=\"bg-white shadow-sm\"><div class=\"mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8\"><h1 class=\"text-3xl font-bold tracking-tight text-gray-900\">Welcome, Admin</h1></div></header></div><a href=\"/admin/players\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Players</a> <a href=\"/admin/teams\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Teams</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
