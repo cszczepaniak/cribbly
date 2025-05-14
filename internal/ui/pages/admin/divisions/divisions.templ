@@ -15,10 +15,10 @@ templ indexEditing(divisions []divisions.Division, editData editDivisionData) {
 
 templ fullIndexPage(divisions []divisions.Division, editData editDivisionData, isEditing bool) {
 	@components.Shell() {
-		<main id="divisions">
+		<main id="divisions" class="relative">
 			<div class="min-h-full">
 				<header class="bg-white shadow-sm">
-					<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+					<div class="max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 						<h1 class="text-3xl font-bold tracking-tight text-gray-900">Divisions Registration</h1>
 					</div>
 				</header>
@@ -28,41 +28,36 @@ templ fullIndexPage(divisions []divisions.Division, editData editDivisionData, i
 				hx-on::after-request="if(event.detail.successful) this.reset()"
 				hx-target="#divisions"
 				hx-swap="outerHTML"
-				class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				class="m-4 px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
 			>
-				Add
+				Create New Division
 			</button>
 			<div class="px-4 sm:px-6 lg:px-8">
 				<div class="mt-8 flow-root">
 					<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
 						<div class="inline-block min-w-full py-2 align-middle">
-							<table class="min-w-full border-separate border-spacing-0">
-								<thead>
-									<tr>
-										<th
-											scope="col"
-											class="sticky top-0 z-10 border-b
-										border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left
-										text-sm font-semibold text-gray-900 backdrop-blur-sm
-										backdrop-filter sm:pl-6 lg:pl-8"
-										>Division</th>
-										<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"></th>
-									</tr>
-								</thead>
+							<table class="min-w-full border-separate border-spacing-0 px-8">
 								<tbody id="division-list">
 									for _, division := range divisions {
 										<tr>
 											<td
-												class="border-b border-gray-200 py-4 pr-3 pl-4
-											text-sm font-medium whitespace-nowrap text-gray-900
-											sm:pl-6 lg:pl-8"
+												class="border-b border-gray-200 
+											text-sm font-medium whitespace-nowrap text-gray-900"
 											>{ division.Name }</td>
-											<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">
+											<td
+												class="border-b border-gray-200 py-4 pr-3 pl-4
+											text-sm font-medium whitespace-nowrap text-gray-900"
+											>
 												<a
-													href={ templ.SafeURL("/admin/divisions?edit=" +
-												division.ID) }
+													href={ templ.SafeURL("/admin/divisions?edit=" + division.ID) }
 												>
-													<button class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit</button>
+													<button class="hover:cursor-pointer">
+														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2">
+															<path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"></path>
+															<path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"></path>
+															<path d="M16 5l3 3"></path>
+														</svg>
+													</button>
 												</a>
 											</td>
 										</tr>
@@ -82,75 +77,84 @@ templ fullIndexPage(divisions []divisions.Division, editData editDivisionData, i
 }
 
 templ editDivisionForm(data editDivisionData) {
-	<dialog open>
-		<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-			<h1 class="text-3xl font-bold tracking-tight text-gray-900">Edit Division { data.division.Name }</h1>
-		</div>
-		<form method="dialog">
-			<label class="block text-sm font-medium text-gray-700 mb-1">Division Name</label>
-			<input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4" name="name"/>
-			<label class="block text-sm font-medium text-gray-700 mb-1">Players:</label>
-			<div class="inline-block min-w-full py-2 align-middle">
-				<table class="min-w-full border-separate border-spacing-0">
-					<thead>
-						<tr>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8">Name</th>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"></th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, team := range data.teams {
-							<tr>
-								<td
-									class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm
-								font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8"
-								>{ team.Name }</td>
-								<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">
-									<button
-										hx-put={ "/admin/divisions/" + data.division.ID + "?unassignTeam=" + team.ID }
-										hx-target="#divisions"
-										hx-swap="outerHTML"
-										class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-									>Unassign</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-			<div class="inline-block min-w-full py-2 align-middle">
-				<table class="min-w-full border-separate border-spacing-0">
-					<thead>
-						<tr>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8">Name</th>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"></th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, team := range data.availableTeams {
-							<tr>
-								<td
-									class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm
-								font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8"
-								>{ team.Name }</td>
-								<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">
-									<button
-										hx-put={ "/admin/divisions/" + data.division.ID + "?assignTeam=" +
+	<div
+		class="relative z-10"
+	>
+		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+		<div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+			<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+				<div
+					class="relative transform overflow-hidden rounded-lg bg-white text-left
+					shadow-xl p-6 min-w-md"
+				>
+					<div class="mx-auto max-w-7xl px-4 py-6">
+						<h1 class="text-center text-3xl font-bold text-gray-900">Edit Division { data.division.Name }</h1>
+					</div>
+					<form>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Division Name</label>
+						<input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4" name="name"/>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Teams:</label>
+						<div class="min-w-full py-2 align-middle">
+							for _, team := range data.teams {
+								<div
+									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
+								p-4"
+								>
+									<div class="text-sm font-medium text-gray-900">{ team.Name }</div>
+									<div class="text-sm font-medium text-gray-900">
+										<button
+											hx-put={ "/admin/divisions/" + data.division.ID + "?unassignTeam=" + team.ID }
+											hx-target="#divisions"
+											hx-swap="outerHTML"
+											class="text-red-700 hover:cursor-pointer"
+										>
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2">
+												<path d="M4 7l16 0"></path>
+												<path d="M10 11l0 6"></path>
+												<path d="M14 11l0 6"></path>
+												<path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+												<path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
+											</svg>
+										</button>
+									</div>
+								</div>
+							}
+						</div>
+						<h2 class="block text-sm font-medium text-gray-700 mt-8 mb-1">Available Teams:</h2>
+						<div class="min-w-full py-2 align-middle">
+							for _, team := range data.availableTeams {
+								<div
+									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
+								p-4"
+								>
+									<div class="text-sm font-medium text-gray-900">{ team.Name }</div>
+									<div class="text-sm font-medium text-gray-900">
+										<button
+											hx-put={ "/admin/divisions/" + data.division.ID + "?assignTeam=" +
 										team.ID }
-										hx-target="#divisions"
-										hx-swap="outerHTML"
-										class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-									>Assign</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
+											hx-target="#divisions"
+											hx-swap="outerHTML"
+											class="text-green-600 hover:cursor-pointer"
+										>
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2">
+												<path d="M9 12h6"></path>
+												<path d="M12 9v6"></path>
+												<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"></path>
+											</svg>
+										</button>
+									</div>
+								</div>
+							}
+						</div>
+						<div class="flex justify-end space-x-4 mt-4">
+							<button hx-put={ "/admin/divisions/" + data.division.ID } hx-target="#divisions" hx-swap="outerHTML" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save</button>
+							<a href="/admin/divisions">
+								<button class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Close</button>
+							</a>
+						</div>
+					</form>
+				</div>
 			</div>
-			<button hx-put={ "/admin/divisions/" + data.division.ID } hx-target="#divisions" hx-swap="outerHTML" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save</button>
-		</form>
-		<a href="/admin/divisions">
-			<button class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Close</button>
-		</a>
-	</dialog>
+		</div>
+	</div>
 }
