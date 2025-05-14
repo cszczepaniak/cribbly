@@ -1,16 +1,10 @@
 package players
 
-import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 
 templ playerRegistrationPage(players []string) {
-	@components.Shell() {
-		<div class="min-h-full">
-			<header class="bg-white shadow-sm">
-				<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-				<h1 class="text-3xl font-bold tracking-tight text-gray-900">Player Registration</h1>
-				</div>
-			</header>
-		</div>
+	@admincomponents.Shell(admincomponents.Players) {
+		<h1 class="my-4 text-3xl font-bold tracking-tight text-gray-900">Player Registration</h1>
 		<form
 			action="/admin/players"
 			method="POST"
@@ -40,7 +34,7 @@ templ playerRegistrationPage(players []string) {
 					</div>
 				</div>
 			</div>
-		</div>		
+		</div>
 	}
 }
 
