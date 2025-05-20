@@ -1,0 +1,39 @@
+package admincomponents
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+
+templ Shell(route Route) {
+	@components.Shell() {
+		<div class="flex flex-col">
+			<header class="bg-slate-600 text-white p-6 text-2xl font-semibold">Admin Area</header>
+			<div class="flex min-h-svh">
+				<nav class="bg-slate-700">
+					<ul class="flex flex-col space-y-2 mt-8">
+						@adminNavs(route)
+					</ul>
+				</nav>
+				<main class="p-4">
+					{ children... }
+				</main>
+			</div>
+		</div>
+	}
+}
+
+templ adminNavs(selected Route) {
+	for _, targ := range []Route{
+		Players,
+		Teams,
+		Divisions,
+	} {
+		<a
+			href={ targ.ToSafeURL() }
+			if selected == targ {
+				class="pointer-events-none bg-slate-500 text-white font-semibold px-8 py-2"
+				disabled
+			} else {
+				class="hover:cursor-pointer hover:bg-slate-500 text-white font-semibold px-8 py-2"
+			}
+		>{ string(targ) }</a>
+	}
+}
