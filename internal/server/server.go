@@ -3,11 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/a-h/templ"
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
@@ -33,10 +31,6 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("GET /admin/teams", components.Handle(th.Index))
 	mux.Handle("POST /admin/teams", components.Handle(th.Create))
 	mux.Handle("PUT /admin/teams/{id}", components.Handle(th.Save))
-	// TODO: this is a placeholder until we build a real divisions team
-	mux.Handle("GET /admin/divisions", components.Handle(func(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
-		return admincomponents.Shell(admincomponents.Divisions), nil
-	}))
 	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
 
 	dh := divisions.DivisionsHandler{
