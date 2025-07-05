@@ -29,7 +29,7 @@ templ adminNavs(selected Route) {
 		<a
 			href={ targ.ToSafeURL() }
 			if selected == targ {
-				class="bg-slate-500 text-white font-semibold px-8 py-2"
+				class="pointer-events-none bg-slate-500 text-white font-semibold px-8 py-2"
 				disabled
 			} else {
 				class="hover:cursor-pointer hover:bg-slate-500 text-white font-semibold px-8 py-2"
