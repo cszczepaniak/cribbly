@@ -1,0 +1,10 @@
+{
+    "devDependencies": {
+        "@tailwindcss/cli": "^4.1.11",
+        "prettier": "^3.6.2",
+        "tailwindcss": "^4.1.11"
+    },
+	"prettier": {
+		"tabWidth": 2
+	}
+}

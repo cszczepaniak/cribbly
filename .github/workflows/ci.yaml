@@ -1,48 +1,81 @@
 name: CI
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+    pull_request:
+    push:
+        branches:
+            - main
 jobs:
-  unit-tests:
-    runs-on: ubuntu-latest
-    name: Unit Tests
-    steps:
-      - uses: actions/checkout@v3
+    unit-tests:
+        runs-on: ubuntu-latest
+        name: Unit Tests
+        steps:
+            - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: stable
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
 
-      - name: Run Tests
-        run: go test -v ./...
-  build:
-    runs-on: ubuntu-latest
-    name: Build
-    steps:
-      - uses: actions/checkout@v3
+            - name: Run Tests
+              run: go test -v ./...
+    build:
+        runs-on: ubuntu-latest
+        name: Build
+        steps:
+            - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: stable
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
 
-      - run: go build
-  verify-generated:
-    runs-on: ubuntu-latest
-    name: Verify Generated Code
-    steps:
-      - uses: actions/checkout@v3
+            - run: go build
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: stable
-      - name: Verify Generated Code
-        run: |
-          go tool templ generate
-          DIFF=$(git diff)
-          if [[ -n "$DIFF" ]]; then
-            echo "The following diff was detected when regenerating code. Regenerate locally and commit the changes!"
-            git diff
-            exit 1
-          fi
+    verify-go:
+        runs-on: ubuntu-latest
+        name: Verify Go Code Consistency
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
+
+            - name: Verify Go Formatting
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make format-go
+
+    verify-templ:
+        runs-on: ubuntu-latest
+        name: Verify Templ Code Consistency
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
+
+            - name: Verify Templ Formatting
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make format-templ
+
+            - name: Verify Templ Generation
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make generate-templ
+
+    verify-tailwind:
+        runs-on: ubuntu-latest
+        name: Verify Tailwind
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-node@v4
+
+            - name: Install Node Modules
+              run: npm install
+
+            - name: Verify Tailwind
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make tailwind

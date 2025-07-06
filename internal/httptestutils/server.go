@@ -6,8 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/stretchr/testify/require"
+
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 type Server struct {
