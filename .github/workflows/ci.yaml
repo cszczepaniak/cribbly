@@ -28,9 +28,10 @@ jobs:
                   go-version: stable
 
             - run: go build
-    verify-generated:
+
+    verify-go:
         runs-on: ubuntu-latest
-        name: Verify Code Consistency
+        name: Verify Go Code Consistency
         steps:
             - uses: actions/checkout@v3
 
@@ -38,26 +39,41 @@ jobs:
               with:
                   go-version: stable
 
-            # Node is used to run tailwind
-            - uses: actions/setup-node@v4
-
-            - name: Install Node Modules
-              run: npm install
-
-            - name: Verify Generated Templates
-              uses: ./.github/actions/verify_code_consistency
-              with:
-                  cmd: make generate-templ
-
             - name: Verify Go Formatting
               uses: ./.github/actions/verify_code_consistency
               with:
                   cmd: make format-go
 
-            - name: Verify Template Formatting
+    verify-templ:
+        runs-on: ubuntu-latest
+        name: Verify Templ Code Consistency
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
+
+            - name: Verify Templ Formatting
               uses: ./.github/actions/verify_code_consistency
               with:
                   cmd: make format-templ
+
+            - name: Verify Templ Generation
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make generate-templ
+
+    verify-tailwind:
+        runs-on: ubuntu-latest
+        name: Verify Tailwind
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-node@v4
+
+            - name: Install Node Modules
+              run: npm install
 
             - name: Verify Tailwind
               uses: ./.github/actions/verify_code_consistency
