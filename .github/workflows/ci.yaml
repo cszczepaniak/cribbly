@@ -47,7 +47,7 @@ jobs:
             - name: Verify Generated Templates
               uses: ./.github/actions/verify_code_consistency
               with:
-                  cmd: go tool templ generate
+                  cmd: make generate-templ
 
             - name: Verify Go Formatting
               uses: ./.github/actions/verify_code_consistency
