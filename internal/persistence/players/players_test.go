@@ -3,10 +3,11 @@ package players
 import (
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
 
 func TestPlayerService(t *testing.T) {

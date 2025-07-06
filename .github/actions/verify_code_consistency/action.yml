@@ -1,21 +1,21 @@
 inputs:
-  cmd:
-    required: true
-    type: string
+    cmd:
+        required: true
+        type: string
 
 runs:
-  using: "composite"
-  steps:
-    - name: Run Command
-      run: "${{ inputs.cmd }}"
-      shell: bash
+    using: "composite"
+    steps:
+        - name: Run Command
+          run: "${{ inputs.cmd }}"
+          shell: bash
 
-    - name: Check Diff
-      run: |
-        DIFF=$(git diff)
-        if [[ -n "$DIFF" ]]; then
-          echo "The following diff was detected when regenerating code. Run '${{ inputs.cmd }}' and commit the changes!"
-          git diff
-          exit 1
-        fi
-      shell: bash
+        - name: Check Diff
+          run: |
+              DIFF=$(git diff)
+              if [[ -n "$DIFF" ]]; then
+                echo "The following diff was detected when regenerating code. Run '${{ inputs.cmd }}' and commit the changes!"
+                git diff
+                exit 1
+              fi
+          shell: bash

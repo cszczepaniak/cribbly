@@ -1,7 +1,23 @@
 .PHONY: tailwind
 tailwind:
-	tailwindcss -i internal/ui/components/css/input.css -o public/output.css
+	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css
+	@make format-pretter
 
 .PHONY: tailwind-watch
 tailwind-watch:
-	tailwindcss -i internal/ui/components/css/input.css -o public/output.css --watch
+	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css --watch
+
+.PHONY: format
+format: format-prettier format-go format-templ
+
+.PHONY: format-prettier
+format-prettier:
+	npx prettier . --write --log-level=warn
+
+.PHONY: format-go
+format-go:
+	go tool goimports -local github.com/cszczepaniak/cribbly -w .
+
+.PHONY: format-templ
+format-templ:
+	go tool templ fmt .

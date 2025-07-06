@@ -1,61 +1,65 @@
 name: CI
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+    pull_request:
+    push:
+        branches:
+            - main
 jobs:
-  unit-tests:
-    runs-on: ubuntu-latest
-    name: Unit Tests
-    steps:
-      - uses: actions/checkout@v3
+    unit-tests:
+        runs-on: ubuntu-latest
+        name: Unit Tests
+        steps:
+            - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: stable
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
 
-      - name: Run Tests
-        run: go test -v ./...
-  build:
-    runs-on: ubuntu-latest
-    name: Build
-    steps:
-      - uses: actions/checkout@v3
+            - name: Run Tests
+              run: go test -v ./...
+    build:
+        runs-on: ubuntu-latest
+        name: Build
+        steps:
+            - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: stable
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
 
-      - run: go build
-  verify-generated:
-    runs-on: ubuntu-latest
-    name: Verify Generated Code
-    steps:
-      - uses: actions/checkout@v3
+            - run: go build
+    verify-generated:
+        runs-on: ubuntu-latest
+        name: Verify Generated Code
+        steps:
+            - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: stable
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
 
+            # Node is used to run tailwind
+            - uses: actions/setup-node@v4
 
-      - name: Verify Generated Templates
-        uses: ./.github/actions/verify_code_consistency
-        with:
-          cmd: go tool templ generate
+            - name: "Install Node Modules"
+              run: npm install
 
-      - name: Verify Template Formatting
-        uses: ./.github/actions/verify_code_consistency
-        with:
-          cmd: go tool templ fmt .
+            - name: Verify Generated Templates
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: go tool templ generate
 
-      # Node is used to run tailwind
-      - uses: actions/setup-node@v4
+            - name: Verify Go Formatting
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make format-go
 
-      - name: Install Tailwind
-        run: npm install tailwindcss @tailwindcss/cli@v4.1.5
+            - name: Verify Template Formatting
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make format-templ
 
-      - name: Verify Tailwind
-        uses: ./.github/actions/verify_code_consistency
-        with:
-          cmd: npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css
+            - name: Verify Tailwind
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: make tailwind

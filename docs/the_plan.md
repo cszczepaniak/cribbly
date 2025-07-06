@@ -1,6 +1,7 @@
 # The Plan
 
 ## Minimum Viable Product
+
 There are lots of things we could do with Cribbly to make it awesome. To begin with, let's outline
 the minimum set of things it would need to do to be usable during a cribbage tournament.
 
@@ -28,6 +29,7 @@ An admin should be able to pair players together to form teams.
 An admin should be able to manually group teams together to form divisions.
 
 Questions:
+
 - Are divisions always 4 teams? Do we need to support 5- or 6-team divisions?
 
 #### 4. Prelim Scheduling
@@ -38,6 +40,7 @@ team plays each other team once.
 Any player should be able to view the schedule so they know who to play next.
 
 Questions:
+
 - If 5- or 6-team divisions are supported, how do we handle this?
 
 #### 5. Prelim Score Reporting
@@ -72,38 +75,45 @@ case things go wrong and something needs to be corrected.
 #### Language
 
 Server options:
+
 - Go: this is pretty much already decided as we're both comfortable with Go. Are there others we
-should consider?
+  should consider?
 
 Assuming Go, more options:
-  - Router options:
+
+- Router options:
     - stdlib: it now supports [path parameters and method specification](https://pkg.go.dev/net/http#hdr-Patterns-ServeMux) for routes. Would this suffice, or do we need to reach for a third party library?
     - [fiber](https://gofiber.io/)
 
 Frontend options:
+
 - Markup options
-  - HTMX from the server
-    - [Go's builtin template package](https://pkg.go.dev/html/template)
-    - [Templ](https://templ.guide/)
-  - Something javascript-y like [Svelte](https://svelte.dev/) or [React](https://react.dev/)
+    - HTMX from the server
+        - [Go's builtin template package](https://pkg.go.dev/html/template)
+        - [Templ](https://templ.guide/)
+    - Something javascript-y like [Svelte](https://svelte.dev/) or [React](https://react.dev/)
 - Styling: Tailwind (decided) ✅
 
 #### Infrastructure
+
 We'd like to keep costs as low as possible while in development.
 
 Server options:
-  - [Digital Ocean](https://www.digitalocean.com/)
-  - [Railway](https://railway.com/)
-  - [fly.io](https://fly.io/)
-  - Some sort of cloud function option like AWS Lambda
+
+- [Digital Ocean](https://www.digitalocean.com/)
+- [Railway](https://railway.com/)
+- [fly.io](https://fly.io/)
+- Some sort of cloud function option like AWS Lambda
 
 Persistence options:
-  - SQLite, [Turso](https://turso.tech/)) as an initial deployment option ✅
+
+- SQLite, [Turso](https://turso.tech/)) as an initial deployment option ✅
 
 #### Other Stuff
 
 Authentication:
-  - OAuth2 with an identity provider like Google
+
+- OAuth2 with an identity provider like Google
     - I don't really know what this takes, but should be possible
-  - Identity as a service, like [Auth0](https://auth0.com/)
+- Identity as a service, like [Auth0](https://auth0.com/)
     - Might have more bells and whistles than we need
