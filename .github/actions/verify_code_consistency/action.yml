@@ -1,4 +1,3 @@
-name: Verify Code Consistency
 on:
   workflow_call:
     inputs:
