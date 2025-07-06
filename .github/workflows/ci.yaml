@@ -39,11 +39,11 @@ jobs:
           go-version: stable
 
       - name: Verify Generated Templates
-        uses: ./.github/actions/verify_code_consistency.yml
+        uses: ./.github/actions/verify_code_consistency
         with:
           command: go tool templ generate
 
       - name: Verify Template Formatting
-        uses: ./.github/actions/verify_code_consistency.yml
+        uses: ./.github/actions/verify_code_consistency
         with:
           command: go tool templ fmt .
