@@ -1,7 +1,7 @@
 .PHONY: tailwind
 tailwind:
 	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css
-	@make format-prettier
+	npx prettier public/output.css -w
 
 .PHONY: tailwind-watch
 tailwind-watch:
@@ -13,11 +13,7 @@ generate-templ:
 	@make format-go
 
 .PHONY: format
-format: format-prettier format-go format-templ
-
-.PHONY: format-prettier
-format-prettier:
-	npx prettier . --write --log-level=warn
+format: format-go format-templ
 
 .PHONY: format-go
 format-go:
