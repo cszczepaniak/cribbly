@@ -30,7 +30,7 @@ jobs:
             - run: go build
     verify-generated:
         runs-on: ubuntu-latest
-        name: Verify Generated Code
+        name: Verify Code Consistency
         steps:
             - uses: actions/checkout@v3
 
