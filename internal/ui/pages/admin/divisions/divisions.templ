@@ -135,9 +135,9 @@ templ editDivisionForm(data editDivisionData) {
 							}
 						</div>
 						<div class="flex justify-end space-x-4 mt-4">
-							<button hx-put={ "/admin/divisions/" + data.division.ID } hx-target="#divisions" hx-swap="outerHTML" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save</button>
+							<button hx-put={ "/admin/divisions/" + data.division.ID } hx-target="#divisions" hx-swap="outerHTML" class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Save</button>
 							<a href="/admin/divisions">
-								<button class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Close</button>
+								<button class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Close</button>
 							</a>
 						</div>
 					</form>
