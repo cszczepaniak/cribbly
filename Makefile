@@ -1,7 +1,7 @@
 .PHONY: tailwind
 tailwind:
 	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css
-	@make format-pretter
+	@make format-prettier
 
 .PHONY: tailwind-watch
 tailwind-watch:
