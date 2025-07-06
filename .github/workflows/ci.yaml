@@ -38,8 +38,6 @@ jobs:
         with:
           go-version: stable
 
-      # Node is used to run tailwind
-      - uses: actions/setup-node@v4
 
       - name: Verify Generated Templates
         uses: ./.github/actions/verify_code_consistency
@@ -50,6 +48,12 @@ jobs:
         uses: ./.github/actions/verify_code_consistency
         with:
           cmd: go tool templ fmt .
+
+      # Node is used to run tailwind
+      - uses: actions/setup-node@v4
+
+      - name: Install Tailwind
+        run: npm install tailwindcss @tailwindcss/cli
 
       - name: Verify Tailwind
         uses: ./.github/actions/verify_code_consistency
