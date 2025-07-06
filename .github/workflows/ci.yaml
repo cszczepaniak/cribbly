@@ -41,7 +41,7 @@ jobs:
             # Node is used to run tailwind
             - uses: actions/setup-node@v4
 
-            - name: "Install Node Modules"
+            - name: Install Node Modules
               run: npm install
 
             - name: Verify Generated Templates
