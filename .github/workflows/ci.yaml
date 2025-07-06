@@ -37,12 +37,23 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: stable
+
       - name: Verify Generated Code
         run: |
           go tool templ generate
           DIFF=$(git diff)
           if [[ -n "$DIFF" ]]; then
             echo "The following diff was detected when regenerating code. Regenerate locally and commit the changes!"
+            git diff
+            exit 1
+          fi
+
+      - name: Verify Template Formatting
+        run: |
+          go tool templ fmt .
+          DIFF=$(git diff)
+          if [[ -n "$DIFF" ]]; then
+            echo "The following diff was detected when regenerating code. Re-format locally and commit the changes!"
             git diff
             exit 1
           fi
