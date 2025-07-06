@@ -4,3 +4,5 @@ data/
 .tool-versions
 node_modules
 package*.json
+
+.editorconfig

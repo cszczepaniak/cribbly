@@ -3,71 +3,75 @@ package divisions
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 )
 
 templ index(divisions []divisions.Division) {
-	@fullIndexPage(divisions, editDivisionData{}, false)
+	@admincomponents.Shell(admincomponents.Divisions) {
+		@fullIndexPage(divisions, editDivisionData{}, false)
+	}
 }
 
 templ indexEditing(divisions []divisions.Division, editData editDivisionData) {
-	@fullIndexPage(divisions, editData, true)
+	@admincomponents.Shell(admincomponents.Divisions) {
+		@fullIndexPage(divisions, editData, true)
+	}
 }
 
 templ fullIndexPage(divisions []divisions.Division, editData editDivisionData, isEditing bool) {
-	@admincomponents.Shell(admincomponents.Divisions) {
-		<main id="divisions" class="relative">
-			<h1 class="text-3xl font-bold tracking-tight text-gray-900">Divisions Registration</h1>
-			<button
-				hx-post="/admin/divisions"
-				hx-on::after-request="if(event.detail.successful) this.reset()"
-				hx-target="#divisions"
-				hx-swap="outerHTML"
-				class="my-4 px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-			>
-				Create New Division
-			</button>
-			<div>
-				<div class="mt-8 flow-root">
-					<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-						<div class="inline-block min-w-full py-2 align-middle">
-							<table class="min-w-full border-separate border-spacing-0 px-8">
-								<tbody id="division-list">
-									for _, division := range divisions {
-										<tr>
-											<td
-												class="border-b border-gray-200 
-											text-sm font-medium whitespace-nowrap text-gray-900"
-											>{ division.Name }</td>
-											<td
-												class="border-b border-gray-200 py-4 pr-3 pl-4
-											text-sm font-medium whitespace-nowrap text-gray-900"
+	<main id="divisions">
+		<h1 class="text-3xl font-bold tracking-tight text-gray-900">Divisions Registration</h1>
+		<button
+			hx-post="/admin/divisions"
+			hx-on::after-request="if(event.detail.successful) this.reset()"
+			hx-target="#divisions"
+			hx-swap="outerHTML"
+			class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer"
+		>
+			Create New Division
+		</button>
+		<div>
+			<div class="mt-4">
+				<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
+					<div class="inline-block min-w-full py-2 align-middle">
+						<table class="min-w-full border-separate border-spacing-0 px-8">
+							<tbody id="division-list">
+								for _, division := range divisions {
+									<tr class="flex flex-row space-x-4 border-b border-gray-200 items-center">
+										<td
+											class="py-4 text-sm font-medium whitespace-nowrap text-gray-900"
+										>
+											<a
+												href={ templ.SafeURL("/admin/divisions?edit=" + division.ID) }
 											>
-												<a
-													href={ templ.SafeURL("/admin/divisions?edit=" + division.ID) }
-												>
-													<button class="hover:cursor-pointer">
-														<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2">
-															<path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"></path>
-															<path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"></path>
-															<path d="M16 5l3 3"></path>
-														</svg>
-													</button>
-												</a>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
+												<button class="hover:cursor-pointer">
+													@icons.Edit(icons.WithStrokeWidth(1.5))
+												</button>
+											</a>
+										</td>
+										<td
+											class="py-4 text-sm font-medium whitespace-nowrap text-red-500"
+										>
+											<button hx-delete={ "/admin/divisions/" + division.ID } hx-target="#divisions" hx-swap="outerHTML" class="hover:cursor-pointer">
+												@icons.Trash(icons.WithStrokeWidth(1.5))
+											</button>
+										</td>
+										<td
+											class="text-sm font-medium whitespace-nowrap text-gray-900"
+										>{ division.Name }</td>
+									</tr>
+								}
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
-			<ul></ul>
-			if isEditing {
-				@editDivisionForm(editData)
-			}
-		</main>
-	}
+		</div>
+		<ul></ul>
+		if isEditing {
+			@editDivisionForm(editData)
+		}
+	</main>
 }
 
 templ editDivisionForm(data editDivisionData) {
@@ -82,17 +86,17 @@ templ editDivisionForm(data editDivisionData) {
 					shadow-xl p-6 min-w-md"
 				>
 					<div class="mx-auto max-w-7xl px-4 py-6">
-						<h1 class="text-center text-3xl font-bold text-gray-900">Edit Division { data.division.Name }</h1>
+						<h1 class="text-center text-3xl font-bold text-gray-900">Edit Division</h1>
 					</div>
 					<form>
 						<label class="block text-sm font-medium text-gray-700 mb-1">Division Name</label>
-						<input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4" name="name"/>
+						<input class="w-full px-3 py-2 rounded-md outline outline-slate-400 focus:outline-slate-700 mb-4" name="name" placeholder={ data.division.Name }/>
 						<label class="block text-sm font-medium text-gray-700 mb-1">Teams:</label>
 						<div class="min-w-full py-2 align-middle">
 							for _, team := range data.teams {
 								<div
 									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
-								p-4"
+								px-2 py-4"
 								>
 									<div class="text-sm font-medium text-gray-900">{ team.Name }</div>
 									<div class="text-sm font-medium text-gray-900">
@@ -100,15 +104,9 @@ templ editDivisionForm(data editDivisionData) {
 											hx-put={ "/admin/divisions/" + data.division.ID + "?unassignTeam=" + team.ID }
 											hx-target="#divisions"
 											hx-swap="outerHTML"
-											class="text-red-700 hover:cursor-pointer"
+											class="text-red-500 hover:cursor-pointer"
 										>
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2">
-												<path d="M4 7l16 0"></path>
-												<path d="M10 11l0 6"></path>
-												<path d="M14 11l0 6"></path>
-												<path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-												<path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
-											</svg>
+											@icons.Trash(icons.WithStrokeWidth(1.5))
 										</button>
 									</div>
 								</div>
@@ -119,7 +117,7 @@ templ editDivisionForm(data editDivisionData) {
 							for _, team := range data.availableTeams {
 								<div
 									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
-								p-4"
+								px-2 py-4"
 								>
 									<div class="text-sm font-medium text-gray-900">{ team.Name }</div>
 									<div class="text-sm font-medium text-gray-900">
@@ -130,11 +128,7 @@ templ editDivisionForm(data editDivisionData) {
 											hx-swap="outerHTML"
 											class="text-green-600 hover:cursor-pointer"
 										>
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2">
-												<path d="M9 12h6"></path>
-												<path d="M12 9v6"></path>
-												<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"></path>
-											</svg>
+											@icons.CirclePlus(icons.WithStrokeWidth(1.5))
 										</button>
 									</div>
 								</div>

@@ -30,11 +30,21 @@ type DivisionsHandler struct {
 }
 
 func (h DivisionsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	if id := r.URL.Query().Get("edit"); id != "" {
-		return h.renderIndexWithEditForm(r.Context(), id)
+	divisions, err := h.DivisionService.GetAll(r.Context())
+	if err != nil {
+		return nil, err
 	}
 
-	return h.renderIndex(r.Context())
+	if id := r.URL.Query().Get("edit"); id != "" {
+		editData, err := h.editDataFor(r.Context(), id)
+		if err != nil {
+			return nil, err
+		}
+
+		return indexEditing(divisions, editData), nil
+	}
+
+	return index(divisions), nil
 }
 
 func (h DivisionsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -43,7 +53,27 @@ func (h DivisionsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.
 		return nil, err
 	}
 
-	return h.renderIndex(r.Context())
+	divisions, err := h.DivisionService.GetAll(r.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return fullIndexPage(divisions, editDivisionData{}, false), nil
+}
+
+func (h DivisionsHandler) Delete(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+	divisionID := r.PathValue("id")
+	err := h.DivisionService.Delete(r.Context(), divisionID)
+	if err != nil {
+		return nil, err
+	}
+
+	divisions, err := h.DivisionService.GetAll(r.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return fullIndexPage(divisions, editDivisionData{}, false), nil
 }
 
 func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -86,43 +116,43 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Co
 	return nil, nil
 }
 
-func (h DivisionsHandler) renderIndex(ctx context.Context) (templ.Component, error) {
-	divisions, err := h.DivisionService.GetAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return index(divisions), nil
-}
-
 func (h DivisionsHandler) renderIndexWithEditForm(ctx context.Context, divisionID string) (templ.Component, error) {
-	// TODO: we could also simply find the division from the list of all divisions we query below instead of
-	// making another query to the DB.
-	division, err := h.DivisionService.Get(ctx, divisionID)
-	if err != nil {
-		return nil, err
-	}
-
 	allDivisions, err := h.DivisionService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	teamsInThisDivision, err := h.TeamService.GetForDivision(ctx, divisionID)
+	// TODO: we could also simply find the division from the list of all divisions we query below instead of
+	// making another query to the DB.
+	editData, err := h.editDataFor(ctx, divisionID)
 	if err != nil {
 		return nil, err
+	}
+
+	return fullIndexPage(allDivisions, editData, true), nil
+}
+
+func (h DivisionsHandler) editDataFor(ctx context.Context, divisionID string) (editDivisionData, error) {
+	division, err := h.DivisionService.Get(ctx, divisionID)
+	if err != nil {
+		return editDivisionData{}, err
+	}
+
+	teamsInThisDivision, err := h.TeamService.GetForDivision(ctx, divisionID)
+	if err != nil {
+		return editDivisionData{}, err
 	}
 
 	availableTeams, err := h.TeamService.GetWithoutDivision(ctx)
 	if err != nil {
-		return nil, err
+		return editDivisionData{}, err
 	}
 
-	return indexEditing(allDivisions, editDivisionData{
+	return editDivisionData{
 		divisionData: divisionData{
 			division: division,
 			teams:    teamsInThisDivision,
 		},
 		availableTeams: availableTeams,
-	}), nil
+	}, nil
 }

@@ -40,6 +40,7 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("GET /admin/divisions", components.Handle(dh.Index))
 	mux.Handle("POST /admin/divisions", components.Handle(dh.Create))
 	mux.Handle("PUT /admin/divisions/{id}", components.Handle(dh.Save))
+	mux.Handle("DELETE /admin/divisions/{id}", components.Handle(dh.Delete))
 
 	return mux
 }
