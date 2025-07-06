@@ -8,6 +8,7 @@ runs:
   steps:
     - name: Run Command
       run: "${{ inputs.cmd }}"
+      shell: bash
 
     - name: Check Diff
       run: |
@@ -17,3 +18,4 @@ runs:
           git diff
           exit 1
         fi
+      shell: bash
