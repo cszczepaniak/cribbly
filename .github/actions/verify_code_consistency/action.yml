@@ -1,7 +1,7 @@
 on:
   workflow_call:
     inputs:
-      command:
+      cmd:
         required: true
         type: string
 
@@ -11,13 +11,13 @@ jobs:
     name: Verify Generated Code
     steps:
       - name: Run Command
-        run: ${{ github.event.inputs.command }}
+        run: "${{ inputs.cmd }}"
 
       - name: Check Diff
         run: |
           DIFF=$(git diff)
           if [[ -n "$DIFF" ]]; then
-            echo "The following diff was detected when regenerating code. Run '${{ github.event.inputs.command }}' and commit the changes!"
+            echo "The following diff was detected when regenerating code. Run '${{ inputs.cmd }}' and commit the changes!"
             git diff
             exit 1
           fi
