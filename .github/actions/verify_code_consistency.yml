@@ -1,0 +1,24 @@
+name: Verify Code Consistency
+on:
+  workflow_call:
+    inputs:
+      command:
+        required: true
+        type: string
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    name: Verify Generated Code
+    steps:
+      - name: Run Command
+        run: ${{ inputs.command }}
+
+      - name: Check Diff
+        run: |
+          DIFF=$(git diff)
+          if [[ -n "$DIFF" ]]; then
+            echo "The following diff was detected when regenerating code. Run '${{ inputs.command }}' and commit the changes!"
+            git diff
+            exit 1
+          fi
