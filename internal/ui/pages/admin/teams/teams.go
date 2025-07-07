@@ -42,10 +42,10 @@ func (h TeamsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Compo
 			return nil, err
 		}
 
-		return indexEditing2(teams, editData), nil
+		return indexEditing(teams, editData), nil
 	}
 
-	return index2(teams), nil
+	return index(teams), nil
 }
 
 func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -59,7 +59,7 @@ func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Comp
 		return nil, err
 	}
 
-	return fullIndexPage2(teams, editTeamData{}, false), nil
+	return fullIndexPage(teams, editTeamData{}, false), nil
 }
 
 func (h TeamsHandler) Delete(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -74,7 +74,7 @@ func (h TeamsHandler) Delete(_ http.ResponseWriter, r *http.Request) (templ.Comp
 		return nil, err
 	}
 
-	return fullIndexPage2(teams, editTeamData{}, false), nil
+	return fullIndexPage(teams, editTeamData{}, false), nil
 }
 
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -130,7 +130,7 @@ func (h TeamsHandler) renderIndexWithEditForm(ctx context.Context, teamID string
 		return nil, err
 	}
 
-	return fullIndexPage2(allTeams, editData, true), nil
+	return fullIndexPage(allTeams, editData, true), nil
 }
 
 func (h TeamsHandler) getEditData(ctx context.Context, teamID string) (editTeamData, error) {

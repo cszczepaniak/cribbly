@@ -2,135 +2,147 @@ package teams
 
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
 templ index(teams []teams.Team) {
-	@fullIndexPage(teams, editTeamData{}, false)
-}
-
-templ indexEditing(teams []teams.Team, editData editTeamData) {
-	@fullIndexPage(teams, editData, true)
-}
-
-templ fullIndexPage(teams []teams.Team, editData editTeamData, isEditing bool) {
 	@admincomponents.Shell(admincomponents.Teams) {
-		<main id="teams">
-			<div class="min-h-full">
-				<header class="bg-white shadow-sm">
-					<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-						<h1 class="text-3xl font-bold tracking-tight text-gray-900">Teams Registration</h1>
-					</div>
-				</header>
-			</div>
-			<button
-				hx-post="/admin/teams"
-				hx-on::after-request="if(event.detail.successful) this.reset()"
-				hx-target="#teams"
-				hx-swap="outerHTML"
-				class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-			>
-				Add
-			</button>
-			<div class="px-4 sm:px-6 lg:px-8">
-				<div class="mt-8 flow-root">
-					<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-						<div class="inline-block min-w-full py-2 align-middle">
-							<table class="min-w-full border-separate border-spacing-0">
-								<thead>
-									<tr>
-										<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8">Team</th>
-										<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"></th>
-									</tr>
-								</thead>
-								<tbody id="team-list">
-									for _, team := range teams {
-										<tr>
-											<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">{ team.Name }</td>
-											<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">
-												<a href={ templ.SafeURL("/admin/teams?edit=" + team.ID) }>
-													<button class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit</button>
-												</a>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-			<ul></ul>
-			if isEditing {
-				@editTeamForm(editData)
-			}
-		</main>
+		@fullIndexPage(teams, editTeamData{}, false)
 	}
 }
 
-templ editTeamForm(data editTeamData) {
-	<dialog open>
-		<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-			<h1 class="text-3xl font-bold tracking-tight text-gray-900">Edit Team { data.team.Name }</h1>
+templ indexEditing(teams []teams.Team, editData editTeamData) {
+	@admincomponents.Shell(admincomponents.Teams) {
+		@fullIndexPage(teams, editData, true)
+	}
+}
+
+templ fullIndexPage(teams []teams.Team, editData editTeamData, isEditing bool) {
+	<main id="teams">
+		<h1 class="text-3xl font-bold tracking-tight text-gray-900">Teams Registration</h1>
+		<button
+			hx-post="/admin/teams"
+			hx-on::after-request="if(event.detail.successful) this.reset()"
+			hx-target="#teams"
+			hx-swap="outerHTML"
+			class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer"
+		>
+			Create New Team
+		</button>
+		<div>
+			<div class="mt-4">
+				<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
+					<div class="inline-block min-w-full py-2 align-middle">
+						<table class="min-w-full border-separate border-spacing-0 px-8">
+							<tbody id="team-list">
+								for _, team := range teams {
+									<tr class="flex flex-row space-x-4 border-b border-gray-200 items-center">
+										<td
+											class="py-4 text-sm font-medium whitespace-nowrap text-gray-900"
+										>
+											<a
+												href={ templ.SafeURL("/admin/teams?edit=" + team.ID) }
+											>
+												<button class="hover:cursor-pointer">
+													@icons.Edit(icons.WithStrokeWidth(1.5))
+												</button>
+											</a>
+										</td>
+										<td
+											class="py-4 text-sm font-medium whitespace-nowrap text-red-500"
+										>
+											<button hx-delete={ "/admin/teams/" + team.ID } hx-target="#teams" hx-swap="outerHTML" class="hover:cursor-pointer">
+												@icons.Trash(icons.WithStrokeWidth(1.5))
+											</button>
+										</td>
+										<td
+											class="text-sm font-medium whitespace-nowrap text-gray-900"
+										>{ team.Name }</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
 		</div>
-		<form method="dialog">
-			<label class="block text-sm font-medium text-gray-700 mb-1">Team Name</label>
-			<input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm outline outline-2 outline-black-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4" name="name"/>
-			<label class="block text-sm font-medium text-gray-700 mb-1">Players:</label>
-			<div class="inline-block min-w-full py-2 align-middle">
-				<table class="min-w-full border-separate border-spacing-0">
-					<thead>
-						<tr>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8">Name</th>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"></th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, p := range data.players {
-							<tr>
-								<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">{ p.Name }</td>
-								<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">
-									<button
-										hx-put={ "/admin/teams/" + data.team.ID + "?unassignPlayer=" + p.ID }
-										hx-target="#teams"
-										hx-swap="outerHTML"
-										class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-									>Unassign</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
+		<ul></ul>
+		if isEditing {
+			@editTeamForm(editData)
+		}
+	</main>
+}
+
+templ editTeamForm(data editTeamData) {
+	<div
+		class="relative z-10"
+	>
+		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+		<div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+			<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+				<div
+					class="relative transform overflow-hidden rounded-lg bg-white text-left
+					shadow-xl p-6 min-w-md"
+				>
+					<div class="mx-auto max-w-7xl px-4 py-6">
+						<h1 class="text-center text-3xl font-bold text-gray-900">Edit Team</h1>
+					</div>
+					<form>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Team Name</label>
+						<input class="w-full px-3 py-2 rounded-md outline outline-slate-400 focus:outline-slate-700 mb-4" name="name" placeholder={ data.team.Name }/>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Players:</label>
+						<div class="min-w-full py-2 align-middle">
+							for _, player := range data.players {
+								<div
+									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
+								px-2 py-4"
+								>
+									<div class="text-sm font-medium text-gray-900">{ player.Name }</div>
+									<div class="text-sm font-medium text-gray-900">
+										<button
+											hx-put={ "/admin/teams/" + data.team.ID + "?unassignPlayer=" + player.ID }
+											hx-target="#teams"
+											hx-swap="outerHTML"
+											class="text-red-500 hover:cursor-pointer"
+										>
+											@icons.Trash(icons.WithStrokeWidth(1.5))
+										</button>
+									</div>
+								</div>
+							}
+						</div>
+						<h2 class="block text-sm font-medium text-gray-700 mt-8 mb-1">Available Players:</h2>
+						<div class="min-w-full py-2 align-middle">
+							for _, player := range data.availablePlayers {
+								<div
+									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
+								px-2 py-4"
+								>
+									<div class="text-sm font-medium text-gray-900">{ player.Name }</div>
+									<div class="text-sm font-medium text-gray-900">
+										<button
+											hx-put={ "/admin/teams/" + data.team.ID + "?assignPlayer=" +
+										player.ID }
+											hx-target="#teams"
+											hx-swap="outerHTML"
+											class="text-green-600 hover:cursor-pointer"
+										>
+											@icons.CirclePlus(icons.WithStrokeWidth(1.5))
+										</button>
+									</div>
+								</div>
+							}
+						</div>
+						<div class="flex justify-end space-x-4 mt-4">
+							<button hx-put={ "/admin/teams/" + data.team.ID } hx-target="#teams" hx-swap="outerHTML" class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Save</button>
+							<a href="/admin/teams">
+								<button class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Close</button>
+							</a>
+						</div>
+					</form>
+				</div>
 			</div>
-			<div class="inline-block min-w-full py-2 align-middle">
-				<table class="min-w-full border-separate border-spacing-0">
-					<thead>
-						<tr>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8">Name</th>
-							<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"></th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, p := range data.availablePlayers {
-							<tr>
-								<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">{ p.Name }</td>
-								<td class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8">
-									<button
-										hx-put={ "/admin/teams/" + data.team.ID + "?assignPlayer=" + p.ID }
-										hx-target="#teams"
-										hx-swap="outerHTML"
-										class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-									>Assign</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-			<button hx-put={ "/admin/teams/" + data.team.ID } hx-target="#teams" hx-swap="outerHTML" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save</button>
-		</form>
-		<a href="/admin/teams">
-			<button class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Close</button>
-		</a>
-	</dialog>
+		</div>
+	</div>
 }
