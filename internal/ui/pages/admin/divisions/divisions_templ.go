@@ -128,29 +128,12 @@ func fullIndexPage(ds []divisions.Division, editData editDivisionData, isEditing
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"divisions\"><h1 class=\"text-3xl font-bold tracking-tight text-gray-900\">Divisions Registration</h1><button hx-post=\"/admin/divisions\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" hx-target=\"#divisions\" hx-swap=\"outerHTML\" class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer\">Create New Division</button>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = admincomponents.TeamOrDivisionTable(ds, func(division divisions.Division) admincomponents.TeamOrDivisionRowProps {
-			return admincomponents.TeamOrDivisionRowProps{
-				ID:        division.ID,
-				Name:      division.Name,
-				EditURL:   templ.SafeURL("/admin/divisions?edit=" + division.ID),
-				DeleteURL: templ.SafeURL("/admin/divisions/" + division.ID),
-				HXTarget:  "#divisions",
-			}
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
+
+		var editing *divisions.Division
 		if isEditing {
-			templ_7745c5c3_Err = admincomponents.EditTeamOrDivisionModal(editData.division, editData.teams, editData.availableTeams).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+			editing = &editData.division
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</main>")
+		templ_7745c5c3_Err = admincomponents.TeamOrDivisionPage(ds, editing, editData.teams, editData.availableTeams).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
