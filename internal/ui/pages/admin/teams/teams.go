@@ -31,11 +31,21 @@ type TeamsHandler struct {
 }
 
 func (h TeamsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	if id := r.URL.Query().Get("edit"); id != "" {
-		return h.renderIndexWithEditForm(r.Context(), id)
+	teams, err := h.TeamService.GetAll(r.Context())
+	if err != nil {
+		return nil, err
 	}
 
-	return h.renderIndex(r.Context())
+	if id := r.URL.Query().Get("edit"); id != "" {
+		editData, err := h.getEditData(r.Context(), id)
+		if err != nil {
+			return nil, err
+		}
+
+		return indexEditing2(teams, editData), nil
+	}
+
+	return index2(teams), nil
 }
 
 func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -44,7 +54,27 @@ func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Comp
 		return nil, err
 	}
 
-	return h.renderIndex(r.Context())
+	teams, err := h.TeamService.GetAll(r.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return fullIndexPage2(teams, editTeamData{}, false), nil
+}
+
+func (h TeamsHandler) Delete(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+	id := r.PathValue("id")
+	err := h.TeamService.Delete(r.Context(), id)
+	if err != nil {
+		return nil, err
+	}
+
+	teams, err := h.TeamService.GetAll(r.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return fullIndexPage2(teams, editTeamData{}, false), nil
 }
 
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
@@ -87,43 +117,43 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Compon
 	return nil, nil
 }
 
-func (h TeamsHandler) renderIndex(ctx context.Context) (templ.Component, error) {
-	teams, err := h.TeamService.GetAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return index(teams), nil
-}
-
 func (h TeamsHandler) renderIndexWithEditForm(ctx context.Context, teamID string) (templ.Component, error) {
-	// TODO: we could also simply find the team from the list of all teams we query below instead of
-	// making another query to the DB.
-	team, err := h.TeamService.Get(ctx, teamID)
-	if err != nil {
-		return nil, err
-	}
-
 	allTeams, err := h.TeamService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	playersOnThisTeam, err := h.PlayerService.GetForTeam(ctx, teamID)
+	// TODO: we could also simply find the team from the list of all teams we query below instead of
+	// making another query to the DB.
+	editData, err := h.getEditData(ctx, teamID)
 	if err != nil {
 		return nil, err
+	}
+
+	return fullIndexPage2(allTeams, editData, true), nil
+}
+
+func (h TeamsHandler) getEditData(ctx context.Context, teamID string) (editTeamData, error) {
+	team, err := h.TeamService.Get(ctx, teamID)
+	if err != nil {
+		return editTeamData{}, err
+	}
+
+	playersOnThisTeam, err := h.PlayerService.GetForTeam(ctx, teamID)
+	if err != nil {
+		return editTeamData{}, err
 	}
 
 	availablePlayers, err := h.PlayerService.GetFreeAgents(ctx)
 	if err != nil {
-		return nil, err
+		return editTeamData{}, err
 	}
 
-	return indexEditing(allTeams, editTeamData{
+	return editTeamData{
 		teamData: teamData{
 			team:    team,
 			players: playersOnThisTeam,
 		},
 		availablePlayers: availablePlayers,
-	}), nil
+	}, nil
 }

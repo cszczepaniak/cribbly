@@ -14,8 +14,9 @@ import (
 func Setup(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /", components.Handle(index.Index))
+	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
 
+	mux.Handle("GET /", components.Handle(index.Index))
 	mux.Handle("GET /admin", components.Handle(admin.Index))
 
 	ph := players.PlayersHandler{
@@ -31,7 +32,7 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("GET /admin/teams", components.Handle(th.Index))
 	mux.Handle("POST /admin/teams", components.Handle(th.Create))
 	mux.Handle("PUT /admin/teams/{id}", components.Handle(th.Save))
-	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
+	mux.Handle("DELETE /admin/teams/{id}", components.Handle(th.Delete))
 
 	dh := divisions.DivisionsHandler{
 		TeamService:     cfg.TeamService,
