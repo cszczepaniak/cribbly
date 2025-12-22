@@ -126,6 +126,13 @@ func (s Service) Create(ctx context.Context, name string) (string, error) {
 	return id, nil
 }
 
+func (s Service) Delete(ctx context.Context, id string) error {
+	_, err := s.b.DeleteFromTable("Players").
+		Where(filter.Equals("ID", id)).
+		ExecContext(ctx, s.db)
+	return err
+}
+
 func (s Service) selectPlayers() *sel.Builder {
 	return s.b.SelectFrom(table.Named("Players")).
 		Columns("ID", "Name", "TeamID")

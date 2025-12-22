@@ -5,12 +5,10 @@ package admincomponents
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import (
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
 
-	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
-)
+import "github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 
 func TeamOrDivisionPage[T teamOrDiv, U playerOrTeam](
 	items []T,

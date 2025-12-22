@@ -1,10 +1,9 @@
 package players
 
 import (
-	"errors"
 	"net/http"
 
-	"github.com/a-h/templ"
+	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 )
@@ -17,37 +16,56 @@ type PlayersHandler struct {
 	PlayerService players.Service
 }
 
-func (h PlayersHandler) RegistrationPage(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	return h.renderAllPlayers(r, playerRegistrationPage)
-}
-
-func (h PlayersHandler) PostPlayer(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
-	name := r.FormValue(nameFormKey)
-	if name == "" {
-		return nil, errors.New("name must be provided")
-	}
-
-	_, err := h.PlayerService.Create(r.Context(), name)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.renderAllPlayers(r, playerList)
-}
-
-func (h PlayersHandler) renderAllPlayers(
-	r *http.Request,
-	fn func([]string) templ.Component,
-) (templ.Component, error) {
+func (h PlayersHandler) RegistrationPage(w http.ResponseWriter, r *http.Request) error {
 	players, err := h.PlayerService.GetAll(r.Context())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	playerNames := make([]string, 0, len(players))
-	for _, p := range players {
-		playerNames = append(playerNames, p.Name)
+	tm := playerRegistrationPage(players)
+	return tm.Render(r.Context(), w)
+}
+
+func (h PlayersHandler) PostPlayer(w http.ResponseWriter, r *http.Request) error {
+	var signals struct {
+		Name string `json:"name"`
+	}
+	if err := datastar.ReadSignals(r, &signals); err != nil {
+		return err
 	}
 
-	return fn(playerNames), nil
+	_, err := h.PlayerService.Create(r.Context(), signals.Name)
+	if err != nil {
+		return err
+	}
+
+	players, err := h.PlayerService.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(playerTable(players))
+}
+
+func (h PlayersHandler) DeletePlayer(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	err := h.PlayerService.UnassignFromTeam(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	err = h.PlayerService.Delete(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	players, err := h.PlayerService.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(playerTable(players))
 }

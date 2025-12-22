@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
@@ -22,8 +23,9 @@ func Setup(cfg Config) http.Handler {
 	ph := players.PlayersHandler{
 		PlayerService: cfg.PlayerService,
 	}
-	mux.Handle("GET /admin/players", components.Handle(ph.RegistrationPage))
-	mux.Handle("POST /admin/players", components.Handle(ph.PostPlayer))
+	mux.Handle("GET /admin/players", handleWithError(ph.RegistrationPage))
+	mux.Handle("POST /admin/players", handleWithError(ph.PostPlayer))
+	mux.Handle("DELETE /admin/players/{id}", handleWithError(ph.DeletePlayer))
 
 	th := teams.TeamsHandler{
 		PlayerService: cfg.PlayerService,
@@ -44,4 +46,14 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("DELETE /admin/divisions/{id}", components.Handle(dh.Delete))
 
 	return mux
+}
+
+func handleWithError(fn func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := fn(w, r)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
 }
