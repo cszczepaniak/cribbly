@@ -1,94 +1,113 @@
 package teams
 
 import (
-	"context"
+	"fmt"
 	"net/http"
 
-	"github.com/a-h/templ"
+	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
-	"github.com/cszczepaniak/cribbly/internal/ui/hx"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
-
-type teamsData struct {
-	teams []teams.Team
-}
-
-type teamData struct {
-	team    teams.Team
-	players []players.Player
-}
-
-type editTeamData struct {
-	teamData
-	availablePlayers []players.Player
-}
 
 type TeamsHandler struct {
 	PlayerService players.Service
 	TeamService   teams.Service
 }
 
-func (h TeamsHandler) Index(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+func (h TeamsHandler) Index(w http.ResponseWriter, r *http.Request) error {
 	teams, err := h.TeamService.GetAll(r.Context())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	if id := r.URL.Query().Get("edit"); id != "" {
-		editData, err := h.getEditData(r.Context(), id)
-		if err != nil {
-			return nil, err
-		}
-
-		return indexEditing(teams, editData), nil
-	}
-
-	return index(teams), nil
+	return index(teams).Render(r.Context(), w)
 }
 
-func (h TeamsHandler) Create(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+	team, err := h.TeamService.Get(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	availablePlayers, err := h.PlayerService.GetFreeAgents(r.Context())
+	if err != nil {
+		return err
+	}
+
+	onThisTeam, err := h.PlayerService.GetForTeam(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(
+		admincomponents.EditTeamOrDivisionModal(team, onThisTeam, availablePlayers),
+		datastar.WithSelectorID("teams"),
+		datastar.WithModeAppend(),
+	)
+}
+
+func (h TeamsHandler) CancelEdit(w http.ResponseWriter, r *http.Request) error {
+	sse := datastar.NewSSE(w, r)
+	return resetEdit(sse)
+}
+
+func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 	_, err := h.TeamService.Create(r.Context())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	teams, err := h.TeamService.GetAll(r.Context())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return fullIndexPage(teams, editTeamData{}, false), nil
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(admincomponents.TeamOrDivisionTable(teams))
 }
 
-func (h TeamsHandler) Delete(_ http.ResponseWriter, r *http.Request) (templ.Component, error) {
+func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	err := h.TeamService.Delete(r.Context(), id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	teams, err := h.TeamService.GetAll(r.Context())
-	if err != nil {
-		return nil, err
-	}
-
-	return fullIndexPage(teams, editTeamData{}, false), nil
+	sse := datastar.NewSSE(w, r)
+	return sse.RemoveElementByID(fmt.Sprintf("table-row-%s", id))
 }
 
-func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Component, error) {
+type signals struct {
+	Name string `json:"name"`
+}
+
+func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	teamID := r.PathValue("id")
 
 	playerToDelete := r.FormValue("unassignPlayer")
 	if playerToDelete != "" {
 		err := h.PlayerService.UnassignFromTeam(r.Context(), playerToDelete)
 		if err != nil {
-			return nil, err
+			return err
+		}
+
+		onThisTeam, err := h.PlayerService.GetForTeam(r.Context(), teamID)
+		if err != nil {
+			return err
+		}
+
+		available, err := h.PlayerService.GetFreeAgents(r.Context())
+		if err != nil {
+			return err
 		}
 
 		// If we're unassigning a player, we'll keep the modal open (by not redirecting).
-		return h.renderIndexWithEditForm(r.Context(), teamID)
+		sse := datastar.NewSSE(w, r)
+		return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](teamID, available, onThisTeam))
 	}
 
 	playerToAssign := r.FormValue("assignPlayer")
@@ -96,64 +115,52 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) (templ.Compon
 		// TODO: validate that we're not adding too many players to the team.
 		err := h.PlayerService.AssignToTeam(r.Context(), playerToAssign, teamID)
 		if err != nil {
-			return nil, err
+			return err
+		}
+
+		onThisTeam, err := h.PlayerService.GetForTeam(r.Context(), teamID)
+		if err != nil {
+			return err
+		}
+
+		available, err := h.PlayerService.GetFreeAgents(r.Context())
+		if err != nil {
+			return err
 		}
 
 		// If we're assigning a player, we'll keep the modal open (by not redirecting).
-		return h.renderIndexWithEditForm(r.Context(), teamID)
+		sse := datastar.NewSSE(w, r)
+		return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](teamID, available, onThisTeam))
 	}
 
-	newName := r.FormValue("name")
-	if newName != "" {
-		err := h.TeamService.Rename(r.Context(), teamID, newName)
+	var signals signals
+	err := datastar.ReadSignals(r, &signals)
+	if err != nil {
+		return err
+	}
+
+	if signals.Name != "" {
+		err := h.TeamService.Rename(r.Context(), teamID, signals.Name)
 		if err != nil {
-			return nil, err
+			return err
 		}
+
+		sse := datastar.NewSSE(w, r)
+
+		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(teamID, signals.Name))
+		if err != nil {
+			return err
+		}
+		return resetEdit(sse)
 	}
 
-	hx.RedirectTo(w, "/admin/teams")
-
-	// Since we're redirecting, the index will get loaded and we don't need to return a component.
-	return nil, nil
+	return nil
 }
 
-func (h TeamsHandler) renderIndexWithEditForm(ctx context.Context, teamID string) (templ.Component, error) {
-	allTeams, err := h.TeamService.GetAll(ctx)
+func resetEdit(sse *datastar.ServerSentEventGenerator) error {
+	err := sse.MarshalAndPatchSignals(signals{Name: ""})
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	// TODO: we could also simply find the team from the list of all teams we query below instead of
-	// making another query to the DB.
-	editData, err := h.getEditData(ctx, teamID)
-	if err != nil {
-		return nil, err
-	}
-
-	return fullIndexPage(allTeams, editData, true), nil
-}
-
-func (h TeamsHandler) getEditData(ctx context.Context, teamID string) (editTeamData, error) {
-	team, err := h.TeamService.Get(ctx, teamID)
-	if err != nil {
-		return editTeamData{}, err
-	}
-
-	playersOnThisTeam, err := h.PlayerService.GetForTeam(ctx, teamID)
-	if err != nil {
-		return editTeamData{}, err
-	}
-
-	availablePlayers, err := h.PlayerService.GetFreeAgents(ctx)
-	if err != nil {
-		return editTeamData{}, err
-	}
-
-	return editTeamData{
-		teamData: teamData{
-			team:    team,
-			players: playersOnThisTeam,
-		},
-		availablePlayers: availablePlayers,
-	}, nil
+	return sse.RemoveElementByID("edit-modal")
 }

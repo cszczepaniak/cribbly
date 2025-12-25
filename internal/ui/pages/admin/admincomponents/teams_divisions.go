@@ -1,8 +1,6 @@
 package admincomponents
 
 import (
-	"github.com/a-h/templ"
-
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -34,10 +32,6 @@ func getName[T teamOrDiv](val T) string {
 	}
 }
 
-func getHXTarget[T teamOrDiv]() string {
-	return ifTeam[T]("#teams", "#divisions")
-}
-
 func isTeam[T teamOrDiv]() bool {
 	_, ok := any(*new(T)).(teams.Team)
 	return ok
@@ -54,23 +48,19 @@ type playerOrTeam interface {
 	players.Player | teams.Team
 }
 
-type teamOrDivisionRowProps[T teamOrDiv] struct {
-	val T
-}
-
-func (ps teamOrDivisionRowProps[T]) editURL() templ.SafeURL {
-	switch t := any(ps.val).(type) {
+func editURL[T teamOrDiv](val T) string {
+	switch t := any(val).(type) {
 	case teams.Team:
-		return templ.SafeURL("/admin/teams?edit=" + t.ID)
+		return "/admin/teams/edit/" + t.ID
 	case divisions.Division:
-		return templ.SafeURL("/admin/divisions?edit=" + t.ID)
+		return "/admin/divisions/edit/" + t.ID
 	default:
 		panic("unreachable")
 	}
 }
 
-func (ps teamOrDivisionRowProps[T]) deleteURL() string {
-	switch t := any(ps.val).(type) {
+func deleteURL[T teamOrDiv](val T) string {
+	switch t := any(val).(type) {
 	case teams.Team:
 		return "/admin/teams/" + t.ID
 	case divisions.Division:
@@ -80,53 +70,31 @@ func (ps teamOrDivisionRowProps[T]) deleteURL() string {
 	}
 }
 
-type editTeamOrDivisionModalProps[T teamOrDiv, U playerOrTeam] struct {
-	val                  T
-	itemsInThisTeamOrDiv []U
-	availableItems       []U
-}
-
-func (ps editTeamOrDivisionModalProps[T, U]) isTeam() bool {
-	_, ok := any(ps.val).(teams.Team)
-	return ok
-}
-
-func (ps editTeamOrDivisionModalProps[T, U]) itemID(item U) string {
+func assignURL[U playerOrTeam](teamOrDivID string, item U) string {
 	switch t := any(item).(type) {
 	case players.Player:
-		return t.ID
+		return "/admin/teams/" + teamOrDivID + "?assignPlayer=" + t.ID
 	case teams.Team:
-		return t.ID
-	default:
-		panic("unreachable")
-	}
-}
-
-func (ps editTeamOrDivisionModalProps[T, U]) assignURL(item U) string {
-	switch t := any(ps.val).(type) {
-	case teams.Team:
-		return "/admin/teams/" + t.ID + "?assignPlayer=" + ps.itemID(item)
-	case divisions.Division:
-		return "/admin/divisions/" + t.ID + "?assignTeam=" + ps.itemID(item)
+		return "/admin/divisions/" + teamOrDivID + "?assignTeam=" + t.ID
 	default:
 		panic("unreachable")
 	}
 
 }
 
-func (ps editTeamOrDivisionModalProps[T, U]) unassignURL(item U) string {
-	switch t := any(ps.val).(type) {
+func unassignURL[U playerOrTeam](teamOrDivID string, item U) string {
+	switch t := any(item).(type) {
+	case players.Player:
+		return "/admin/teams/" + teamOrDivID + "?unassignPlayer=" + t.ID
 	case teams.Team:
-		return "/admin/teams/" + t.ID + "?unassignPlayer=" + ps.itemID(item)
-	case divisions.Division:
-		return "/admin/divisions/" + t.ID + "?unassignTeam=" + ps.itemID(item)
+		return "/admin/divisions/" + teamOrDivID + "?unassignTeam=" + t.ID
 	default:
 		panic("unreachable")
 	}
 }
 
-func (ps editTeamOrDivisionModalProps[T, U]) saveURL() string {
-	switch t := any(ps.val).(type) {
+func saveURL[T teamOrDiv](val T) string {
+	switch t := any(val).(type) {
 	case teams.Team:
 		return "/admin/teams/" + t.ID
 	case divisions.Division:
@@ -136,18 +104,7 @@ func (ps editTeamOrDivisionModalProps[T, U]) saveURL() string {
 	}
 }
 
-func (ps editTeamOrDivisionModalProps[T, U]) name() string {
-	switch t := any(ps.val).(type) {
-	case teams.Team:
-		return t.Name
-	case divisions.Division:
-		return t.Name
-	default:
-		panic("unreachable")
-	}
-}
-
-func (ps editTeamOrDivisionModalProps[T, U]) itemName(item U) string {
+func itemName[U playerOrTeam](item U) string {
 	switch t := any(item).(type) {
 	case players.Player:
 		return t.Name
@@ -158,7 +115,18 @@ func (ps editTeamOrDivisionModalProps[T, U]) itemName(item U) string {
 	}
 }
 
-func (ps editTeamOrDivisionModalProps[T, U]) availableTitle() string {
+func itemOrDivID[T teamOrDiv](item T) string {
+	switch t := any(item).(type) {
+	case teams.Team:
+		return t.ID
+	case divisions.Division:
+		return t.ID
+	default:
+		panic("unreachable")
+	}
+}
+
+func availableTitle[U playerOrTeam]() string {
 	switch any(*new(U)).(type) {
 	case players.Player:
 		return "Available Players:"

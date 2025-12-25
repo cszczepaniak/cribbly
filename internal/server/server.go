@@ -34,19 +34,23 @@ func Setup(cfg Config) http.Handler {
 		PlayerService: cfg.PlayerService,
 		TeamService:   cfg.TeamService,
 	}
-	mux.Handle("GET /admin/teams", components.Handle(th.Index))
-	mux.Handle("POST /admin/teams", components.Handle(th.Create))
-	mux.Handle("PUT /admin/teams/{id}", components.Handle(th.Save))
-	mux.Handle("DELETE /admin/teams/{id}", components.Handle(th.Delete))
+	mux.Handle("GET /admin/teams", handleWithError(th.Index))
+	mux.Handle("GET /admin/teams/edit/{id}", handleWithError(th.Edit))
+	mux.Handle("POST /admin/teams/edit/cancel", handleWithError(th.CancelEdit))
+	mux.Handle("POST /admin/teams", handleWithError(th.Create))
+	mux.Handle("PUT /admin/teams/{id}", handleWithError(th.Save))
+	mux.Handle("DELETE /admin/teams/{id}", handleWithError(th.Delete))
 
 	dh := divisions.DivisionsHandler{
 		TeamService:     cfg.TeamService,
 		DivisionService: cfg.DivisionService,
 	}
-	mux.Handle("GET /admin/divisions", components.Handle(dh.Index))
-	mux.Handle("POST /admin/divisions", components.Handle(dh.Create))
-	mux.Handle("PUT /admin/divisions/{id}", components.Handle(dh.Save))
-	mux.Handle("DELETE /admin/divisions/{id}", components.Handle(dh.Delete))
+	mux.Handle("GET /admin/divisions", handleWithError(dh.Index))
+	mux.Handle("GET /admin/divisions/edit/{id}", handleWithError(dh.Edit))
+	mux.Handle("POST /admin/divisions/edit/cancel", handleWithError(dh.CancelEdit))
+	mux.Handle("POST /admin/divisions", handleWithError(dh.Create))
+	mux.Handle("PUT /admin/divisions/{id}", handleWithError(dh.Save))
+	mux.Handle("DELETE /admin/divisions/{id}", handleWithError(dh.Delete))
 
 	gh := games.Handler{}
 	mux.Handle("GET /admin/games", handleWithError(gh.Index))
@@ -56,10 +60,15 @@ func Setup(cfg Config) http.Handler {
 
 func handleWithError(fn func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, r.URL)
+
 		err := fn(w, r)
 		if err != nil {
-			log.Println(err)
+			log.Println(r.Method, r.URL, err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
+
+		log.Println(r.Method, r.URL, "COMPLETE")
 	}
 }

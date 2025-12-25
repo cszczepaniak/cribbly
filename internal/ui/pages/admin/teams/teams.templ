@@ -5,24 +5,8 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
-templ index(teams []teams.Team) {
+templ index(ts []teams.Team) {
 	@admincomponents.Shell(admincomponents.Teams) {
-		@fullIndexPage(teams, editTeamData{}, false)
+		@admincomponents.TeamOrDivisionPage(ts)
 	}
-}
-
-templ indexEditing(teams []teams.Team, editData editTeamData) {
-	@admincomponents.Shell(admincomponents.Teams) {
-		@fullIndexPage(teams, editData, true)
-	}
-}
-
-templ fullIndexPage(ts []teams.Team, editData editTeamData, isEditing bool) {
-	{{
-		var editing *teams.Team
-		if isEditing {
-			editing = &editData.team
-		}
-	}}
-	@admincomponents.TeamOrDivisionPage(ts, editing, editData.players, editData.availablePlayers)
 }

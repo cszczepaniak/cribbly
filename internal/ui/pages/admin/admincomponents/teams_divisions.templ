@@ -1,33 +1,25 @@
 package admincomponents
 
-import "github.com/cszczepaniak/cribbly/internal/ui/components/icons"
+import (
+	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
+)
 
-templ TeamOrDivisionPage[T teamOrDiv, U playerOrTeam](
-	items []T,
-	editing *T,
-	members []U,
-	availableMembers []U,
-) {
+templ TeamOrDivisionPage[T teamOrDiv](items []T) {
 	<main id={ ifTeam[T]("teams", "divisions") }>
 		<h1 class="text-3xl font-bold tracking-tight text-gray-900">{ ifTeam[T]("Teams", "Divisions") } Registration</h1>
 		<button
-			hx-post={ ifTeam[T]("/admin/teams", "/admin/divisions") }
-			hx-on::after-request="if(event.detail.successful) this.reset()"
-			hx-target={ getHXTarget[T]() }
-			hx-swap="outerHTML"
+			data-on:click={ ifTeam[T]("@post('/admin/teams')", "@post('/admin/divisions')") }
 			class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer"
 		>
 			Create New { ifTeam[T]("Team", "Division") }
 		</button>
-		@teamOrDivisionTable(items)
-		if editing != nil {
-			@editTeamOrDivisionModal(*editing, members, availableMembers)
-		}
+		@TeamOrDivisionTable(items)
 	</main>
 }
 
-templ teamOrDivisionTable[T teamOrDiv](items []T) {
-	<div>
+templ TeamOrDivisionTable[T teamOrDiv](items []T) {
+	<div id="table">
 		<div class="mt-4">
 			<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
 				<div class="inline-block min-w-full py-2 align-middle">
@@ -45,35 +37,38 @@ templ teamOrDivisionTable[T teamOrDiv](items []T) {
 }
 
 templ teamOrDivisionRow[T teamOrDiv](val T) {
-	{{ props := teamOrDivisionRowProps[T]{val: val} }}
-	<tr class="flex flex-row space-x-4 border-b border-gray-200 items-center">
+	<tr id={ "table-row-" + getID(val) } class="flex flex-row space-x-4 border-b border-gray-200 items-center">
 		<td
 			class="py-4 text-sm font-medium whitespace-nowrap text-gray-900"
 		>
-			<a
-				href={ props.editURL() }
+			<button
+				class="hover:cursor-pointer"
+				data-on:click={ fmt.Sprintf("@get('%s')", editURL(val)) }
 			>
-				<button class="hover:cursor-pointer">
-					@icons.Edit(icons.WithStrokeWidth(1.5))
-				</button>
-			</a>
+				@icons.Edit(icons.WithStrokeWidth(1.5))
+			</button>
 		</td>
 		<td
 			class="py-4 text-sm font-medium whitespace-nowrap text-red-500"
 		>
-			<button hx-delete={ props.deleteURL() } hx-target={ getHXTarget[T]() } hx-swap="outerHTML" class="hover:cursor-pointer">
+			<button data-on:click={ fmt.Sprintf("@delete('%s')", deleteURL(val)) } class="hover:cursor-pointer">
 				@icons.Trash(icons.WithStrokeWidth(1.5))
 			</button>
 		</td>
-		<td
-			class="text-sm font-medium whitespace-nowrap text-gray-900"
-		>{ getName(val) }</td>
+		@TeamOrDivisionName(getID(val), getName(val))
 	</tr>
 }
 
-templ editTeamOrDivisionModal[T teamOrDiv, U playerOrTeam](val T, items []U, availableItems []U) {
-	{{ props := editTeamOrDivisionModalProps[T, U]{val: val, itemsInThisTeamOrDiv: items, availableItems: availableItems} }}
+templ TeamOrDivisionName(id, name string) {
+	<td
+		id={ "row-name-" + id }
+		class="text-sm font-medium whitespace-nowrap text-gray-900"
+	>{ name }</td>
+}
+
+templ EditTeamOrDivisionModal[T teamOrDiv, U playerOrTeam](val T, items []U, availableItems []U) {
 	<div
+		id="edit-modal"
 		class="relative z-10"
 	>
 		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
@@ -86,63 +81,65 @@ templ editTeamOrDivisionModal[T teamOrDiv, U playerOrTeam](val T, items []U, ava
 					<div class="mx-auto max-w-7xl px-4 py-6">
 						<h1 class="text-center text-3xl font-bold text-gray-900">Edit { ifTeam[T]("Team", "Division") }</h1>
 					</div>
-					<form>
-						<label class="block text-sm font-medium text-gray-700 mb-1">{ ifTeam[T]("Team", "Division") } Name</label>
-						<input class="w-full px-3 py-2 rounded-md outline outline-slate-400 focus:outline-slate-700 mb-4" name="name" placeholder={ getName(props.val) }/>
-						<label class="block text-sm font-medium text-gray-700 mb-1">
-							{ 
-						ifTeam[T]("Players", "Teams") }
-						</label>
-						<div class="min-w-full py-2 align-middle">
-							for _, item := range props.itemsInThisTeamOrDiv {
-								<div
-									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
-								px-2 py-4"
-								>
-									<div class="text-sm font-medium text-gray-900">{ props.itemName(item) }</div>
-									<div class="text-sm font-medium text-gray-900">
-										<button
-											hx-put={ props.unassignURL(item) }
-											hx-target={ getHXTarget[T]() }
-											hx-swap="outerHTML"
-											class="text-red-500 hover:cursor-pointer"
-										>
-											@icons.Trash(icons.WithStrokeWidth(1.5))
-										</button>
-									</div>
-								</div>
-							}
-						</div>
-						<h2 class="block text-sm font-medium text-gray-700 mt-8 mb-1">{ props.availableTitle() }</h2>
-						<div class="min-w-full py-2 align-middle">
-							for _, item := range props.availableItems {
-								<div
-									class="flex items-center justify-between flex-grow border-b border-t border-gray-200
-								px-2 py-4"
-								>
-									<div class="text-sm font-medium text-gray-900">{ props.itemName(item) }</div>
-									<div class="text-sm font-medium text-gray-900">
-										<button
-											hx-put={ props.assignURL(item) }
-											hx-target={ getHXTarget[T]() }
-											hx-swap="outerHTML"
-											class="text-green-600 hover:cursor-pointer"
-										>
-											@icons.CirclePlus(icons.WithStrokeWidth(1.5))
-										</button>
-									</div>
-								</div>
-							}
-						</div>
-						<div class="flex justify-end space-x-4 mt-4">
-							<button hx-put={ props.saveURL() } hx-target={ getHXTarget[T]() } hx-swap="outerHTML" class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Save</button>
-							<a href="/admin/divisions">
-								<button class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Close</button>
-							</a>
-						</div>
-					</form>
+					<label class="block text-sm font-medium text-gray-700 mb-1">{ ifTeam[T]("Team", "Division") } Name</label>
+					<input
+						class="w-full px-3 py-2 rounded-md outline outline-slate-400
+						focus:outline-slate-700 mb-4"
+						data-bind="name"
+						placeholder={ getName(val) }
+					/>
+					@ItemsListing[T](itemOrDivID(val), availableItems, items)
+					<div class="flex justify-end space-x-4 mt-4">
+						<button data-on:click={ fmt.Sprintf("@put('%s')", saveURL(val)) } class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Save</button>
+						<button data-on:click="@post('/admin/teams/edit/cancel')" class="px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer">Close</button>
+					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+}
+
+templ ItemsListing[T teamOrDiv, U playerOrTeam](thingID string, available, onThisOne []U) {
+	<div id="items-listing">
+		<label class="block text-sm font-medium text-gray-700 mb-1">
+			{ ifTeam[T]("Players", "Teams") }
+		</label>
+		<div class="min-w-full py-2 align-middle">
+			for _, item := range onThisOne {
+				<div
+					class="flex items-center justify-between flex-grow border-b border-t border-gray-200
+								px-2 py-4"
+				>
+					<div class="text-sm font-medium text-gray-900">{ itemName(item) }</div>
+					<div class="text-sm font-medium text-gray-900">
+						<button
+							data-on:click={ fmt.Sprintf("@put('%s')", unassignURL(thingID, item)) }
+							class="text-red-500 hover:cursor-pointer"
+						>
+							@icons.Trash(icons.WithStrokeWidth(1.5))
+						</button>
+					</div>
+				</div>
+			}
+		</div>
+		<h2 class="block text-sm font-medium text-gray-700 mt-8 mb-1">{ availableTitle[U]() }</h2>
+		<div class="min-w-full py-2 align-middle">
+			for _, item := range available {
+				<div
+					class="flex items-center justify-between flex-grow border-b border-t border-gray-200
+								px-2 py-4"
+				>
+					<div class="text-sm font-medium text-gray-900">{ itemName(item) }</div>
+					<div class="text-sm font-medium text-gray-900">
+						<button
+							data-on:click={ fmt.Sprintf("@put('%s')", assignURL(thingID, item)) }
+							class="text-green-600 hover:cursor-pointer"
+						>
+							@icons.CirclePlus(icons.WithStrokeWidth(1.5))
+						</button>
+					</div>
+				</div>
+			}
 		</div>
 	</div>
 }
