@@ -1,10 +1,38 @@
 package admincomponents
 
 import (
+	"net/http"
+
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )
+
+type Assignment struct {
+	Assign   string
+	Unassign string
+}
+
+func GetAssignmentForEdit(r *http.Request) Assignment {
+	return Assignment{
+		Assign:   r.FormValue("assign"),
+		Unassign: r.FormValue("unassign"),
+	}
+}
+
+func TableRowID(id string) string {
+	return "table-row-" + id
+}
+
+func tableRowNameID(id string) string {
+	return "table-row-name-" + id
+}
+
+func MainContentID[T teamOrDiv]() string {
+	return ifTeam[T]("teams", "divisions")
+}
+
+const EditModalID = "edit-modal"
 
 type teamOrDiv interface {
 	teams.Team | divisions.Division
@@ -73,9 +101,9 @@ func deleteURL[T teamOrDiv](val T) string {
 func assignURL[U playerOrTeam](teamOrDivID string, item U) string {
 	switch t := any(item).(type) {
 	case players.Player:
-		return "/admin/teams/" + teamOrDivID + "?assignPlayer=" + t.ID
+		return "/admin/teams/" + teamOrDivID + "?assign=" + t.ID
 	case teams.Team:
-		return "/admin/divisions/" + teamOrDivID + "?assignTeam=" + t.ID
+		return "/admin/divisions/" + teamOrDivID + "?assign=" + t.ID
 	default:
 		panic("unreachable")
 	}
@@ -85,9 +113,9 @@ func assignURL[U playerOrTeam](teamOrDivID string, item U) string {
 func unassignURL[U playerOrTeam](teamOrDivID string, item U) string {
 	switch t := any(item).(type) {
 	case players.Player:
-		return "/admin/teams/" + teamOrDivID + "?unassignPlayer=" + t.ID
+		return "/admin/teams/" + teamOrDivID + "?unassign=" + t.ID
 	case teams.Team:
-		return "/admin/divisions/" + teamOrDivID + "?unassignTeam=" + t.ID
+		return "/admin/divisions/" + teamOrDivID + "?unassign=" + t.ID
 	default:
 		panic("unreachable")
 	}

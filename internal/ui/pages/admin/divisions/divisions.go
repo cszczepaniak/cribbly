@@ -88,32 +88,14 @@ type signals struct {
 func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	divisionID := r.PathValue("id")
 
-	teamToDelete := r.FormValue("unassignTeam")
-	if teamToDelete != "" {
-		err := h.TeamService.UnassignFromDivision(r.Context(), teamToDelete)
-		if err != nil {
-			return err
+	a := admincomponents.GetAssignmentForEdit(r)
+	if a != (admincomponents.Assignment{}) {
+		var err error
+		if a.Assign != "" {
+			err = h.TeamService.AssignToDivision(r.Context(), a.Assign, divisionID)
+		} else {
+			err = h.TeamService.UnassignFromDivision(r.Context(), a.Unassign)
 		}
-
-		onThisTeam, err := h.TeamService.GetForDivision(r.Context(), divisionID)
-		if err != nil {
-			return err
-		}
-
-		available, err := h.TeamService.GetWithoutDivision(r.Context())
-		if err != nil {
-			return err
-		}
-
-		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
-		sse := datastar.NewSSE(w, r)
-		return sse.PatchElementTempl(admincomponents.ItemsListing[divisions.Division](divisionID, available, onThisTeam))
-	}
-
-	teamToAssign := r.FormValue("assignTeam")
-	if teamToAssign != "" {
-		// TODO: validate that we're not adding too many teams to the division
-		err := h.TeamService.AssignToDivision(r.Context(), teamToAssign, divisionID)
 		if err != nil {
 			return err
 		}
@@ -128,7 +110,7 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		// If we're assigning a player, we'll keep the modal open (by not redirecting).
+		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
 		sse := datastar.NewSSE(w, r)
 		return sse.PatchElementTempl(admincomponents.ItemsListing[divisions.Division](divisionID, available, inThisDivision))
 	}
@@ -162,5 +144,5 @@ func resetEdit(sse *datastar.ServerSentEventGenerator) error {
 	if err != nil {
 		return err
 	}
-	return sse.RemoveElementByID("edit-modal")
+	return sse.RemoveElementByID(admincomponents.EditModalID)
 }

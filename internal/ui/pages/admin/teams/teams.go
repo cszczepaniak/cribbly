@@ -1,7 +1,6 @@
 package teams
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/starfederation/datastar-go/datastar"
@@ -45,7 +44,7 @@ func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	sse := datastar.NewSSE(w, r)
 	return sse.PatchElementTempl(
 		admincomponents.EditTeamOrDivisionModal(team, onThisTeam, availablePlayers),
-		datastar.WithSelectorID("teams"),
+		datastar.WithSelectorID(admincomponents.MainContentID[teams.Team]()),
 		datastar.WithModeAppend(),
 	)
 }
@@ -78,7 +77,7 @@ func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.RemoveElementByID(fmt.Sprintf("table-row-%s", id))
+	return sse.RemoveElementByID(admincomponents.TableRowID(id))
 }
 
 type signals struct {
@@ -88,9 +87,14 @@ type signals struct {
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	teamID := r.PathValue("id")
 
-	playerToDelete := r.FormValue("unassignPlayer")
-	if playerToDelete != "" {
-		err := h.PlayerService.UnassignFromTeam(r.Context(), playerToDelete)
+	a := admincomponents.GetAssignmentForEdit(r)
+	if a != (admincomponents.Assignment{}) {
+		var err error
+		if a.Assign != "" {
+			err = h.PlayerService.AssignToTeam(r.Context(), a.Assign, teamID)
+		} else {
+			err = h.PlayerService.UnassignFromTeam(r.Context(), a.Unassign)
+		}
 		if err != nil {
 			return err
 		}
@@ -105,30 +109,7 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		// If we're unassigning a player, we'll keep the modal open (by not redirecting).
-		sse := datastar.NewSSE(w, r)
-		return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](teamID, available, onThisTeam))
-	}
-
-	playerToAssign := r.FormValue("assignPlayer")
-	if playerToAssign != "" {
-		// TODO: validate that we're not adding too many players to the team.
-		err := h.PlayerService.AssignToTeam(r.Context(), playerToAssign, teamID)
-		if err != nil {
-			return err
-		}
-
-		onThisTeam, err := h.PlayerService.GetForTeam(r.Context(), teamID)
-		if err != nil {
-			return err
-		}
-
-		available, err := h.PlayerService.GetFreeAgents(r.Context())
-		if err != nil {
-			return err
-		}
-
-		// If we're assigning a player, we'll keep the modal open (by not redirecting).
+		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
 		sse := datastar.NewSSE(w, r)
 		return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](teamID, available, onThisTeam))
 	}
@@ -162,5 +143,5 @@ func resetEdit(sse *datastar.ServerSentEventGenerator) error {
 	if err != nil {
 		return err
 	}
-	return sse.RemoveElementByID("edit-modal")
+	return sse.RemoveElementByID(admincomponents.EditModalID)
 }

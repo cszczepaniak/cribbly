@@ -6,7 +6,7 @@ import (
 )
 
 templ TeamOrDivisionPage[T teamOrDiv](items []T) {
-	<main id={ ifTeam[T]("teams", "divisions") }>
+	<main id={ MainContentID[T]() }>
 		<h1 class="text-3xl font-bold tracking-tight text-gray-900">{ ifTeam[T]("Teams", "Divisions") } Registration</h1>
 		<button
 			data-on:click={ ifTeam[T]("@post('/admin/teams')", "@post('/admin/divisions')") }
@@ -37,7 +37,7 @@ templ TeamOrDivisionTable[T teamOrDiv](items []T) {
 }
 
 templ teamOrDivisionRow[T teamOrDiv](val T) {
-	<tr id={ "table-row-" + getID(val) } class="flex flex-row space-x-4 border-b border-gray-200 items-center">
+	<tr id={ TableRowID(getID(val)) } class="flex flex-row space-x-4 border-b border-gray-200 items-center">
 		<td
 			class="py-4 text-sm font-medium whitespace-nowrap text-gray-900"
 		>
@@ -61,14 +61,14 @@ templ teamOrDivisionRow[T teamOrDiv](val T) {
 
 templ TeamOrDivisionName(id, name string) {
 	<td
-		id={ "row-name-" + id }
+		id={ tableRowNameID(id) }
 		class="text-sm font-medium whitespace-nowrap text-gray-900"
 	>{ name }</td>
 }
 
 templ EditTeamOrDivisionModal[T teamOrDiv, U playerOrTeam](val T, items []U, availableItems []U) {
 	<div
-		id="edit-modal"
+		id={ EditModalID }
 		class="relative z-10"
 	>
 		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
