@@ -49,7 +49,7 @@ func playerRegistrationPage(players []players.Player) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 class=\"my-4 text-3xl font-bold tracking-tight text-gray-900\">Player Registration</h1><form data-on:submit=\"@post(&#39;/admin/players&#39;)\"><label class=\"block text-sm font-medium text-gray-700 mb-1\">Player Name</label> <input data-bind=\"name\" class=\"w-full px-3 py-2 border border-gray-300 rounded-md\n\t\t\tshadow-sm outline-2 outline-black-200 focus:outline-none focus:ring-2\n\t\t\tfocus:ring-blue-500 focus:border-blue-500 mb-4\"> <input type=\"submit\" class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer\" value=\"Add\"></form><div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle\"><table class=\"min-w-full border-separate border-spacing-0\"><thead><tr><th scope=\"col\" class=\"sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8\">Name</th></tr></thead>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 class=\"my-4 text-3xl font-bold tracking-tight text-gray-900\">Player Registration</h1><form data-on:submit=\"@post(&#39;/admin/players&#39;)\"><label class=\"block text-sm font-medium text-gray-700 mb-1\">Player Name</label> <input data-bind=\"name\" class=\"w-full px-3 py-2 border border-gray-300 rounded-md\n\t\t\tshadow-sm outline-2 outline-black-200 focus:outline-none focus:ring-2\n\t\t\tfocus:ring-blue-500 focus:border-blue-500 mb-4\"> <input type=\"submit\" class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer\" value=\"Add\"></form><details><summary class=\"font-semibold\">Dev Tools</summary><form data-on:submit=\"@post(&#39;/admin/players/random&#39;)\"><h2 class=\"my-4 text-xl font-semibold tracking-tight text-gray-900\">Generate Random Players</h2><label class=\"block text-sm font-medium text-gray-700 mb-1\">Number of Players</label> <input data-bind=\"num\" type=\"number\" class=\"w-full px-3 py-2 border border-gray-300 rounded-md\n\t\t\tshadow-sm outline-2 outline-black-200 focus:outline-none focus:ring-2\n\t\t\tfocus:ring-blue-500 focus:border-blue-500 mb-4\"> <input type=\"submit\" class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow\n\t\t\thover:bg-slate-700 hover:cursor-pointer\" value=\"Generate\"></form><button class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow\n\t\t\thover:bg-slate-700 hover:cursor-pointer\" data-on:click=\"@delete(&#39;/admin/players&#39;)\">Delete All Players</button></details><div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle\"><table class=\"min-w-full border-separate border-spacing-0\"><thead><tr><th scope=\"col\" class=\"sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8\">Name</th></tr></thead>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -137,7 +137,7 @@ func playerList(players []players.Player) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@delete('/admin/players/%s')", p.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 56, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 81, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -158,7 +158,7 @@ func playerList(players []players.Player) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 60, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/players/players.templ`, Line: 85, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {

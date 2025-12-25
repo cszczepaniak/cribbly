@@ -26,7 +26,9 @@ func Setup(cfg Config) http.Handler {
 	}
 	mux.Handle("GET /admin/players", handleWithError(ph.RegistrationPage))
 	mux.Handle("POST /admin/players", handleWithError(ph.PostPlayer))
+	mux.Handle("POST /admin/players/random", handleWithError(ph.GenerateRandomPlayers))
 	mux.Handle("DELETE /admin/players/{id}", handleWithError(ph.DeletePlayer))
+	mux.Handle("DELETE /admin/players", handleWithError(ph.DeleteAllPlayers))
 
 	th := teams.TeamsHandler{
 		PlayerService: cfg.PlayerService,

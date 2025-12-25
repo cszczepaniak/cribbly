@@ -20,6 +20,31 @@ templ playerRegistrationPage(players []players.Player) {
 			/>
 			<input type="submit" class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer" value="Add"/>
 		</form>
+		<details>
+			<summary class="font-semibold">Dev Tools</summary>
+			<form data-on:submit="@post('/admin/players/random')">
+				<h2 class="my-4 text-xl font-semibold tracking-tight text-gray-900">Generate Random Players</h2>
+				<label class="block text-sm font-medium text-gray-700 mb-1">Number of Players</label>
+				<input
+					data-bind="num"
+					type="number"
+					class="w-full px-3 py-2 border border-gray-300 rounded-md
+			shadow-sm outline-2 outline-black-200 focus:outline-none focus:ring-2
+			focus:ring-blue-500 focus:border-blue-500 mb-4"
+				/>
+				<input
+					type="submit"
+					class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
+			hover:bg-slate-700 hover:cursor-pointer"
+					value="Generate"
+				/>
+			</form>
+			<button
+				class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
+			hover:bg-slate-700 hover:cursor-pointer"
+				data-on:click="@delete('/admin/players')"
+			>Delete All Players</button>
+		</details>
 		<div class="px-4 sm:px-6 lg:px-8">
 			<div class="mt-8 flow-root">
 				<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
