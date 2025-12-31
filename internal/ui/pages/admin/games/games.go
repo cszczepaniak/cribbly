@@ -3,8 +3,10 @@ package games
 import (
 	"context"
 	"errors"
+	"fmt"
 	"iter"
 	"net/http"
+	"strconv"
 
 	"github.com/starfederation/datastar-go/datastar"
 
@@ -50,6 +52,64 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 
 	sse := datastar.NewSSE(w, r)
 	return sse.PatchElementTempl(gameList(gs))
+}
+
+type signals struct {
+	Score string `json:"score"`
+}
+
+func (h Handler) Edit(w http.ResponseWriter, r *http.Request) error {
+	gameID := r.URL.Query().Get("gameID")
+	teamID := r.URL.Query().Get("teamID")
+
+	score, err := h.GameService.GetScore(r.Context(), gameID, teamID)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	err = sse.MarshalAndPatchSignals(signals{Score: fmt.Sprint(score)})
+	if err != nil {
+		return err
+	}
+
+	return sse.PatchElementTempl(
+		editScore(gameID, teamID, score),
+		datastar.WithSelectorID(scoreCellID(gameID, teamID)),
+		datastar.WithModeInner(),
+	)
+}
+
+func (h Handler) Save(w http.ResponseWriter, r *http.Request) error {
+	gameID := r.URL.Query().Get("gameID")
+	teamID := r.URL.Query().Get("teamID")
+
+	var signals signals
+	err := datastar.ReadSignals(r, &signals)
+	if err != nil {
+		return err
+	}
+
+	score, err := strconv.Atoi(signals.Score)
+	if err != nil {
+		return err
+	}
+
+	err = h.GameService.UpdateScore(r.Context(), gameID, teamID, score)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(
+		displayScore(gameID, teamID, score),
+		datastar.WithSelectorID(scoreCellID(gameID, teamID)),
+		datastar.WithModeInner(),
+	)
+}
+
+func scoreCellID(gameID, teamID string) string {
+	return fmt.Sprintf("score-%s-%s", gameID, teamID)
 }
 
 type game struct {

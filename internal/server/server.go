@@ -60,6 +60,8 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("GET /admin/games", handleWithError(gh.Index))
 	mux.Handle("POST /admin/games/generate", handleWithError(gh.Generate))
 	mux.Handle("DELETE /admin/games", handleWithError(gh.DeleteAll))
+	mux.Handle("PUT /admin/games/scores/edit", handleWithError(gh.Edit))
+	mux.Handle("PUT /admin/games/scores/save", handleWithError(gh.Save))
 
 	return mux
 }

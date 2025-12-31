@@ -70,6 +70,24 @@ func (s Service) UpdateScore(ctx context.Context, gameID, teamID string, score i
 	return err
 }
 
+func (s Service) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
+	row, err := s.b.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
+		filter.Equals("GameID", gameID),
+		filter.Equals("TeamID", teamID),
+	).QueryRowContext(ctx, s.db)
+	if err != nil {
+		return 0, err
+	}
+
+	var score int
+	err = row.Scan(&score)
+	if err != nil {
+		return 0, err
+	}
+
+	return score, nil
+}
+
 func (s Service) GetAll(ctx context.Context) ([]Score, error) {
 	rows, err := s.b.SelectFrom(table.Named("Scores")).Columns("GameID", "TeamID", "Score").QueryContext(ctx, s.db)
 	if err != nil {

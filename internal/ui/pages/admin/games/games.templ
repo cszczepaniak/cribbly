@@ -2,6 +2,7 @@ package games
 
 import (
 	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
@@ -74,9 +75,10 @@ templ gameList(games []game) {
 					{ game.team1.Name }
 				</td>
 				<td
-					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+					id={ scoreCellID(game.gameID, game.team1.ID) }
+					class="flex flex-row border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
 				>
-					{ fmt.Sprint(game.team1Score) }
+					@displayScore(game.gameID, game.team1.ID, game.team1Score)
 				</td>
 				<td
 					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
@@ -84,11 +86,40 @@ templ gameList(games []game) {
 					{ game.team2.Name }
 				</td>
 				<td
-					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+					id={ scoreCellID(game.gameID, game.team2.ID) }
+					class="flex flex-row border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
 				>
-					{ fmt.Sprint(game.team2Score) }
+					@displayScore(game.gameID, game.team2.ID, game.team2Score)
 				</td>
 			</tr>
 		}
 	</tbody>
+}
+
+templ displayScore(gameID, teamID string, score int) {
+	<div class="mr-8">
+		{ fmt.Sprint(score) }
+	</div>
+	<button
+		data-on:click={ fmt.Sprintf("@put('/admin/games/scores/edit?gameID=%s&teamID=%s')", gameID, teamID) }
+		class="hover:cursor-pointer"
+	>
+		@icons.Edit()
+	</button>
+}
+
+templ editScore(gameID, teamID string, score int) {
+	<div class="mr-8">
+		<input
+			class="w-full px-3 py-2 rounded-md outline outline-slate-400 focus:outline-slate-700"
+			data-bind="score"
+			value={ fmt.Sprint(score) }
+		/>
+	</div>
+	<button
+		data-on:click={ fmt.Sprintf("@put('/admin/games/scores/save?gameID=%s&teamID=%s')", gameID, teamID) }
+		class="hover:cursor-pointer"
+	>
+		@icons.Check(icons.WithStrokeWidth(2))
+	</button>
 }
