@@ -13,6 +13,14 @@ templ index(games []game) {
 			hover:bg-slate-700 hover:cursor-pointer"
 			data-on:click="@post('/admin/games/generate')"
 		>Generate</button>
+		<details>
+			<summary class="font-semibold">Dev Tools</summary>
+			<button
+				class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
+			hover:bg-slate-700 hover:cursor-pointer"
+				data-on:click="@delete('/admin/games')"
+			>Delete All</button>
+		</details>
 		<div class="px-4 sm:px-6 lg:px-8">
 			<div class="mt-8 flow-root">
 				<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">

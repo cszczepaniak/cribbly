@@ -5,12 +5,11 @@ package games
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
 import (
 	"fmt"
-
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
-
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
@@ -47,7 +46,7 @@ func index(games []game) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 class=\"my-4 text-3xl font-bold tracking-tight text-gray-900\">Prelim Games</h1><button class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow\n\t\t\thover:bg-slate-700 hover:cursor-pointer\" data-on:click=\"@post(&#39;/admin/games/generate&#39;)\">Generate</button><div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle\"><table class=\"min-w-full border-separate border-spacing-0\"><thead><tr><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Division</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 1</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 1 Score</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 2</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 2 Score</th></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 class=\"my-4 text-3xl font-bold tracking-tight text-gray-900\">Prelim Games</h1><button class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow\n\t\t\thover:bg-slate-700 hover:cursor-pointer\" data-on:click=\"@post(&#39;/admin/games/generate&#39;)\">Generate</button> <details><summary class=\"font-semibold\">Dev Tools</summary> <button class=\"my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow\n\t\t\thover:bg-slate-700 hover:cursor-pointer\" data-on:click=\"@delete(&#39;/admin/games&#39;)\">Delete All</button></details><div class=\"px-4 sm:px-6 lg:px-8\"><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle\"><table class=\"min-w-full border-separate border-spacing-0\"><thead><tr><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Division</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 1</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 1 Score</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 2</th><th scope=\"col\" class=\"sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900\">Team 2 Score</th></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -102,7 +101,7 @@ func gameList(games []game) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(game.division.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 61, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 69, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -115,7 +114,7 @@ func gameList(games []game) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(game.team1.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 66, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 74, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -128,7 +127,7 @@ func gameList(games []game) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(game.team1Score))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 71, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 79, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -141,7 +140,7 @@ func gameList(games []game) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(game.team2.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 76, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 84, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -154,7 +153,7 @@ func gameList(games []game) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(game.team2Score))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 81, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/games/games.templ`, Line: 89, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {

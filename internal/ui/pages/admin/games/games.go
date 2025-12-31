@@ -28,6 +28,15 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 	return index(gs).Render(r.Context(), w)
 }
 
+func (h Handler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
+	err := h.GameService.DeleteAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	return index(nil).Render(r.Context(), w)
+}
+
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 	err := h.generatePrelimGames(r.Context())
 	if err != nil {

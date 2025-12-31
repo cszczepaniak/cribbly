@@ -90,3 +90,8 @@ func (s Service) GetAll(ctx context.Context) ([]Score, error) {
 
 	return scores, nil
 }
+
+func (s Service) DeleteAll(ctx context.Context) error {
+	_, err := s.b.DeleteFromTable("Scores").ExecContext(ctx, s.db)
+	return err
+}
