@@ -1,13 +1,17 @@
 package games
 
-import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+import (
+	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+)
 
-templ index() {
+templ index(games []game) {
 	@admincomponents.Shell(admincomponents.Games) {
 		<h1 class="my-4 text-3xl font-bold tracking-tight text-gray-900">Prelim Games</h1>
 		<button
 			class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
 			hover:bg-slate-700 hover:cursor-pointer"
+			data-on:click="@post('/admin/games/generate')"
 		>Generate</button>
 		<div class="px-4 sm:px-6 lg:px-8">
 			<div class="mt-8 flow-root">
@@ -37,40 +41,46 @@ templ index() {
 										class="sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
 									>Team 2 Score</th>
 								</tr>
+								@gameList(games)
 							</thead>
-							<tbody id="game-list">
-								<tr>
-									<td
-										class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-									>
-										hey
-									</td>
-									<td
-										class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-									>
-										hey
-									</td>
-									<td
-										class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-									>
-										hey
-									</td>
-									<td
-										class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-									>
-										hey
-									</td>
-									<td
-										class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-									>
-										hey
-									</td>
-								</tr>
-							</tbody>
 						</table>
 					</div>
 				</div>
 			</div>
 		</div>
 	}
+}
+
+templ gameList(games []game) {
+	<tbody id="game-list">
+		for _, game := range games {
+			<tr>
+				<td
+					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+				>
+					{ game.division.Name }
+				</td>
+				<td
+					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+				>
+					{ game.team1.Name }
+				</td>
+				<td
+					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+				>
+					{ fmt.Sprint(game.team1Score) }
+				</td>
+				<td
+					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+				>
+					{ game.team2.Name }
+				</td>
+				<td
+					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
+				>
+					{ fmt.Sprint(game.team2Score) }
+				</td>
+			</tr>
+		}
+	</tbody>
 }

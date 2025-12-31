@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/column"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
@@ -31,23 +30,30 @@ func NewService(db *sql.DB) Service {
 }
 
 func (s Service) Init(ctx context.Context) error {
-	_, err := s.b.CreateTable("Scores").
-		IfNotExists().
-		Columns(
-			column.VarChar("GameID", 36).PrimaryKey(),
-			column.VarChar("TeamID", 36).PrimaryKey(),
-			column.SmallInt("Score"),
-		).
-		Exec(s.db)
+	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Scores (
+			GameID VARCHAR(36),
+			TeamID VARCHAR(36),
+			Score SMALLINT,
+			
+			PRIMARY KEY (GameID, TeamID)
+		)`)
 	return err
 }
 
-func (s Service) Create(ctx context.Context, teamID string) (string, error) {
+func (s Service) Create(ctx context.Context, teamID1, teamID2 string) (string, error) {
 	id := uuid.NewString()
 
 	_, err := s.b.InsertIntoTable("Scores").
 		Fields("GameID", "TeamID", "Score").
-		Values(id, teamID, 0).
+		Values(id, teamID1, 0).
+		ExecContext(ctx, s.db)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = s.b.InsertIntoTable("Scores").
+		Fields("GameID", "TeamID", "Score").
+		Values(id, teamID2, 0).
 		ExecContext(ctx, s.db)
 	if err != nil {
 		return "", err

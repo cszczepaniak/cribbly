@@ -52,8 +52,13 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("PUT /admin/divisions/{id}", handleWithError(dh.Save))
 	mux.Handle("DELETE /admin/divisions/{id}", handleWithError(dh.Delete))
 
-	gh := games.Handler{}
+	gh := games.Handler{
+		DivisionService: cfg.DivisionService,
+		TeamService:     cfg.TeamService,
+		GameService:     cfg.GameService,
+	}
 	mux.Handle("GET /admin/games", handleWithError(gh.Index))
+	mux.Handle("POST /admin/games/generate", handleWithError(gh.Generate))
 
 	return mux
 }
