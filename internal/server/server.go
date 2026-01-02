@@ -17,66 +17,66 @@ func Setup(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
-
 	mux.Handle("GET /", components.Handle(index.Index))
-	mux.Handle("GET /admin", components.Handle(admin.Index))
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("unknown route", r.Method, r.URL)
+	}))
+
+	r := NewRouter(mux)
+
+	// NOTE: these two admin routes must be registered without using the admin router because they
+	// must _not_ have the auth middleware attached to them.
+	r.Handle("GET /admin/login", admin.LoginPage)
+	r.Handle("POST /admin/login", admin.DoLogin)
+
+	adminRouter := r.Group("/admin", admin.AuthenticationMiddleware)
+	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{
 		PlayerService: cfg.PlayerService,
 	}
-	mux.Handle("GET /admin/players", handleWithError(ph.RegistrationPage))
-	mux.Handle("POST /admin/players", handleWithError(ph.PostPlayer))
-	mux.Handle("POST /admin/players/random", handleWithError(ph.GenerateRandomPlayers))
-	mux.Handle("DELETE /admin/players/{id}", handleWithError(ph.DeletePlayer))
-	mux.Handle("DELETE /admin/players", handleWithError(ph.DeleteAllPlayers))
+	playersRouter := adminRouter.Group("/players")
+	playersRouter.Handle("GET /", ph.RegistrationPage)
+	playersRouter.Handle("POST /", ph.PostPlayer)
+	playersRouter.Handle("POST /random", ph.GenerateRandomPlayers)
+	playersRouter.Handle("DELETE /{id}", ph.DeletePlayer)
+	playersRouter.Handle("DELETE /", ph.DeleteAllPlayers)
 
 	th := teams.TeamsHandler{
 		PlayerService: cfg.PlayerService,
 		TeamService:   cfg.TeamService,
 	}
-	mux.Handle("GET /admin/teams", handleWithError(th.Index))
-	mux.Handle("GET /admin/teams/edit/{id}", handleWithError(th.Edit))
-	mux.Handle("POST /admin/teams/edit/cancel", handleWithError(th.CancelEdit))
-	mux.Handle("POST /admin/teams", handleWithError(th.Create))
-	mux.Handle("PUT /admin/teams/{id}", handleWithError(th.Save))
-	mux.Handle("DELETE /admin/teams/{id}", handleWithError(th.Delete))
+	teamsRouter := adminRouter.Group("/teams")
+	teamsRouter.Handle("GET /", th.Index)
+	teamsRouter.Handle("GET /edit/{id}", th.Edit)
+	teamsRouter.Handle("POST /edit/cancel", th.CancelEdit)
+	teamsRouter.Handle("POST /", th.Create)
+	teamsRouter.Handle("PUT /{id}", th.Save)
+	teamsRouter.Handle("DELETE /{id}", th.Delete)
 
 	dh := divisions.DivisionsHandler{
 		TeamService:     cfg.TeamService,
 		DivisionService: cfg.DivisionService,
 	}
-	mux.Handle("GET /admin/divisions", handleWithError(dh.Index))
-	mux.Handle("GET /admin/divisions/edit/{id}", handleWithError(dh.Edit))
-	mux.Handle("POST /admin/divisions/edit/cancel", handleWithError(dh.CancelEdit))
-	mux.Handle("POST /admin/divisions", handleWithError(dh.Create))
-	mux.Handle("PUT /admin/divisions/{id}", handleWithError(dh.Save))
-	mux.Handle("DELETE /admin/divisions/{id}", handleWithError(dh.Delete))
+	divisionsRouter := adminRouter.Group("/divisions")
+	divisionsRouter.Handle("GET /", dh.Index)
+	divisionsRouter.Handle("GET /edit/{id}", dh.Edit)
+	divisionsRouter.Handle("POST /edit/cancel", dh.CancelEdit)
+	divisionsRouter.Handle("POST /", dh.Create)
+	divisionsRouter.Handle("PUT /{id}", dh.Save)
+	divisionsRouter.Handle("DELETE /{id}", dh.Delete)
 
 	gh := games.Handler{
 		DivisionService: cfg.DivisionService,
 		TeamService:     cfg.TeamService,
 		GameService:     cfg.GameService,
 	}
-	mux.Handle("GET /admin/games", handleWithError(gh.Index))
-	mux.Handle("POST /admin/games/generate", handleWithError(gh.Generate))
-	mux.Handle("DELETE /admin/games", handleWithError(gh.DeleteAll))
-	mux.Handle("PUT /admin/games/scores/edit", handleWithError(gh.Edit))
-	mux.Handle("PUT /admin/games/scores/save", handleWithError(gh.Save))
+	gamesRouter := adminRouter.Group("/games")
+	gamesRouter.Handle("GET /", gh.Index)
+	gamesRouter.Handle("POST /generate", gh.Generate)
+	gamesRouter.Handle("DELETE /", gh.DeleteAll)
+	gamesRouter.Handle("PUT /scores/edit", gh.Edit)
+	gamesRouter.Handle("PUT /scores/save", gh.Save)
 
 	return mux
-}
-
-func handleWithError(fn func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method, r.URL)
-
-		err := fn(w, r)
-		if err != nil {
-			log.Println(r.Method, r.URL, err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		log.Println(r.Method, r.URL, "COMPLETE")
-	}
 }
