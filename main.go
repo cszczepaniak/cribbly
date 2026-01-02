@@ -15,6 +15,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 	"github.com/cszczepaniak/cribbly/internal/server"
 )
 
@@ -63,11 +64,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+	userService := users.NewService(db)
+	err = userService.Init(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cfg := server.Config{
 		PlayerService:   playerService,
 		TeamService:     teamService,
 		DivisionService: divisionService,
 		GameService:     gameService,
+		UserService:     userService,
 	}
 
 	s := server.Setup(cfg)

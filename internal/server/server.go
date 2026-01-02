@@ -26,10 +26,15 @@ func Setup(cfg Config) http.Handler {
 
 	// NOTE: these two admin routes must be registered without using the admin router because they
 	// must _not_ have the auth middleware attached to them.
+	ah := admin.AdminHandler{
+		UserService: cfg.UserService,
+	}
 	r.Handle("GET /admin/login", admin.LoginPage)
-	r.Handle("POST /admin/login", admin.DoLogin)
+	r.Handle("POST /admin/login", ah.DoLogin)
+	r.Handle("GET /admin/register", admin.RegisterPage)
+	r.Handle("POST /admin/register", ah.Register)
 
-	adminRouter := r.Group("/admin", admin.AuthenticationMiddleware)
+	adminRouter := r.Group("/admin", ah.AuthenticationMiddleware)
 	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{

@@ -1,9 +1,36 @@
 package admin
 
 import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/input"
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/button"
 
 templ adminPage() {
 	@admincomponents.Shell(admincomponents.Home) {
 		<h1 class="text-3xl font-bold tracking-tight text-gray-900">Welcome, Admin!</h1>
+	}
+}
+
+templ loginPage() {
+	@components.Shell() {
+		<h1>Sign In</h1>
+		@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
+		@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
+		@button.Button(button.OnClick(dstar.SendPostf("/admin/login"))) {
+			Login
+		}
+	}
+}
+
+templ registerPage() {
+	@components.Shell() {
+		<h1>Register</h1>
+		@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
+		@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
+		@input.Input(input.WithDataBind("repeat_password"), input.WithPlaceholder("Repeat Password"), input.AsPassword())
+		@button.Button(button.OnClick(dstar.SendPostf("/admin/register"))) {
+			Register
+		}
 	}
 }
