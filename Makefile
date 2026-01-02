@@ -13,14 +13,13 @@ generate: tailwind generate-templ
 .PHONY: generate-templ
 generate-templ:
 	go tool templ generate
-	@make format-go
 
 .PHONY: format
 format: format-go format-templ
 
 .PHONY: format-go
 format-go:
-	go tool goimports -local github.com/cszczepaniak/cribbly -w .
+	./scripts/format.sh
 
 .PHONY: format-templ
 format-templ:

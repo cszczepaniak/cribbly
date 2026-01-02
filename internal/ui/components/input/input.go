@@ -1,9 +1,9 @@
 package input
 
 type params struct {
-	dataBind string
+	dataBind    string
 	placeholder string
-	typ string
+	typ         string
 }
 
 type Opt func(params) params
