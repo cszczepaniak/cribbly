@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	errUnknownUser    = errors.New("unknown user")
+	ErrUnknownUser    = errors.New("unknown user")
 	errSessionExpired = errors.New("session expired")
 )
 
@@ -47,7 +47,7 @@ func (s Service) Init(ctx context.Context) error {
 
 // CreateUser creates the given user. The user must have already been reserved using [ReserveUser],
 // otherwise an error is returned.
-func (s Service) CreateUser(ctx context.Context, username string, passwordHash []byte) error {
+func (s Service) CreateUser(ctx context.Context, username, passwordHash string) error {
 	res, err := s.db.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, passwordHash, username)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (s Service) CreateUser(ctx context.Context, username string, passwordHash [
 	}
 
 	if n == 0 {
-		return errUnknownUser
+		return ErrUnknownUser
 	}
 
 	return nil
@@ -72,15 +72,19 @@ func (s Service) ReserveUser(ctx context.Context, username string) error {
 }
 
 // GetPassword returns the persisted hash of the password for the given user.
-func (s Service) GetPassword(ctx context.Context, username string) ([]byte, error) {
-	var pw []byte
+func (s Service) GetPassword(ctx context.Context, username string) (string, error) {
+	var pw string
 	err := s.db.QueryRowContext(
 		ctx,
 		`SELECT PasswordHash FROM Users WHERE Username = ?`,
 		username,
 	).Scan(&pw)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", ErrUnknownUser
+		}
+
+		return "", err
 	}
 
 	return pw, nil
@@ -103,7 +107,7 @@ func (s Service) CreateSession(ctx context.Context, username string, expiresIn t
 	}
 
 	if !exists {
-		return "", errUnknownUser
+		return "", ErrUnknownUser
 	}
 
 	id := uuid.NewString()
@@ -120,23 +124,22 @@ func (s Service) CreateSession(ctx context.Context, username string, expiresIn t
 	return id, nil
 }
 
-func (s Service) GetSession(ctx context.Context, sessionID string) (string, time.Time, error) {
-	var username string
+func (s Service) GetSession(ctx context.Context, sessionID string) (time.Time, error) {
 	var expires time.Time
 
 	err := s.db.QueryRowContext(
 		ctx,
-		`SELECT Username, Expires FROM Sessions WHERE ID = ?`,
+		`SELECT Expires FROM Sessions WHERE ID = ?`,
 		sessionID,
-	).Scan(&username, &expires)
+	).Scan(&expires)
 	if err != nil {
-		return "", time.Time{}, err
+		return time.Time{}, err
 	}
 
 	if time.Now().After(expires) {
 		_, deleteErr := s.db.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
-		return "", time.Time{}, errors.Join(errSessionExpired, deleteErr)
+		return time.Time{}, errors.Join(errSessionExpired, deleteErr)
 	}
 
-	return username, expires, nil
+	return expires, nil
 }
