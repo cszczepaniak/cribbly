@@ -1,0 +1,18 @@
+package button
+
+templ Button(opts ...Opt) {
+	{{
+		var p params
+		for _, opt := range opts {
+			p = opt(p)
+		}
+	}}
+	<button
+		if p.onClick != "" {
+			data-on:click={ p.onClick }
+		}
+		class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer"
+	>
+		{ children... }
+	</button>
+}
