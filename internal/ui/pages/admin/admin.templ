@@ -14,23 +14,39 @@ templ adminPage() {
 
 templ loginPage() {
 	@components.Shell() {
-		<h1>Sign In</h1>
-		@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
-		@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
-		@button.Button(button.OnClick(dstar.SendPostf("/admin/login"))) {
-			Login
-		}
+		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
+			<h1 class="text-5xl text-center">Admin Sign In</h1>
+			@notAnAdmin()
+			@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
+			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
+			@button.Button(button.OnClick(dstar.SendPostf("/admin/login"))) {
+				Login
+			}
+		</div>
 	}
 }
 
 templ registerPage() {
 	@components.Shell() {
-		<h1>Register</h1>
-		@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
-		@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
-		@input.Input(input.WithDataBind("repeat_password"), input.WithPlaceholder("Repeat Password"), input.AsPassword())
-		@button.Button(button.OnClick(dstar.SendPostf("/admin/register"))) {
-			Register
-		}
+		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
+			<h1 class="text-5xl text-center">Admin Registration</h1>
+			@notAnAdmin()
+			@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
+			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
+			@input.Input(input.WithDataBind("repeat_password"), input.WithPlaceholder("Repeat Password"), input.AsPassword())
+			@button.Button(button.OnClick(dstar.SendPostf("/admin/register"))) {
+				Register
+			}
+		</div>
 	}
+}
+
+templ notAnAdmin() {
+	<p class="text-slate-600 text-center italic">
+		If you aren't an admin, you can click <a
+	href="/"
+	class="underline hover:cursor-pointer"
+>here</a>
+		to be redirected to the home page.
+	</p>
 }
