@@ -150,24 +150,28 @@ func (h AdminHandler) AuthenticationMiddleware(next handler) handler {
 			return fmt.Errorf("get session cookie: %w", err)
 		}
 
+		clearCookieAndRedirect := func() {
+			http.SetCookie(w, &http.Cookie{
+				Name:    "session",
+				Value:   "",
+				MaxAge:  -1,
+				Expires: time.Now().Add(-time.Minute),
+			})
+			http.Redirect(w, r, "/admin/login", http.StatusTemporaryRedirect)
+		}
+
 		// TODO: in-memory caching of sessions to avoid a DB call for each request
 		expires, err := h.UserService.GetSession(r.Context(), cookie.Value)
 		if err != nil {
 			if errors.Is(err, users.ErrSessionExpired) {
-				http.Redirect(w, r, "/admin/login", http.StatusTemporaryRedirect)
+				clearCookieAndRedirect()
 				return nil
 			}
 			return err
 		}
 
 		if time.Now().After(expires) {
-			// Clear out the old session cookie
-			http.SetCookie(w, &http.Cookie{
-				Name:   "session",
-				Value:  "",
-				MaxAge: -1,
-			})
-			http.Redirect(w, r, "/admin/login", http.StatusTemporaryRedirect)
+			clearCookieAndRedirect()
 			return nil
 		}
 
