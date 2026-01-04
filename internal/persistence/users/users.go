@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrUnknownUser    = errors.New("unknown user")
-	errSessionExpired = errors.New("session expired")
+	ErrSessionExpired = errors.New("session expired")
 )
 
 type Service struct {
@@ -133,12 +133,16 @@ func (s Service) GetSession(ctx context.Context, sessionID string) (time.Time, e
 		sessionID,
 	).Scan(&expires)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return time.Time{}, ErrSessionExpired
+		}
+
 		return time.Time{}, err
 	}
 
 	if time.Now().After(expires) {
 		_, deleteErr := s.db.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
-		return time.Time{}, errors.Join(errSessionExpired, deleteErr)
+		return time.Time{}, errors.Join(ErrSessionExpired, deleteErr)
 	}
 
 	return expires, nil

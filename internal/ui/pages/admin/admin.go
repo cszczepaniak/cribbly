@@ -153,6 +153,10 @@ func (h AdminHandler) AuthenticationMiddleware(next handler) handler {
 		// TODO: in-memory caching of sessions to avoid a DB call for each request
 		expires, err := h.UserService.GetSession(r.Context(), cookie.Value)
 		if err != nil {
+			if errors.Is(err, users.ErrSessionExpired) {
+				http.Redirect(w, r, "/admin/login", http.StatusTemporaryRedirect)
+				return nil
+			}
 			return err
 		}
 
