@@ -9,10 +9,6 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 )
 
-const (
-	nameFormKey = "name"
-)
-
 type PlayersHandler struct {
 	PlayerService players.Service
 }
