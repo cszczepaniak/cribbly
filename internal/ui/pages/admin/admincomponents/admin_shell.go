@@ -14,6 +14,7 @@ const (
 	Teams     Route = "Teams"
 	Divisions Route = "Divisions"
 	Games     Route = "Games"
+	Users     Route = "Users"
 )
 
 func (r Route) ToSafeURL() templ.SafeURL {
@@ -28,6 +29,8 @@ func (r Route) ToSafeURL() templ.SafeURL {
 		return "/admin/teams"
 	case Games:
 		return "/admin/games"
+	case Users:
+		return "/admin/users"
 	default:
 		panic(fmt.Sprintf("unexpected admincomponents.Route: %#v", r))
 	}

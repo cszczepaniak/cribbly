@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
 
 func TestUsers(t *testing.T) {

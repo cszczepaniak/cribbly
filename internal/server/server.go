@@ -10,6 +10,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
 )
 
@@ -82,6 +83,14 @@ func Setup(cfg Config) http.Handler {
 	gamesRouter.Handle("DELETE /", gh.DeleteAll)
 	gamesRouter.Handle("PUT /scores/edit", gh.Edit)
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
+
+	uh := users.UsersHandler{
+		UserService: cfg.UserService,
+	}
+	usersRouter := adminRouter.Group("/users")
+	usersRouter.Handle("GET /", uh.Index)
+	usersRouter.Handle("POST /", uh.Create)
+	usersRouter.Handle("DELETE /{name}", uh.Delete)
 
 	return mux
 }
