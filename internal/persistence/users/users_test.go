@@ -59,9 +59,9 @@ func TestSessions(t *testing.T) {
 	sessionID, err := s.CreateSession(t.Context(), "mario", time.Hour)
 	require.NoError(t, err)
 
-	expires, err := s.GetSession(t.Context(), sessionID)
+	sesh, err := s.GetSession(t.Context(), sessionID)
 	require.NoError(t, err)
-	assert.False(t, expires.Before(time.Now()))
+	assert.False(t, sesh.Expired())
 
 	// Create an already-expired session now
 	expiredSessionID, err := s.CreateSession(t.Context(), "mario", -time.Hour)

@@ -2,7 +2,6 @@ package admin
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -135,48 +134,4 @@ func (h AdminHandler) Register(w http.ResponseWriter, r *http.Request) error {
 
 	http.Redirect(w, r, "/admin/login", http.StatusFound)
 	return nil
-}
-
-// TODO: share this type somewhere (can't be server pkg because that'd cause an import cycle)
-type handler = func(http.ResponseWriter, *http.Request) error
-
-func (h AdminHandler) AuthenticationMiddleware(next handler) handler {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		cookie, err := r.Cookie("session")
-		if err != nil {
-			if errors.Is(err, http.ErrNoCookie) {
-				http.Redirect(w, r, "/admin/login", http.StatusTemporaryRedirect)
-				return nil
-			}
-
-			return fmt.Errorf("get session cookie: %w", err)
-		}
-
-		clearCookieAndRedirect := func() {
-			http.SetCookie(w, &http.Cookie{
-				Name:    "session",
-				Value:   "",
-				MaxAge:  -1,
-				Expires: time.Now().Add(-time.Minute),
-			})
-			http.Redirect(w, r, "/admin/login", http.StatusTemporaryRedirect)
-		}
-
-		// TODO: in-memory caching of sessions to avoid a DB call for each request
-		expires, err := h.UserService.GetSession(r.Context(), cookie.Value)
-		if err != nil {
-			if errors.Is(err, users.ErrSessionExpired) {
-				clearCookieAndRedirect()
-				return nil
-			}
-			return err
-		}
-
-		if time.Now().After(expires) {
-			clearCookieAndRedirect()
-			return nil
-		}
-
-		return next(w, r)
-	}
 }

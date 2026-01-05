@@ -106,6 +106,11 @@ func (s Service) GetPassword(ctx context.Context, username string) (string, erro
 	return pw, nil
 }
 
+func (s Service) ChangePassword(ctx context.Context, username, newPassHash string) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, newPassHash, username)
+	return err
+}
+
 func (s Service) DeleteUser(ctx context.Context, username string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM Users WHERE Username = ?`, username)
 	return err
@@ -140,26 +145,38 @@ func (s Service) CreateSession(ctx context.Context, username string, expiresIn t
 	return id, nil
 }
 
-func (s Service) GetSession(ctx context.Context, sessionID string) (time.Time, error) {
-	var expires time.Time
+type Session struct {
+	ID       string
+	Username string
+	expires  time.Time
+}
+
+func (s Session) Expired() bool {
+	return time.Now().After(s.expires)
+}
+
+func (s Service) GetSession(ctx context.Context, sessionID string) (Session, error) {
+	sesh := Session{
+		ID: sessionID,
+	}
 
 	err := s.db.QueryRowContext(
 		ctx,
-		`SELECT Expires FROM Sessions WHERE ID = ?`,
+		`SELECT Username, Expires FROM Sessions WHERE ID = ?`,
 		sessionID,
-	).Scan(&expires)
+	).Scan(&sesh.Username, &sesh.expires)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return time.Time{}, ErrSessionExpired
+			return Session{}, ErrSessionExpired
 		}
 
-		return time.Time{}, err
+		return Session{}, err
 	}
 
-	if time.Now().After(expires) {
+	if sesh.Expired() {
 		_, deleteErr := s.db.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
-		return time.Time{}, errors.Join(ErrSessionExpired, deleteErr)
+		return Session{}, errors.Join(ErrSessionExpired, deleteErr)
 	}
 
-	return expires, nil
+	return sesh, nil
 }

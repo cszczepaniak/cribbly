@@ -6,9 +6,11 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/profile"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
@@ -35,7 +37,7 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("GET /admin/register", admin.RegisterPage)
 	r.Handle("POST /admin/register", ah.Register)
 
-	adminRouter := r.Group("/admin", ah.AuthenticationMiddleware)
+	adminRouter := r.Group("/admin", adminmiddleware.AuthenticationMiddleware(cfg.UserService))
 	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{
@@ -91,6 +93,13 @@ func Setup(cfg Config) http.Handler {
 	usersRouter.Handle("GET /", uh.Index)
 	usersRouter.Handle("POST /", uh.Create)
 	usersRouter.Handle("DELETE /{name}", uh.Delete)
+
+	pph := profile.ProfileHandler{
+		UserService: cfg.UserService,
+	}
+	profileRouter := adminRouter.Group("/profile")
+	profileRouter.Handle("GET /", pph.Index)
+	profileRouter.Handle("POST /password", pph.ChangePassword)
 
 	return mux
 }

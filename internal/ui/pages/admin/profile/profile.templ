@@ -1,0 +1,21 @@
+package profile
+
+import (
+	"github.com/cszczepaniak/cribbly/internal/ui/components/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/input"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+)
+
+templ index() {
+	@admincomponents.Shell(admincomponents.Profile) {
+		<h1 class="my-4 text-3xl font-bold tracking-tight text-gray-900">My Profile</h1>
+		<div class="space-y-4 flex flex-col">
+			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("New Password"), input.AsPassword())
+			@input.Input(input.WithDataBind("confirm_password"), input.WithPlaceholder("Confirm New Password"), input.AsPassword())
+			@button.Button(button.OnClick(dstar.SendPostf("/admin/profile/password"))) {
+				Change Password
+			}
+		</div>
+	}
+}
