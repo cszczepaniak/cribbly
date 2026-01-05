@@ -17,6 +17,7 @@ templ loginPage() {
 		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
 			<h1 class="text-5xl text-center">Admin Sign In</h1>
 			@notAnAdmin()
+			@loginError("")
 			@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
 			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
 			@button.Button(button.OnClick(dstar.SendPostf("/admin/login"))) {
@@ -26,11 +27,24 @@ templ loginPage() {
 	}
 }
 
+templ loginError(text string) {
+	<div
+		id="login-error"
+		class="bg-red-100 outline outline-red-300 rounded-md p-2"
+		if text == "" {
+			hidden
+		}
+	>
+		<p class="text-red-700">{ text }</p>
+	</div>
+}
+
 templ registerPage() {
 	@components.Shell() {
 		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
 			<h1 class="text-5xl text-center">Admin Registration</h1>
 			@notAnAdmin()
+			@registerError("")
 			@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
 			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
 			@input.Input(input.WithDataBind("repeat_password"), input.WithPlaceholder("Repeat Password"), input.AsPassword())
@@ -39,6 +53,18 @@ templ registerPage() {
 			}
 		</div>
 	}
+}
+
+templ registerError(text string) {
+	<div
+		id="register-error"
+		class="bg-red-100 outline outline-red-300 rounded-md p-2"
+		if text == "" {
+			hidden
+		}
+	>
+		<p class="text-red-700">{ text }</p>
+	</div>
 }
 
 templ notAnAdmin() {

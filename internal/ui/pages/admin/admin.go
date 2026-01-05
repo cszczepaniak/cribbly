@@ -3,6 +3,7 @@ package admin
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -49,8 +50,7 @@ func (h AdminHandler) DoLogin(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		// TODO: do a real error display somehow
-		return sse.ExecuteScript("alert('bad login')")
+		return sse.PatchElementTempl(loginError("Invalid credentials"))
 	}
 
 	pwHash, err := h.UserService.GetPassword(r.Context(), signals.Username)
@@ -102,10 +102,12 @@ func (h AdminHandler) Register(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	badLogin := func(msg string) error {
+	badLogin := func(msg string, clearUser bool) error {
 		sse := datastar.NewSSE(w, r)
 
-		signals.Username = ""
+		if clearUser {
+			signals.Username = ""
+		}
 		signals.Password = ""
 		signals.RepeatPassword = ""
 		err := sse.MarshalAndPatchSignals(signals)
@@ -113,12 +115,11 @@ func (h AdminHandler) Register(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		// TODO: do a real error display somehow
-		return sse.ExecuteScript(fmt.Sprintf("alert(%q)", msg))
+		return sse.PatchElementTempl(registerError(msg))
 	}
 
 	if signals.Password != signals.RepeatPassword {
-		badLogin("passwords don't match")
+		return badLogin("Passwords don't match.", false)
 	}
 
 	hash, err := argon2id.CreateHash(signals.Password, argon2id.DefaultParams)
@@ -128,7 +129,8 @@ func (h AdminHandler) Register(w http.ResponseWriter, r *http.Request) error {
 
 	err = h.UserService.CreateUser(r.Context(), signals.Username, hash)
 	if err != nil {
-		return err
+		log.Println("registration error:", err)
+		return badLogin("Error with registration. Contact an admin for help.", true)
 	}
 
 	http.Redirect(w, r, "/admin/login", http.StatusFound)
