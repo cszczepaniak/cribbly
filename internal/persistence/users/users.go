@@ -1,9 +1,11 @@
 package users
 
 import (
+	"cmp"
 	"context"
 	"database/sql"
 	"errors"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,30 +47,44 @@ func (s Service) Init(ctx context.Context) error {
 	return err
 }
 
-// CreateUser creates the given user. The user must have already been reserved using [ReserveUser],
-// otherwise an error is returned.
+type User struct {
+	Name string
+}
+
+func (s Service) GetAll(ctx context.Context) ([]User, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT Username FROM Users`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []User
+	for rows.Next() {
+		var name string
+		err := rows.Scan(&name)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, User{
+			Name: name,
+		})
+	}
+
+	slices.SortFunc(users, func(a, b User) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+
+	return users, nil
+}
+
+// CreateUser creates the given user.
 func (s Service) CreateUser(ctx context.Context, username, passwordHash string) error {
-	res, err := s.db.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, passwordHash, username)
+	_, err := s.db.ExecContext(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
 	if err != nil {
 		return err
-	}
-
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if n == 0 {
-		return ErrUnknownUser
 	}
 
 	return nil
-}
-
-// ReserveUser reserves the given username that can be used to register a user later.
-func (s Service) ReserveUser(ctx context.Context, username string) error {
-	_, err := s.db.ExecContext(ctx, `INSERT INTO Users (Username) VALUES (?)`, username)
-	return err
 }
 
 // GetPassword returns the persisted hash of the password for the given user.

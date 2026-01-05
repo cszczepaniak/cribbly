@@ -1,7 +1,6 @@
 package users
 
 import (
-	"database/sql"
 	"testing"
 	"time"
 
@@ -16,19 +15,32 @@ func TestUsers(t *testing.T) {
 	require.NoError(t, s.Init(t.Context()))
 
 	err := s.CreateUser(t.Context(), "mario", "secret")
-	assert.ErrorIs(t, err, ErrUnknownUser)
+	require.NoError(t, err)
 
-	require.NoError(t, s.ReserveUser(t.Context(), "mario"))
-	err = s.CreateUser(t.Context(), "mario", "secret")
+	err = s.CreateUser(t.Context(), "luigi", "secret")
 	require.NoError(t, err)
 
 	pw, err := s.GetPassword(t.Context(), "mario")
 	require.NoError(t, err)
 	assert.Equal(t, "secret", pw)
 
+	all, err := s.GetAll(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, []User{{
+		Name: "luigi",
+	}, {
+		Name: "mario",
+	}}, all)
+
 	require.NoError(t, s.DeleteUser(t.Context(), "mario"))
 	_, err = s.GetPassword(t.Context(), "mario")
 	assert.ErrorIs(t, err, ErrUnknownUser)
+
+	all, err = s.GetAll(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, []User{{
+		Name: "luigi",
+	}}, all)
 }
 
 func TestSessions(t *testing.T) {
@@ -40,7 +52,6 @@ func TestSessions(t *testing.T) {
 	_, err := s.CreateSession(t.Context(), "who?", time.Hour)
 	assert.ErrorIs(t, err, ErrUnknownUser)
 
-	require.NoError(t, s.ReserveUser(t.Context(), "mario"))
 	err = s.CreateUser(t.Context(), "mario", "secret")
 	require.NoError(t, err)
 
@@ -60,5 +71,5 @@ func TestSessions(t *testing.T) {
 
 	// We opportunistically delete the session if we notice it's expired
 	_, err = s.GetSession(t.Context(), expiredSessionID)
-	assert.ErrorIs(t, err, sql.ErrNoRows)
+	assert.ErrorIs(t, err, ErrSessionExpired)
 }
