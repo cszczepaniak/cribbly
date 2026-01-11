@@ -2,124 +2,131 @@ package games
 
 import (
 	"fmt"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 )
 
 templ index(games []game) {
 	@admincomponents.Shell(admincomponents.Games) {
-		<h1 class="my-4 text-3xl font-bold tracking-tight text-gray-900">Prelim Games</h1>
-		<button
-			class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
-			hover:bg-slate-700 hover:cursor-pointer"
-			data-on:click="@post('/admin/games/generate')"
-		>Generate</button>
-		<details>
-			<summary class="font-semibold">Dev Tools</summary>
-			<button
-				class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
-			hover:bg-slate-700 hover:cursor-pointer"
-				data-on:click="@delete('/admin/games')"
-			>Delete All</button>
-		</details>
-		<div class="px-4 sm:px-6 lg:px-8">
-			<div class="mt-8 flow-root">
-				<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-					<div class="inline-block min-w-full py-2 align-middle">
-						<table class="min-w-full border-separate border-spacing-0">
-							<thead>
-								<tr>
-									<th
-										scope="col"
-										class="sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
-									>Division</th>
-									<th
-										scope="col"
-										class="sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
-									>Team 1</th>
-									<th
-										scope="col"
-										class="sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
-									>Team 1 Score</th>
-									<th
-										scope="col"
-										class="sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
-									>Team 2</th>
-									<th
-										scope="col"
-										class="sticky top-0 border-b border-gray-300 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
-									>Team 2 Score</th>
-								</tr>
-								@gameList(games)
-							</thead>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
+		<h1 class="my-4 text-3xl font-semibold text-foreground">Prelim Games</h1>
+		@button.Button(button.Props{
+			Attributes: map[string]any{
+				"data-on:click": dstar.SendPostf("/admin/games/generate"),
+			},
+		}) {
+			Generate
+		}
+		@table.Table() {
+			@table.Header() {
+				@table.Head() {
+					Division
+				}
+				@table.Head() {
+					Team 1
+				}
+				@table.Head() {
+					Team 1 Score
+				}
+				@table.Head() {
+					Team 2
+				}
+				@table.Head() {
+					Team 2 Score
+				}
+			}
+			@gameList(games)
+		}
+		@devTools()
 	}
 }
 
 templ gameList(games []game) {
-	<tbody id="game-list">
+	@table.Body(table.BodyProps{
+		ID: "game-list",
+	}) {
 		for _, game := range games {
-			<tr>
-				<td
-					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-				>
+			@table.Row() {
+				@table.Cell() {
 					{ game.division.Name }
-				</td>
-				<td
-					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-				>
+				}
+				@table.Cell() {
 					{ game.team1.Name }
-				</td>
-				<td
-					id={ scoreCellID(game.gameID, game.team1.ID) }
-					class="flex flex-row border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-				>
+				}
+				@table.Cell(table.CellProps{
+					Class: "flex flex-row items-center",
+					ID:    scoreCellID(game.gameID, game.team1.ID),
+				}) {
 					@displayScore(game.gameID, game.team1.ID, game.team1Score)
-				</td>
-				<td
-					class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-				>
+				}
+				@table.Cell() {
 					{ game.team2.Name }
-				</td>
-				<td
-					id={ scoreCellID(game.gameID, game.team2.ID) }
-					class="flex flex-row border-b border-gray-200 py-4 pr-3 pl-4 text-sm text-gray-900"
-				>
+				}
+				@table.Cell(table.CellProps{
+					Class: "flex flex-row items-center",
+					ID:    scoreCellID(game.gameID, game.team2.ID),
+				}) {
 					@displayScore(game.gameID, game.team2.ID, game.team2Score)
-				</td>
-			</tr>
+				}
+			}
 		}
-	</tbody>
+	}
 }
 
 templ displayScore(gameID, teamID string, score int) {
-	<div class="mr-8">
+	@button.Button(button.Props{
+		Variant: button.VariantGhost,
+		Attributes: map[string]any{
+			"data-on:click": dstar.SendPutf("/admin/games/scores/edit?gameID=%s&teamID=%s", gameID,
+				teamID),
+		},
+	}) {
+		@icon.Pencil()
+	}
+	<div>
 		{ fmt.Sprint(score) }
 	</div>
-	<button
-		data-on:click={ fmt.Sprintf("@put('/admin/games/scores/edit?gameID=%s&teamID=%s')", gameID, teamID) }
-		class="hover:cursor-pointer"
-	>
-		@icons.Edit()
-	</button>
 }
 
 templ editScore(gameID, teamID string, score int) {
-	<div class="mr-8">
-		<input
-			class="w-full px-3 py-2 rounded-md outline outline-slate-400 focus:outline-slate-700"
-			data-bind="score"
-			value={ fmt.Sprint(score) }
-		/>
+	@button.Button(button.Props{
+		Variant: button.VariantGhost,
+		Attributes: map[string]any{
+			"data-on:click": dstar.SendPutf("/admin/games/scores/save?gameID=%s&teamID=%s", gameID, teamID),
+		},
+	}) {
+		@icon.Check()
+	}
+	<div>
+		@input.Input(input.Props{
+			Type:  input.TypeNumber,
+			Value: fmt.Sprint(score),
+			Attributes: map[string]any{
+				"data-bind": "score",
+			},
+		})
 	</div>
-	<button
-		data-on:click={ fmt.Sprintf("@put('/admin/games/scores/save?gameID=%s&teamID=%s')", gameID, teamID) }
-		class="hover:cursor-pointer"
-	>
-		@icons.Check(icons.WithStrokeWidth(2))
-	</button>
+}
+
+templ devTools() {
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				Dev Tools
+			}
+			@accordion.Content() {
+				@button.Button(button.Props{
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendDeletef("/admin/games"),
+					},
+				}) {
+					Delete All
+				}
+			}
+		}
+	}
 }
