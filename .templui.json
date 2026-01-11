@@ -1,0 +1,7 @@
+{
+  "componentsDir": "internal/ui/components/templui",
+  "utilsDir": "internal/ui/components/templui/utils",
+  "moduleName": "github.com/cszczepaniak/cribbly",
+  "jsDir": "public/js",
+  "jsPublicPath": "/public/js"
+}

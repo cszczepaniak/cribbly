@@ -1,0 +1,61 @@
+package divisions
+
+import "fmt"
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+import "github.com/cszczepaniak/cribbly/internal/persistence/divisions"
+import "github.com/cszczepaniak/cribbly/internal/persistence/teams"
+
+templ Index(divisions []divisions.Division) {
+	@components.Shell() {
+		<div class="w-full max-w-md my-4 mx-auto">
+			@card.Card() {
+				@card.Header() {
+					@card.Title() {
+						Divisions
+					}
+					@card.Description() {
+						Click on your division to view prelim games.
+					}
+				}
+				@card.Content() {
+					<div class="flex flex-col">
+						for _, d := range divisions {
+							<a
+								href={ templ.URL(fmt.Sprintf("/divisions/%s", d.ID)) }
+								class="hover:cursor-pointer"
+							>{ d.Name }</a>
+						}
+					</div>
+				}
+			}
+		</div>
+	}
+}
+
+templ Division(d divisions.Division, teams []teams.Team) {
+	@components.Shell() {
+		<div class="w-full max-w-md my-4 mx-auto">
+			@card.Card() {
+				@card.Header() {
+					@card.Title() {
+						Division { d.Name }
+					}
+					@card.Description() {
+						Click on your team to view prelim games.
+					}
+				}
+				@card.Content() {
+					<div class="flex flex-col">
+						for _, t := range teams {
+							<a
+								href={ templ.URL(fmt.Sprintf("/teams/%s/games", t.ID)) }
+								class="hover:cursor-pointer"
+							>{ t.Name }</a>
+						}
+					</div>
+				}
+			}
+		</div>
+	}
+}

@@ -1,0 +1,50 @@
+package teams
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "fmt"
+import "github.com/cszczepaniak/cribbly/internal/persistence/teams"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+
+templ Games(team teams.Team, games []game) {
+	@components.Shell() {
+		<div class="w-full max-w-md my-4 mx-auto">
+			<h1 class="text-xl mb-4">Team { team.Name } Prelim Scores</h1>
+			<div class="flex flex-col space-y-6">
+				for _, g := range games {
+					@card.Card(card.Props{
+						Class: utils.IfElse(!g.complete(), "", utils.IfElse(g.won(team.Name), "bg-green-100", "bg-red-100")),
+					}) {
+						@card.Header() {
+							@card.Title() {
+								{ g.team1.name } vs { g.team2.name }
+							}
+						}
+						@card.Content() {
+							if g.complete() {
+								{{ ranked := g.rankedTeams() }}
+								<p class="text-muted-foreground">
+									{ ranked[0].name } won { fmt.Sprint(ranked[0].score) } to { 
+								fmt.Sprint(ranked[1].score) }
+								</p>
+							} else {
+								<a
+									href={ templ.URL(fmt.Sprintf("/games/%s", g.id)) }
+									class="hover:cursor-pointer"
+								>
+									@button.Button(button.Props{
+										Variant: button.VariantOutline,
+										Class:   "font-thin",
+									}) {
+										Record Score
+									}
+								</a>
+							}
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}

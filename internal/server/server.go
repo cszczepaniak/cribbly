@@ -13,7 +13,9 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/profile"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
+	pubdiv "github.com/cszczepaniak/cribbly/internal/ui/pages/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
+	pubteam "github.com/cszczepaniak/cribbly/internal/ui/pages/teams"
 )
 
 func Setup(cfg Config) http.Handler {
@@ -26,7 +28,25 @@ func Setup(cfg Config) http.Handler {
 	}))
 
 	r := NewRouter(mux)
+	setupAdminRoutes(cfg, r)
 
+	dh := pubdiv.Handler{
+		DivisionService: cfg.DivisionService,
+		TeamService:     cfg.TeamService,
+	}
+	r.Handle("GET /divisions", dh.Index)
+	r.Handle("GET /divisions/{id}", dh.GetDivisions)
+
+	th := pubteam.Handler{
+		GameService: cfg.GameService,
+		TeamService: cfg.TeamService,
+	}
+	r.Handle("GET /teams/{id}/games", th.GetGames)
+
+	return mux
+}
+
+func setupAdminRoutes(cfg Config, r *router) {
 	// NOTE: these two admin routes must be registered without using the admin router because they
 	// must _not_ have the auth middleware attached to them.
 	ah := admin.AdminHandler{
@@ -100,6 +120,4 @@ func Setup(cfg Config) http.Handler {
 	profileRouter := adminRouter.Group("/profile")
 	profileRouter.Handle("GET /", pph.Index)
 	profileRouter.Handle("POST /password", pph.ChangePassword)
-
-	return mux
 }
