@@ -49,33 +49,11 @@ func (s Service) Init(ctx context.Context) error {
 func (s Service) Create(ctx context.Context, teamID1, teamID2 string) (_ string, err error) {
 	id := uuid.NewString()
 
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		if r := recover(); r != nil || err != nil {
-			_ = tx.Rollback()
-		}
-	}()
-
 	_, err = s.b.InsertIntoTable("Scores").
 		Fields("GameID", "TeamID", "Score").
 		Values(id, teamID1, 0).
-		ExecContext(ctx, tx)
-	if err != nil {
-		return "", err
-	}
-
-	_, err = s.b.InsertIntoTable("Scores").
-		Fields("GameID", "TeamID", "Score").
 		Values(id, teamID2, 0).
-		ExecContext(ctx, tx)
-	if err != nil {
-		return "", err
-	}
-
-	err = tx.Commit()
+		ExecContext(ctx, s.db)
 	if err != nil {
 		return "", err
 	}
