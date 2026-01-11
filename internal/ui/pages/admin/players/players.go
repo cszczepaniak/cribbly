@@ -42,6 +42,13 @@ func (h PlayersHandler) PostPlayer(w http.ResponseWriter, r *http.Request) error
 	}
 
 	sse := datastar.NewSSE(w, r)
+
+	signals.Name = ""
+	err = sse.MarshalAndPatchSignals(signals)
+	if err != nil {
+		return err
+	}
+
 	return sse.PatchElementTempl(playerTable(players))
 }
 

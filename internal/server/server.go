@@ -14,6 +14,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
 	pubdiv "github.com/cszczepaniak/cribbly/internal/ui/pages/divisions"
+	pubgame "github.com/cszczepaniak/cribbly/internal/ui/pages/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
 	pubteam "github.com/cszczepaniak/cribbly/internal/ui/pages/teams"
 )
@@ -42,6 +43,13 @@ func Setup(cfg Config) http.Handler {
 		TeamService: cfg.TeamService,
 	}
 	r.Handle("GET /teams/{id}/games", th.GetGames)
+
+	gh := pubgame.Handler{
+		GameService: cfg.GameService,
+		TeamService: cfg.TeamService,
+	}
+	r.Handle("GET /games/{id}", gh.GetGame)
+	r.Handle("PUT /games/{id}", gh.UpdateGame)
 
 	return mux
 }

@@ -1,0 +1,100 @@
+package games
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/radio"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
+
+templ Game(props getGameProps) {
+	@components.Shell() {
+		<div class="w-full max-w-md my-4 mx-auto flex flex-col space-y-2">
+			if props.complete {
+				<h1 class="text-xl font-semibold">Game Completed</h1>
+				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
+			} else {
+				<h1 class="text-xl font-semibold">Record Game Score</h1>
+				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
+				@form.Item(form.ItemProps{
+					ID: "team-input",
+				}) {
+					@form.Label() {
+						Who won?
+					}
+					@form.ItemFlex() {
+						@radio.Radio(radio.Props{
+							Name:  "winner",
+							ID:    "r1",
+							Value: props.team1.ID,
+							Attributes: map[string]any{
+								"data-bind": "winner",
+							},
+						})
+						@form.Label(form.LabelProps{
+							For: "r1",
+						}) {
+							{ props.team1.Name }
+						}
+					}
+					@form.ItemFlex() {
+						@radio.Radio(radio.Props{
+							Name:  "winner",
+							ID:    "r2",
+							Value: props.team2.ID,
+							Attributes: map[string]any{
+								"data-bind": "winner",
+							},
+						})
+						@form.Label(form.LabelProps{
+							For: "r2",
+						}) {
+							{ props.team2.Name }
+						}
+					}
+				}
+				@scoreInput("")
+				@button.Button(button.Props{
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendPutf("/games/%s", props.gameID),
+					},
+				}) {
+					Submit Score
+				}
+			}
+		</div>
+	}
+}
+
+templ teamInputError(msg string) {
+	@form.Message(form.MessageProps{
+		ID:      "team-input-error",
+		Variant: form.MessageVariantError,
+	}) {
+		{ msg }
+	}
+}
+
+templ scoreInput(errMsg string) {
+	@form.Item(form.ItemProps{
+		ID: "score-input",
+	}) {
+		@form.Label() {
+			What was the loser's score?
+		}
+		@input.Input(input.Props{
+			Type: input.TypeNumber,
+			Attributes: map[string]any{
+				"data-bind": "loserScore",
+			},
+			HasError: errMsg != "",
+		})
+		if errMsg != "" {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ errMsg }
+			}
+		}
+	}
+}

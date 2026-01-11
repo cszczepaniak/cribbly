@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
+	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/conflict"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
@@ -69,6 +70,22 @@ func (s Service) UpdateScore(ctx context.Context, gameID, teamID string, score i
 	return err
 }
 
+func (s Service) UpdateScores(ctx context.Context, gameID string, teamIDToScore map[string]int) error {
+	b := s.b.InsertIntoTable("Scores").Fields("GameID", "TeamID", "Score")
+	for teamID, score := range teamIDToScore {
+		b.Values(gameID, teamID, score)
+	}
+	b.OnConflict(
+		conflict.NewKey("GameID", "TeamID"),
+		conflict.Ignore("GameID"),
+		conflict.Ignore("TeamID"),
+		conflict.Overwrite("Score"),
+	)
+
+	_, err := b.ExecContext(ctx, s.db)
+	return err
+}
+
 func (s Service) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
 	row, err := s.b.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
 		filter.Equals("GameID", gameID),
@@ -111,6 +128,41 @@ func (s Service) GetAll(ctx context.Context) ([]Score, error) {
 func (s Service) DeleteAll(ctx context.Context) error {
 	_, err := s.b.DeleteFromTable("Scores").ExecContext(ctx, s.db)
 	return err
+}
+
+func (s Service) Get(ctx context.Context, id string) ([2]Score, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT GameID, TeamID, Score FROM Scores WHERE GameID = ? ORDER BY TeamID`,
+		id,
+	)
+	if err != nil {
+		return [2]Score{}, err
+	}
+	defer rows.Close()
+
+	var res [2]Score
+	idx := 0
+	for rows.Next() {
+		var gameID, teamID string
+		var score int
+		err := rows.Scan(&gameID, &teamID, &score)
+		if err != nil {
+			return [2]Score{}, err
+		}
+
+		if idx == 2 {
+			return [2]Score{}, errors.New("too many scores for game")
+		}
+
+		res[idx] = Score{
+			GameID: gameID,
+			TeamID: teamID,
+			Score:  score,
+		}
+		idx++
+	}
+
+	return res, nil
 }
 
 func (s Service) GetForTeam(ctx context.Context, teamID string) (map[string][2]Score, error) {

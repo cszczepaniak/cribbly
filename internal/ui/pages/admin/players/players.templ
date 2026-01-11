@@ -5,85 +5,113 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 )
 
 templ playerRegistrationPage(players []players.Player) {
 	@admincomponents.Shell(admincomponents.Players) {
-		<h1 class="my-4 text-3xl font-bold tracking-tight text-gray-900">Player Registration</h1>
-		<form data-on:submit="@post('/admin/players')">
-			<label class="block text-sm font-medium text-gray-700 mb-1">Player Name</label>
-			<input
-				data-bind="name"
-				class="w-full px-3 py-2 border border-gray-300 rounded-md
-			shadow-sm outline-2 outline-black-200 focus:outline-none focus:ring-2
-			focus:ring-blue-500 focus:border-blue-500 mb-4"
-			/>
-			<input type="submit" class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow hover:bg-slate-700 hover:cursor-pointer" value="Add"/>
-		</form>
-		<details>
-			<summary class="font-semibold">Dev Tools</summary>
-			<form data-on:submit="@post('/admin/players/random')">
-				<h2 class="my-4 text-xl font-semibold tracking-tight text-gray-900">Generate Random Players</h2>
-				<label class="block text-sm font-medium text-gray-700 mb-1">Number of Players</label>
-				<input
-					data-bind="num"
-					type="number"
-					class="w-full px-3 py-2 border border-gray-300 rounded-md
-			shadow-sm outline-2 outline-black-200 focus:outline-none focus:ring-2
-			focus:ring-blue-500 focus:border-blue-500 mb-4"
-				/>
-				<input
-					type="submit"
-					class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
-			hover:bg-slate-700 hover:cursor-pointer"
-					value="Generate"
-				/>
-			</form>
-			<button
-				class="my-4 px-4 py-2 bg-slate-600 text-white rounded-md shadow
-			hover:bg-slate-700 hover:cursor-pointer"
-				data-on:click="@delete('/admin/players')"
-			>Delete All Players</button>
-		</details>
-		<div class="px-4 sm:px-6 lg:px-8">
-			<div class="mt-8 flow-root">
-				<div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-					<div class="inline-block min-w-full py-2 align-middle">
-						<table class="min-w-full border-separate border-spacing-0">
-							<thead>
-								<tr>
-									<th scope="col" class="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8">Name</th>
-								</tr>
-							</thead>
-							@playerTable(players)
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
+		<h1 class="my-4 text-3xl font-semibold text-foreground">Player Registration</h1>
+		@form.Item() {
+			@form.Label() {
+				Player Name
+			}
+			@input.Input(input.Props{
+				Attributes: map[string]any{
+					"data-bind": "name",
+				},
+			})
+		}
+		@button.Button(button.Props{
+			Class: "my-4",
+			Attributes: map[string]any{
+				"data-on:click": dstar.SendPostf("/admin/players"),
+			},
+		}) {
+			Add
+		}
+		@table.Table() {
+			@table.Header() {
+				@table.Row() {
+					@table.Head() {
+						Name
+					}
+				}
+			}
+			@playerTable(players)
+		}
+		@devTools()
 	}
 }
 
 templ playerTable(players []players.Player) {
-	<tbody id="player-list">
-		@playerList(players)
-	</tbody>
+	@table.Body(table.BodyProps{ID: "player-list"}) {
+		for _, p := range players {
+			@table.Row() {
+				@table.Cell(table.CellProps{
+					Class: "flex flex-row items-center space-x-2",
+				}) {
+					@button.Button(button.Props{
+						Variant: button.VariantGhost,
+					}) {
+						@icon.Trash2()
+					}
+					<button
+						data-on:click={ fmt.Sprintf("@delete('/admin/players/%s')", p.ID) }
+						class="hover:cursor-pointer"
+					>
+						@icons.Trash(icons.WithStrokeWidth(1.5))
+					</button><span>{ p.Name }</span>
+				}
+			}
+		}
+	}
 }
 
-templ playerList(players []players.Player) {
-	for _, p := range players {
-		<tr>
-			<td
-				class="border-b border-gray-200 py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap
-			text-gray-900 sm:pl-6 lg:pl-8 flex flex-row items-center space-x-4"
-			>
-				<button
-					data-on:click={ fmt.Sprintf("@delete('/admin/players/%s')", p.ID) }
-					class="hover:cursor-pointer"
-				>
-					@icons.Trash(icons.WithStrokeWidth(1.5))
-				</button><span>{ p.Name }</span>
-			</td>
-		</tr>
+templ devTools() {
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				Dev Tools
+			}
+			@accordion.Content() {
+				<h2 class="my-4 text-xl font-semibold tracking-tight text-gray-900">Generate Random Players</h2>
+				@form.Item() {
+					@form.Label() {
+						Number of Players
+					}
+					@input.Input(input.Props{
+						Type: input.TypeNumber,
+						Attributes: map[string]any{
+							"data-bind": "num",
+						},
+					})
+				}
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendPostf("/admin/players/random"),
+					},
+				}) {
+					Generate
+				}
+				@separator.Separator()
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendPostf("/admin/players"),
+					},
+					Variant: button.VariantDestructive,
+				}) {
+					Delete All Players
+				}
+			}
+		}
 	}
 }
