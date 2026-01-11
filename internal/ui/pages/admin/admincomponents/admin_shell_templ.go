@@ -43,7 +43,7 @@ func Shell(route Route) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col\"><header class=\"bg-slate-600 text-white p-6 text-2xl font-semibold\">Admin Area</header><div class=\"flex min-h-svh\"><nav class=\"bg-slate-700\"><ul class=\"flex flex-col space-y-2 mt-8 whitespace-nowrap\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col\"><div class=\"flex min-h-svh\"><nav class=\"bg-primary\"><ul class=\"flex flex-col space-y-2 mt-8 whitespace-nowrap\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -116,12 +116,12 @@ func adminNavs(selected Route) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if selected == targ {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"pointer-events-none bg-slate-500 text-white font-semibold px-8 py-2\" disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"pointer-events-none bg-background text-foreground font-semibold px-8 py-2\" disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " class=\"hover:cursor-pointer hover:bg-slate-500 text-white font-semibold px-8 py-2\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " class=\"hover:cursor-pointer hover:bg-background text-background\n\t\t\t\thover:text-foreground font-semibold px-8 py-2\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

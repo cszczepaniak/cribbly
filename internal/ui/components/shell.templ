@@ -1,5 +1,8 @@
 package components
 
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+
 templ Shell() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -11,15 +14,24 @@ templ Shell() {
 			<link href="/public/output.css" rel="stylesheet"/>
 		</head>
 		<body>
-			<div
-				class="bg-foreground text-background p-4 font-semibold tracking-wide text-lg text-center
-			md:text-left"
+			<header
+				class="bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex
+				flex-row justify-between"
 			>
-				Crib<span class="text-red-500">b</span><span class="text-blue-600">l</span><span class="text-green-500">y</span>
-			</div>
-			<div class="p-2">
-				{ children... }
-			</div>
+				<a href="/">
+					Crib<span class="text-red-500">b</span><span
+	class="text-blue-600"
+>l</span><span class="text-green-500">y</span>
+				</a>
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    "/admin",
+					Class:   "text-background",
+				}) {
+					@icon.UserRound()
+				}
+			</header>
+			{ children... }
 		</body>
 	</html>
 }
