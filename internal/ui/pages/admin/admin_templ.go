@@ -9,10 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/input"
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 
 func adminPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -94,11 +94,7 @@ func loginPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col space-y-4 py-4 max-w-md mx-auto\"><h1 class=\"text-5xl text-center\">Admin Sign In</h1>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = notAnAdmin().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col space-y-4 py-4 max-w-md mx-auto\"><h1 class=\"text-5xl text-center\">Admin Sign In</h1><p class=\"text-muted-foreground text-center italic\">If you aren't an admin, you can click <a href=\"/\" class=\"underline hover:cursor-pointer\">here</a> to be redirected to the home page. If you are but need to register, you can do so <a href=\"/admin/register\" class=\"underline hover:cursor-pointer\">here</a></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -106,11 +102,22 @@ func loginPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = input.Input(input.Props{
+				Placeholder: "Username",
+				Attributes: map[string]any{
+					"data-bind": "username",
+				},
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword()).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = input.Input(input.Props{
+				Placeholder: "Password",
+				Type:        input.TypePassword,
+				Attributes: map[string]any{
+					"data-bind": "password",
+				},
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -132,7 +139,11 @@ func loginPage() templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = button.Button(button.OnClick(dstar.SendPostf("/admin/login"))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = button.Button(button.Props{
+				Attributes: map[string]any{
+					"data-on:click": dstar.SendPostf("/admin/login"),
+				},
+			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -188,7 +199,7 @@ func loginError(text string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/admin.templ`, Line: 38, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/admin.templ`, Line: 60, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -235,11 +246,7 @@ func registerPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"flex flex-col space-y-4 py-4 max-w-md mx-auto\"><h1 class=\"text-5xl text-center\">Admin Registration</h1>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = notAnAdmin().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"flex flex-col space-y-4 py-4 max-w-md mx-auto\"><h1 class=\"text-5xl text-center text-foreground\">Admin Registration</h1><p class=\"text-muted-foreground text-center italic\">If you aren't an admin, you can click <a href=\"/\" class=\"underline hover:cursor-pointer\">here</a> to be redirected to the home page. If you have an admin account, you can log in <a href=\"/admin/login\" class=\"underline hover:cursor-pointer\">here</a></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -247,15 +254,32 @@ func registerPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = input.Input(input.Props{
+				Placeholder: "Username",
+				Attributes: map[string]any{
+					"data-bind": "username",
+				},
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword()).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = input.Input(input.Props{
+				Placeholder: "Password",
+				Type:        input.TypePassword,
+				Attributes: map[string]any{
+					"data-bind": "password",
+				},
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = input.Input(input.WithDataBind("repeat_password"), input.WithPlaceholder("Repeat Password"), input.AsPassword()).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = input.Input(input.Props{
+				Placeholder: "Repeat Password",
+				Type:        input.TypePassword,
+				Attributes: map[string]any{
+					"data-bind": "repeat_password",
+				},
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -277,7 +301,11 @@ func registerPage() templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = button.Button(button.OnClick(dstar.SendPostf("/admin/register"))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = button.Button(button.Props{
+				Attributes: map[string]any{
+					"data-on:click": dstar.SendPostf("/admin/register"),
+				},
+			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -333,7 +361,7 @@ func registerError(text string) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/admin.templ`, Line: 66, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/admin.templ`, Line: 116, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -368,7 +396,7 @@ func notAnAdmin() templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<p class=\"text-slate-600 text-center italic\">If you aren't an admin, you can click <a href=\"/\" class=\"underline hover:cursor-pointer\">here</a> to be redirected to the home page.</p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<p class=\"text-muted-foreground text-center italic\">If you aren't an admin, you can click <a href=\"/\" class=\"underline hover:cursor-pointer\">here</a> to be redirected to the home page.</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

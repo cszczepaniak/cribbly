@@ -1,10 +1,10 @@
 package admin
 
 import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/input"
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 
 templ adminPage() {
 	@admincomponents.Shell(admincomponents.Home) {
@@ -16,11 +16,33 @@ templ loginPage() {
 	@components.Shell() {
 		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
 			<h1 class="text-5xl text-center">Admin Sign In</h1>
-			@notAnAdmin()
+			<p class="text-muted-foreground text-center italic">
+				If you aren't an admin, you can click <a
+	href="/"
+	class="underline hover:cursor-pointer"
+>here</a>
+				to be redirected to the home page. If you are but need to register, you can do so
+				<a href="/admin/register" class="underline hover:cursor-pointer">here</a>
+			</p>
 			@loginError("")
-			@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
-			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
-			@button.Button(button.OnClick(dstar.SendPostf("/admin/login"))) {
+			@input.Input(input.Props{
+				Placeholder: "Username",
+				Attributes: map[string]any{
+					"data-bind": "username",
+				},
+			})
+			@input.Input(input.Props{
+				Placeholder: "Password",
+				Type:        input.TypePassword,
+				Attributes: map[string]any{
+					"data-bind": "password",
+				},
+			})
+			@button.Button(button.Props{
+				Attributes: map[string]any{
+					"data-on:click": dstar.SendPostf("/admin/login"),
+				},
+			}) {
 				Login
 			}
 		</div>
@@ -42,13 +64,41 @@ templ loginError(text string) {
 templ registerPage() {
 	@components.Shell() {
 		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
-			<h1 class="text-5xl text-center">Admin Registration</h1>
-			@notAnAdmin()
+			<h1 class="text-5xl text-center text-foreground">Admin Registration</h1>
+			<p class="text-muted-foreground text-center italic">
+				If you aren't an admin, you can click <a
+	href="/"
+	class="underline hover:cursor-pointer"
+>here</a>
+				to be redirected to the home page. If you have an admin account, you can log in
+				<a href="/admin/login" class="underline hover:cursor-pointer">here</a>
+			</p>
 			@registerError("")
-			@input.Input(input.WithDataBind("username"), input.WithPlaceholder("Username"))
-			@input.Input(input.WithDataBind("password"), input.WithPlaceholder("Password"), input.AsPassword())
-			@input.Input(input.WithDataBind("repeat_password"), input.WithPlaceholder("Repeat Password"), input.AsPassword())
-			@button.Button(button.OnClick(dstar.SendPostf("/admin/register"))) {
+			@input.Input(input.Props{
+				Placeholder: "Username",
+				Attributes: map[string]any{
+					"data-bind": "username",
+				},
+			})
+			@input.Input(input.Props{
+				Placeholder: "Password",
+				Type:        input.TypePassword,
+				Attributes: map[string]any{
+					"data-bind": "password",
+				},
+			})
+			@input.Input(input.Props{
+				Placeholder: "Repeat Password",
+				Type:        input.TypePassword,
+				Attributes: map[string]any{
+					"data-bind": "repeat_password",
+				},
+			})
+			@button.Button(button.Props{
+				Attributes: map[string]any{
+					"data-on:click": dstar.SendPostf("/admin/register"),
+				},
+			}) {
 				Register
 			}
 		</div>
@@ -68,7 +118,7 @@ templ registerError(text string) {
 }
 
 templ notAnAdmin() {
-	<p class="text-slate-600 text-center italic">
+	<p class="text-muted-foreground text-center italic">
 		If you aren't an admin, you can click <a
 	href="/"
 	class="underline hover:cursor-pointer"
