@@ -46,7 +46,7 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\tconst evtSource = new EventSource(\"/sse\");\n\t\t\tevtSource.addEventListener(\"values\", (event) => {\n\t\t\t\tconst ul = document.getElementById(\"items\");\n\t\t\t\tdocument.startViewTransition(() => {\n\t\t\t\t\tul.innerHTML = event.data;\n\t\t\t\t});\n\t\t\t})\n\t\t</script> <style>\n\t\t::view-transition-group(*) {\n\t\tanimation-duration: 500ms;\n\t\t}\n\t\t</style> <p>Hello, Cribbly!</p><ul id=\"items\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\tconst evtSource = new EventSource(\"/sse\");\n\t\t\tevtSource.addEventListener(\"values\", (event) => {\n\t\t\t\tconst ul = document.getElementById(\"items\");\n\t\t\t\tdocument.startViewTransition(() => {\n\t\t\t\t\tul.innerHTML = event.data;\n\t\t\t\t});\n\t\t\t})\n\t\t</script> <style>\n\t\t::view-transition-group(*) {\n\t\t\tanimation-duration: 600ms;\n\t\t}\n\t\t</style> <p>Hello, Cribbly!</p><ul id=\"items\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -54,7 +54,7 @@ func index() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</ul><button hx-get=\"/list\" hx-target=\"#items\" hx-swap=\"transition:true\">Click</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</ul><button hx-get=\"/list\" hx-target=\"#items\">Click</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
