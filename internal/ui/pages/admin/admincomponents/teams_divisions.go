@@ -157,9 +157,9 @@ func itemOrDivID[T teamOrDiv](item T) string {
 func availableTitle[U playerOrTeam]() string {
 	switch any(*new(U)).(type) {
 	case players.Player:
-		return "Available Players:"
+		return "Available Players"
 	case teams.Team:
-		return "Available Teams:"
+		return "Available Teams"
 	default:
 		panic("unreachable")
 	}
