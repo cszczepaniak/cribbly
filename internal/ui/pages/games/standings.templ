@@ -6,7 +6,6 @@ import "github.com/cszczepaniak/cribbly/internal/persistence/games"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 
 templ standings(ss []games.Standing) {
 	@components.Shell() {
@@ -66,7 +65,7 @@ templ standingsItems(ss []games.Standing) {
 				utils.IfElse(i < 8, "bg-green-100", "bg-red-100"),
 			),
 			Attributes: map[string]any{
-				"style": fmt.Sprintf("{view-transition-name:%s}", s.TeamID),
+				"style": fmt.Sprintf("view-transition-name:%s", s.TeamID),
 			},
 		}) {
 			@table.Cell() {
@@ -86,22 +85,4 @@ templ standingsItems(ss []games.Standing) {
 			}
 		}
 	}
-}
-
-templ simple() {
-	@components.Shell() {
-		<h1>Simple Page</h1>
-		@button.Button(button.Props{
-			Attributes: map[string]any{
-				"data-on:click": dstar.SendPostf("/simple/stream"),
-			},
-		}) {
-			Start Stream
-		}
-		<div id="simple">Waiting for stream...</div>
-	}
-}
-
-templ simpleStreamItem(val int) {
-	<div id="simple">{ fmt.Sprint(val) }</div>
 }
