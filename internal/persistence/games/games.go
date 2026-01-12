@@ -211,3 +211,40 @@ func (s Service) GetForTeam(ctx context.Context, teamID string) (map[string][2]S
 
 	return res, nil
 }
+
+type Standing struct {
+	TeamID     string
+	TeamName   string
+	Wins       int
+	Losses     int
+	TotalScore int
+}
+
+func (s Service) GetStandings(ctx context.Context) ([]Standing, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT
+			TeamID,
+			t.Name,
+			SUM(s.Score) as totalScore,
+			SUM(s.Score >= 121) as wins,
+			SUM(s.Score > 0 AND s.Score < 121) as losses
+		FROM Scores s INNER JOIN Teams t ON s.TeamID = t.ID
+		GROUP BY TeamID ORDER BY wins DESC, totalScore DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var res []Standing
+	for rows.Next() {
+		var s Standing
+		err := rows.Scan(&s.TeamID, &s.TeamName, &s.TotalScore, &s.Wins, &s.Losses)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, s)
+	}
+
+	return res, nil
+}

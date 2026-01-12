@@ -1,9 +1,7 @@
 package players
 
 import (
-	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/icons"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
@@ -59,15 +57,13 @@ templ playerTable(players []players.Player) {
 				}) {
 					@button.Button(button.Props{
 						Variant: button.VariantGhost,
+						Attributes: map[string]any{
+							"data-on:click": dstar.SendDeletef("/admin/players/%s", p.ID),
+						},
 					}) {
 						@icon.Trash2()
 					}
-					<button
-						data-on:click={ fmt.Sprintf("@delete('/admin/players/%s')", p.ID) }
-						class="hover:cursor-pointer"
-					>
-						@icons.Trash(icons.WithStrokeWidth(1.5))
-					</button><span>{ p.Name }</span>
+					<span>{ p.Name }</span>
 				}
 			}
 		}

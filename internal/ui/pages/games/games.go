@@ -1,7 +1,9 @@
 package games
 
 import (
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -96,4 +98,37 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return datastar.NewSSE(w, r).Redirectf("/games/%s", gameID)
+}
+
+func (h Handler) StandingsPage(w http.ResponseWriter, r *http.Request) error {
+	s, err := h.GameService.GetStandings(r.Context())
+	if err != nil {
+		return err
+	}
+	return standings(s).Render(r.Context(), w)
+}
+
+func (h Handler) StreamStandings(w http.ResponseWriter, r *http.Request) error {
+	s, err := h.GameService.GetStandings(r.Context())
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	tick := time.NewTicker(2 * time.Second)
+	for {
+		select {
+		case <-r.Context().Done():
+			return nil
+		case <-tick.C:
+			rand.Shuffle(len(s), func(i, j int) {
+				s[i], s[j] = s[j], s[i]
+			})
+
+			err := sse.PatchElementTempl(standingsTable(s), datastar.WithViewTransitions())
+			if err != nil {
+				return err
+			}
+		}
+	}
 }

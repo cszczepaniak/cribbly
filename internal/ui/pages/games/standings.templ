@@ -1,0 +1,102 @@
+package games
+
+import "fmt"
+import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "github.com/cszczepaniak/cribbly/internal/persistence/games"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+
+templ standings(ss []games.Standing) {
+	@components.Shell() {
+		<div class="p-4">
+			<h1 class="text-3xl font-semibold">Prelim Standings</h1>
+			@table.Table(table.Props{
+				Class: "mt-6",
+				Attributes: map[string]any{
+					"data-init": dstar.SendGetf("/standings/stream"),
+				},
+			}) {
+				@table.Header() {
+					@table.Head() {
+						Rank
+					}
+					@table.Head() {
+						Team
+					}
+					@table.Head() {
+						Wins
+					}
+					@table.Head() {
+						Losses
+					}
+					@table.Head() {
+						Total Score
+					}
+				}
+				@table.Body(table.BodyProps{
+					ID: "standings-table",
+				}) {
+					@standingsItems(ss)
+				}
+			}
+		</div>
+	}
+}
+
+templ standingsTable(ss []games.Standing) {
+	@table.Body(table.BodyProps{
+		ID: "standings-table",
+	}) {
+		@standingsItems(ss)
+	}
+}
+
+templ standingsItems(ss []games.Standing) {
+	for i, s := range ss {
+		@table.Row(table.RowProps{
+			Class: utils.TwMerge(
+				"text-lg text-foreground",
+				utils.IfElse(i < 8, "bg-green-100", "bg-red-100"),
+			),
+			Attributes: map[string]any{
+				"style": fmt.Sprintf("{view-transition-name: '%s'}", s.TeamID),
+			},
+		}) {
+			@table.Cell() {
+				{ fmt.Sprint(i+1) }
+			}
+			@table.Cell() {
+				{ s.TeamName }
+			}
+			@table.Cell() {
+				{ fmt.Sprint(s.Wins) }
+			}
+			@table.Cell() {
+				{ fmt.Sprint(s.Losses) }
+			}
+			@table.Cell() {
+				{ fmt.Sprint(s.TotalScore) }
+			}
+		}
+	}
+}
+
+templ simple() {
+	@components.Shell() {
+		<h1>Simple Page</h1>
+		@button.Button(button.Props{
+			Attributes: map[string]any{
+				"data-on:click": dstar.SendPostf("/simple/stream"),
+			},
+		}) {
+			Start Stream
+		}
+		<div id="simple">Waiting for stream...</div>
+	}
+}
+
+templ simpleStreamItem(val int) {
+	<div id="simple">{ fmt.Sprint(val) }</div>
+}

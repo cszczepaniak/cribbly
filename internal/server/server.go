@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
@@ -23,7 +22,7 @@ func Setup(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
-	mux.Handle("GET /", components.Handle(index.Index))
+	mux.Handle("GET /", handleWithError(index.Index))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
@@ -50,6 +49,8 @@ func Setup(cfg Config) http.Handler {
 	}
 	r.Handle("GET /games/{id}", gh.GetGame)
 	r.Handle("PUT /games/{id}", gh.UpdateGame)
+	r.Handle("GET /standings", gh.StandingsPage)
+	r.Handle("GET /standings/stream", gh.StreamStandings)
 
 	return mux
 }
