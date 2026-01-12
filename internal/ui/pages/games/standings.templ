@@ -10,6 +10,11 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 
 templ standings(ss []games.Standing) {
 	@components.Shell() {
+		<style>
+		::view-transition-group(*) {
+			animation-duration: 1000ms;
+		}
+		</style>
 		<div class="p-4">
 			<h1 class="text-3xl font-semibold">Prelim Standings</h1>
 			@table.Table(table.Props{
@@ -61,7 +66,7 @@ templ standingsItems(ss []games.Standing) {
 				utils.IfElse(i < 8, "bg-green-100", "bg-red-100"),
 			),
 			Attributes: map[string]any{
-				"style": fmt.Sprintf("{view-transition-name: '%s'}", s.TeamID),
+				"style": fmt.Sprintf("{view-transition-name:%s}", s.TeamID),
 			},
 		}) {
 			@table.Cell() {
