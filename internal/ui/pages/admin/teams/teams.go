@@ -42,16 +42,15 @@ func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(
-		admincomponents.EditTeamOrDivisionModal(team, onThisTeam, availablePlayers),
-		datastar.WithSelectorID(admincomponents.MainContentID[teams.Team]()),
-		datastar.WithModeAppend(),
-	)
-}
-
-func (h TeamsHandler) CancelEdit(w http.ResponseWriter, r *http.Request) error {
-	sse := datastar.NewSSE(w, r)
-	return resetEdit(sse)
+	err = sse.PatchElementTempl(admincomponents.EditNameInput(team.Name))
+	if err != nil {
+		return err
+	}
+	err = sse.PatchElementTempl(admincomponents.EditSaveButton[teams.Team](id))
+	if err != nil {
+		return err
+	}
+	return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](id, availablePlayers, onThisTeam))
 }
 
 func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
@@ -114,34 +113,26 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](teamID, available, onThisTeam))
 	}
 
-	var signals signals
-	err := datastar.ReadSignals(r, &signals)
+	var sigs signals
+	err := datastar.ReadSignals(r, &sigs)
 	if err != nil {
 		return err
 	}
 
-	if signals.Name != "" {
-		err := h.TeamService.Rename(r.Context(), teamID, signals.Name)
+	if sigs.Name != "" {
+		err := h.TeamService.Rename(r.Context(), teamID, sigs.Name)
 		if err != nil {
 			return err
 		}
 
 		sse := datastar.NewSSE(w, r)
 
-		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(teamID, signals.Name))
+		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(teamID, sigs.Name))
 		if err != nil {
 			return err
 		}
-		return resetEdit(sse)
+		return sse.MarshalAndPatchSignals(signals{Name: ""})
 	}
 
 	return nil
-}
-
-func resetEdit(sse *datastar.ServerSentEventGenerator) error {
-	err := sse.MarshalAndPatchSignals(signals{Name: ""})
-	if err != nil {
-		return err
-	}
-	return sse.RemoveElementByID(admincomponents.EditModalID)
 }

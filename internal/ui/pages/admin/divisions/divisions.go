@@ -43,16 +43,15 @@ func (h DivisionsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(
-		admincomponents.EditTeamOrDivisionModal(division, inThisDivision, availableTeams),
-		datastar.WithSelectorID("divisions"),
-		datastar.WithModeAppend(),
-	)
-}
-
-func (h DivisionsHandler) CancelEdit(w http.ResponseWriter, r *http.Request) error {
-	sse := datastar.NewSSE(w, r)
-	return resetEdit(sse)
+	err = sse.PatchElementTempl(admincomponents.EditNameInput(division.Name))
+	if err != nil {
+		return err
+	}
+	err = sse.PatchElementTempl(admincomponents.EditSaveButton[divisions.Division](id))
+	if err != nil {
+		return err
+	}
+	return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](id, availableTeams, inThisDivision))
 }
 
 func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
@@ -115,34 +114,26 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		return sse.PatchElementTempl(admincomponents.ItemsListing[divisions.Division](divisionID, available, inThisDivision))
 	}
 
-	var signals signals
-	err := datastar.ReadSignals(r, &signals)
+	var sigs signals
+	err := datastar.ReadSignals(r, &sigs)
 	if err != nil {
 		return err
 	}
 
-	if signals.Name != "" {
-		err := h.DivisionService.Rename(r.Context(), divisionID, signals.Name)
+	if sigs.Name != "" {
+		err := h.DivisionService.Rename(r.Context(), divisionID, sigs.Name)
 		if err != nil {
 			return err
 		}
 
 		sse := datastar.NewSSE(w, r)
 
-		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(divisionID, signals.Name))
+		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(divisionID, sigs.Name))
 		if err != nil {
 			return err
 		}
-		return resetEdit(sse)
+		return sse.MarshalAndPatchSignals(signals{Name: ""})
 	}
 
 	return nil
-}
-
-func resetEdit(sse *datastar.ServerSentEventGenerator) error {
-	err := sse.MarshalAndPatchSignals(signals{Name: ""})
-	if err != nil {
-		return err
-	}
-	return sse.RemoveElementByID(admincomponents.EditModalID)
 }

@@ -22,7 +22,52 @@ templ TeamOrDivisionPage[T teamOrDiv](items []T) {
 			Create New { ifTeam[T]("Team", "Division") }
 		}
 		@TeamOrDivisionTable(items)
+		@editDialog[T]()
 	</main>
+}
+
+templ editDialog[T teamOrDiv]() {
+	@dialog.Dialog(dialog.Props{
+		ID: EditModalID,
+	}) {
+		@dialog.Content() {
+			@dialog.Title() {
+				Edit { ifTeam[T]("Team", "Division") }
+			}
+			@form.Item() {
+				@form.Label() {
+					{ ifTeam[T]("Team", "Division") } Name
+				}
+				@EditNameInput("")
+			}
+			@emptyItemsListing()
+			@dialog.Close() {
+				@EditSaveButton[T]("")
+			}
+		}
+	}
+}
+
+templ EditNameInput(placeholder string) {
+	<div id="edit-input">
+		@input.Input(input.Props{
+			Placeholder: placeholder,
+			Attributes: map[string]any{
+				"data-bind": "name",
+			},
+		})
+	</div>
+}
+
+templ EditSaveButton[T teamOrDiv](id string) {
+	@button.Button(button.Props{
+		ID: "edit-button",
+		Attributes: map[string]any{
+			"data-on:click": dstar.SendPutf("/admin/%s/%s", ifTeam[T]("teams", "divisions"), id),
+		},
+	}) {
+		Save
+	}
 }
 
 templ TeamOrDivisionTable[T teamOrDiv](items []T) {
@@ -47,13 +92,17 @@ templ teamOrDivisionRow[T teamOrDiv](val T) {
 		@table.Cell(table.CellProps{
 			Class: "flex flex-row",
 		}) {
-			@button.Button(button.Props{
-				Variant: button.VariantGhost,
-				Attributes: map[string]any{
-					"data-on:click": dstar.SendGetf(editURL(val)),
-				},
+			@dialog.Trigger(dialog.TriggerProps{
+				For: EditModalID,
 			}) {
-				@icon.Pencil()
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendGetf(editURL(val)),
+					},
+				}) {
+					@icon.Pencil()
+				}
 			}
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
@@ -76,35 +125,8 @@ templ TeamOrDivisionName(id, name string) {
 	}
 }
 
-templ EditTeamOrDivisionModal[T teamOrDiv, U playerOrTeam](val T, items []U, availableItems []U) {
-	@dialog.Dialog(dialog.Props{
-		ID: EditModalID,
-	}) {
-		@dialog.Content() {
-			@dialog.Title() {
-				Edit { ifTeam[T]("Team", "Division") }
-			}
-			@form.Item() {
-				@form.Label() {
-					{ ifTeam[T]("Team", "Division") } Name
-				}
-				@input.Input(input.Props{
-					Placeholder: getName(val),
-					Attributes: map[string]any{
-						"data-bind": "name",
-					},
-				})
-			}
-			@ItemsListing[T](getID(val), availableItems, items)
-			@button.Button(button.Props{
-				Attributes: map[string]any{
-					"data-on:click": dstar.SendPutf(saveURL(val)),
-				},
-			}) {
-				Save
-			}
-		}
-	}
+templ emptyItemsListing() {
+	<div id="items-listing"></div>
 }
 
 templ ItemsListing[T teamOrDiv, U playerOrTeam](thingID string, available, onThisOne []U) {
