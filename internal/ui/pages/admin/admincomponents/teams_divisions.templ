@@ -39,11 +39,11 @@ templ editDialog[T teamOrDiv]() {
 					{ ifTeam[T]("Team", "Division") } Name
 				}
 				@EditNameInput("")
+				@dialog.Close() {
+					@EditSaveButton[T]("")
+				}
 			}
 			@emptyItemsListing()
-			@dialog.Close() {
-				@EditSaveButton[T]("")
-			}
 		}
 	}
 }
@@ -61,12 +61,13 @@ templ EditNameInput(placeholder string) {
 
 templ EditSaveButton[T teamOrDiv](id string) {
 	@button.Button(button.Props{
-		ID: "edit-button",
+		ID:    "edit-button",
+		Class: "mt-2",
 		Attributes: map[string]any{
 			"data-on:click": dstar.SendPutf("/admin/%s/%s", ifTeam[T]("teams", "divisions"), id),
 		},
 	}) {
-		Save
+		Save Name
 	}
 }
 
@@ -131,47 +132,59 @@ templ emptyItemsListing() {
 
 templ ItemsListing[T teamOrDiv, U playerOrTeam](thingID string, available, onThisOne []U) {
 	<div id="items-listing">
-		<p class="block text-sm text-muted-foreground mb-1">
-			{ ifTeam[T]("Players", "Teams") }
-		</p>
-		<div class="min-w-full py-2 align-middle">
-			for _, item := range onThisOne {
-				<div
-					class="flex items-center justify-between flex-grow border-b border-t border-gray-200
-								px-2 py-4"
-				>
-					<div class="text-sm font-medium text-foreground">{ itemName(item) }</div>
-					@button.Button(button.Props{
-						Class:   "text-destructive hover:text-destructive hover:bg-background",
-						Variant: button.VariantGhost,
-						Attributes: map[string]any{
-							"data-on:click": dstar.SendPutf(unassignURL(thingID, item)),
-						},
-					}) {
-						@icon.CircleMinus()
-					}
-				</div>
+		@table.Table() {
+			@table.Header() {
+				@table.Head() {
+					{ ifTeam[T]("Players", "Teams") }
+				}
 			}
-		</div>
-		<h2 class="block text-sm text-muted-foreground mt-8 mb-1">{ availableTitle[U]() }</h2>
-		<div class="min-w-full py-2 align-middle">
-			for _, item := range available {
-				<div
-					class="flex items-center justify-between flex-grow border-b border-t border-gray-200
-								px-2 py-4"
-				>
-					<div class="text-sm font-medium text-foreground">{ itemName(item) }</div>
-					@button.Button(button.Props{
-						Class:   "hover:text-foreground hover:bg-background",
-						Variant: button.VariantGhost,
-						Attributes: map[string]any{
-							"data-on:click": dstar.SendPutf(assignURL(thingID, item)),
-						},
-					}) {
-						@icon.CirclePlus()
+			@table.Body() {
+				for _, item := range onThisOne {
+					@table.Row() {
+						@table.Cell(table.CellProps{
+							Class: "flex flex-row justify-between items-center",
+						}) {
+							<div class="text-sm font-medium text-foreground">{ itemName(item) }</div>
+							@button.Button(button.Props{
+								Class:   "text-destructive hover:text-destructive hover:bg-background",
+								Variant: button.VariantGhost,
+								Attributes: map[string]any{
+									"data-on:click": dstar.SendPutf(unassignURL(thingID, item)),
+								},
+							}) {
+								@icon.CircleMinus()
+							}
+						}
 					}
-				</div>
+				}
 			}
-		</div>
+		}
+		@table.Table() {
+			@table.Header() {
+				@table.Head() {
+					{ availableTitle[U]() }
+				}
+			}
+			@table.Body() {
+				for _, item := range available {
+					@table.Row() {
+						@table.Cell(table.CellProps{
+							Class: "flex flex-row justify-between items-center",
+						}) {
+							<div class="text-sm font-medium text-foreground">{ itemName(item) }</div>
+							@button.Button(button.Props{
+								Class:   "hover:text-foreground hover:bg-background",
+								Variant: button.VariantGhost,
+								Attributes: map[string]any{
+									"data-on:click": dstar.SendPutf(assignURL(thingID, item)),
+								},
+							}) {
+								@icon.CirclePlus()
+							}
+						}
+					}
+				}
+			}
+		}
 	</div>
 }
