@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -40,6 +41,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	scoreUpdateNotifier := &notifier.Notifier{}
+
 	playerService := players.NewService(db)
 	err = playerService.Init(ctx)
 	if err != nil {
@@ -58,7 +61,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	gameService := games.NewService(db)
+	gameService := games.NewService(db, scoreUpdateNotifier)
 	err = gameService.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -71,11 +74,12 @@ func main() {
 	}
 
 	cfg := server.Config{
-		PlayerService:   playerService,
-		TeamService:     teamService,
-		DivisionService: divisionService,
-		GameService:     gameService,
-		UserService:     userService,
+		PlayerService:       playerService,
+		TeamService:         teamService,
+		DivisionService:     divisionService,
+		GameService:         gameService,
+		UserService:         userService,
+		ScoreUpdateNotifier: scoreUpdateNotifier,
 	}
 
 	s := server.Setup(cfg)

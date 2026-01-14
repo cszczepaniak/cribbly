@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -9,9 +10,10 @@ import (
 )
 
 type Config struct {
-	PlayerService   players.Service
-	TeamService     teams.Service
-	DivisionService divisions.Service
-	GameService     games.Service
-	UserService     users.Service
+	PlayerService       players.Service
+	TeamService         teams.Service
+	DivisionService     divisions.Service
+	GameService         games.Service
+	UserService         users.Service
+	ScoreUpdateNotifier *notifier.Notifier
 }

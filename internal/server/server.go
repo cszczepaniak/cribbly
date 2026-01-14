@@ -44,8 +44,9 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("GET /teams/{id}/games", th.GetGames)
 
 	gh := pubgame.Handler{
-		GameService: cfg.GameService,
-		TeamService: cfg.TeamService,
+		GameService:         cfg.GameService,
+		TeamService:         cfg.TeamService,
+		ScoreUpdateNotifier: cfg.ScoreUpdateNotifier,
 	}
 	r.Handle("GET /games/{id}", gh.GetGame)
 	r.Handle("PUT /games/{id}", gh.UpdateGame)

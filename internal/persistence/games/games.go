@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/conflict"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
@@ -27,12 +28,14 @@ type Game struct {
 type Service struct {
 	db *sql.DB
 	b  *sqlbuilder.Builder
+	n  *notifier.Notifier
 }
 
-func NewService(db *sql.DB) Service {
+func NewService(db *sql.DB, n *notifier.Notifier) Service {
 	return Service{
 		db: db,
 		b:  sqlbuilder.New(formatter.Sqlite{}),
+		n:  n,
 	}
 }
 
@@ -67,7 +70,12 @@ func (s Service) UpdateScore(ctx context.Context, gameID, teamID string, score i
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
 	).ExecContext(ctx, s.db)
-	return err
+	if err != nil {
+		return err
+	}
+
+	s.n.Notify()
+	return nil
 }
 
 func (s Service) UpdateScores(ctx context.Context, gameID string, teamIDToScore map[string]int) error {
@@ -83,7 +91,12 @@ func (s Service) UpdateScores(ctx context.Context, gameID string, teamIDToScore 
 	)
 
 	_, err := b.ExecContext(ctx, s.db)
-	return err
+	if err != nil {
+		return err
+	}
+
+	s.n.Notify()
+	return nil
 }
 
 func (s Service) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
@@ -229,7 +242,7 @@ func (s Service) GetStandings(ctx context.Context) ([]Standing, error) {
 			SUM(s.Score >= 121) as wins,
 			SUM(s.Score > 0 AND s.Score < 121) as losses
 		FROM Scores s INNER JOIN Teams t ON s.TeamID = t.ID
-		GROUP BY TeamID ORDER BY wins DESC, totalScore DESC
+		GROUP BY TeamID ORDER BY wins DESC, losses ASC, totalScore DESC
 	`)
 	if err != nil {
 		return nil, err

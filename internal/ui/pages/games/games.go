@@ -1,18 +1,18 @@
 package games
 
 import (
-	"math/rand"
 	"net/http"
-	"time"
 
+	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type Handler struct {
-	GameService games.Service
-	TeamService teams.Service
+	GameService         games.Service
+	TeamService         teams.Service
+	ScoreUpdateNotifier *notifier.Notifier
 }
 
 type getGameProps struct {
@@ -109,23 +109,21 @@ func (h Handler) StandingsPage(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h Handler) StreamStandings(w http.ResponseWriter, r *http.Request) error {
-	s, err := h.GameService.GetStandings(r.Context())
-	if err != nil {
-		return err
-	}
-
 	sse := datastar.NewSSE(w, r)
-	tick := time.NewTicker(2 * time.Second)
+	notify, cancel := h.ScoreUpdateNotifier.Subscribe()
+	defer cancel()
+
 	for {
 		select {
 		case <-r.Context().Done():
 			return nil
-		case <-tick.C:
-			rand.Shuffle(len(s), func(i, j int) {
-				s[i], s[j] = s[j], s[i]
-			})
+		case <-notify:
+			s, err := h.GameService.GetStandings(r.Context())
+			if err != nil {
+				return err
+			}
 
-			err := sse.PatchElementTempl(standingsTable(s), datastar.WithViewTransitions())
+			err = sse.PatchElementTempl(standingsTable(s), datastar.WithViewTransitions())
 			if err != nil {
 				return err
 			}
