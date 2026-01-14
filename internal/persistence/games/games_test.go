@@ -3,13 +3,15 @@ package games
 import (
 	"testing"
 
+	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGames(t *testing.T) {
+	n := &notifier.Notifier{}
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewService(db, n)
 	require.NoError(t, s.Init(t.Context()))
 
 	t1 := "a"
