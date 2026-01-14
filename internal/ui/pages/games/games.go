@@ -15,14 +15,46 @@ type Handler struct {
 	ScoreUpdateNotifier *notifier.Notifier
 }
 
+type team struct {
+	teams.Team
+	score int
+}
+
 type getGameProps struct {
 	gameID       string
 	complete     bool
-	scores       [2]games.Score
-	team1, team2 teams.Team
+	team1, team2 team
 
 	// if we came from a team's page, used to redirect back to it
 	fromID string
+}
+
+func (p getGameProps) getWinningTeam() string {
+	if p.team1.score > p.team2.score {
+		return p.team1.Name
+	}
+	return p.team2.Name
+}
+
+func (p getGameProps) getWinningScore() int {
+	if p.team1.score > p.team2.score {
+		return p.team1.score
+	}
+	return p.team2.score
+}
+
+func (p getGameProps) getLosingTeam() string {
+	if p.team1.score < p.team2.score {
+		return p.team1.Name
+	}
+	return p.team2.Name
+}
+
+func (p getGameProps) getLosingScore() int {
+	if p.team1.score < p.team2.score {
+		return p.team1.score
+	}
+	return p.team2.score
 }
 
 func (h Handler) GetGame(w http.ResponseWriter, r *http.Request) error {
@@ -46,10 +78,15 @@ func (h Handler) GetGame(w http.ResponseWriter, r *http.Request) error {
 	return Game(getGameProps{
 		gameID:   id,
 		complete: g[0].Score != 0 && g[1].Score != 0,
-		scores:   g,
-		team1:    team1,
-		team2:    team2,
-		fromID:   r.URL.Query().Get("fromID"),
+		team1: team{
+			Team:  team1,
+			score: g[0].Score,
+		},
+		team2: team{
+			Team:  team2,
+			score: g[1].Score,
+		},
+		fromID: r.URL.Query().Get("fromID"),
 	}).Render(r.Context(), w)
 }
 

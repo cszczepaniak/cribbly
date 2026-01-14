@@ -6,6 +6,8 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/radio"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+import "fmt"
 
 templ Game(props getGameProps) {
 	@components.Shell() {
@@ -13,6 +15,34 @@ templ Game(props getGameProps) {
 			if props.complete {
 				<h1 class="text-xl font-semibold">Game Completed</h1>
 				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
+				@table.Table() {
+					@table.Header() {
+						@table.Head() {
+							Team
+						}
+						@table.Head() {
+							Score
+						}
+					}
+					@table.Body() {
+						@table.Row() {
+							@table.Cell() {
+								{ props.getWinningTeam() }
+							}
+							@table.Cell() {
+								{ fmt.Sprint(props.getWinningScore()) }
+							}
+						}
+						@table.Row() {
+							@table.Cell() {
+								{ props.getLosingTeam() }
+							}
+							@table.Cell() {
+								{ fmt.Sprint(props.getLosingScore()) }
+							}
+						}
+					}
+				}
 			} else {
 				<h1 class="text-xl font-semibold">Record Game Score</h1>
 				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
