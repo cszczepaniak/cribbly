@@ -1,6 +1,6 @@
 module github.com/cszczepaniak/cribbly
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/Oudwins/tailwind-merge-go v0.2.1
