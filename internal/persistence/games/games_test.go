@@ -72,3 +72,34 @@ func TestGames(t *testing.T) {
 		{GameID: g3, TeamID: "c", Score: 0},
 	}, gs[g3])
 }
+
+func TestGames_Notifications(t *testing.T) {
+	n := &notifier.Notifier{}
+	db := sqlite.NewInMemoryForTest(t)
+	s := NewService(db, n)
+	require.NoError(t, s.Init(t.Context()))
+
+	t1 := "a"
+	t2 := "b"
+	t3 := "c"
+
+	g1, err := s.Create(t.Context(), t1, t2)
+	require.NoError(t, err)
+
+	g2, err := s.Create(t.Context(), t1, t3)
+	require.NoError(t, err)
+
+	sub, cancel := n.Subscribe()
+	t.Cleanup(cancel)
+
+	require.NoError(t, s.UpdateScore(t.Context(), g1, t1, 100))
+	// should get notified
+	<-sub
+
+	require.NoError(t, s.UpdateScores(t.Context(), g2, map[string]int{
+		t1: 121,
+		t3: 99,
+	}))
+	// should get notified
+	<-sub
+}
