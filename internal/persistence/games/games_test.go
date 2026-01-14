@@ -5,6 +5,7 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -96,10 +97,31 @@ func TestGames_Notifications(t *testing.T) {
 	// should get notified
 	<-sub
 
-	require.NoError(t, s.UpdateScores(t.Context(), g2, map[string]int{
-		t1: 121,
-		t3: 99,
-	}))
+	require.NoError(t, s.UpdateScores(t.Context(), g2, t1, 121, t3, 99))
 	// should get notified
 	<-sub
+}
+
+func TestGames_UpdateScores_TeamsMustExistForGame(t *testing.T) {
+	n := &notifier.Notifier{}
+	db := sqlite.NewInMemoryForTest(t)
+	s := NewService(db, n)
+	require.NoError(t, s.Init(t.Context()))
+
+	t1 := "a"
+	t2 := "b"
+
+	g, err := s.Create(t.Context(), t1, t2)
+	require.NoError(t, err)
+
+	err = s.UpdateScores(t.Context(), g, t1, 121, "not a team", 100)
+	assert.Error(t, err)
+
+	var exists bool
+	err = db.QueryRowContext(
+		t.Context(),
+		"SELECT EXISTS(SELECT 1 FROM Scores WHERE TeamID = ?)",
+		"not a team",
+	).Scan(&exists)
+	assert.False(t, exists)
 }

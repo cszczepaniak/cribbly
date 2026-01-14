@@ -7,7 +7,6 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/conflict"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
@@ -78,19 +77,58 @@ func (s Service) UpdateScore(ctx context.Context, gameID, teamID string, score i
 	return nil
 }
 
-func (s Service) UpdateScores(ctx context.Context, gameID string, teamIDToScore map[string]int) error {
-	b := s.b.InsertIntoTable("Scores").Fields("GameID", "TeamID", "Score")
-	for teamID, score := range teamIDToScore {
-		b.Values(gameID, teamID, score)
+func (s Service) UpdateScores(
+	ctx context.Context,
+	gameID string,
+	team1ID string,
+	team1Score int,
+	team2ID string,
+	team2Score int,
+) (finalErr error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
 	}
-	b.OnConflict(
-		conflict.NewKey("GameID", "TeamID"),
-		conflict.Ignore("GameID"),
-		conflict.Ignore("TeamID"),
-		conflict.Overwrite("Score"),
-	)
+	defer func() {
+		if r := recover(); r != nil || finalErr != nil {
+			_ = tx.Rollback()
+		}
+	}()
 
-	_, err := b.ExecContext(ctx, s.db)
+	mustUpdateOneRow := func(res sql.Result, err error) error {
+		n, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errors.New("unknown team ID")
+		}
+		return nil
+	}
+
+	err = mustUpdateOneRow(tx.ExecContext(
+		ctx,
+		"UPDATE Scores SET Score = ? WHERE GameID = ? AND TeamID = ?",
+		team1Score,
+		gameID,
+		team1ID,
+	))
+	if err != nil {
+		return err
+	}
+
+	err = mustUpdateOneRow(tx.ExecContext(
+		ctx,
+		"UPDATE Scores SET Score = ? WHERE GameID = ? AND TeamID = ?",
+		team2Score,
+		gameID,
+		team2ID,
+	))
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}

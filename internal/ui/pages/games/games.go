@@ -89,10 +89,7 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 		losingID = scores[0].TeamID
 	}
 
-	err = h.GameService.UpdateScores(r.Context(), gameID, map[string]int{
-		signals.WinningTeamID: 121,
-		losingID:              signals.LoserScore,
-	})
+	err = h.GameService.UpdateScores(r.Context(), gameID, signals.WinningTeamID, 121, losingID, signals.LoserScore)
 	if err != nil {
 		return err
 	}
