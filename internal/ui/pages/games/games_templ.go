@@ -320,7 +320,7 @@ func Game(props getGameProps) templ.Component {
 				})
 				templ_7745c5c3_Err = button.Button(button.Props{
 					Attributes: map[string]any{
-						"data-on:click": dstar.SendPutf("/games/%s", props.gameID),
+						"data-on:click": dstar.SendPutf("/games/%s?fromID=%s", props.gameID, props.fromID),
 					},
 				}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {

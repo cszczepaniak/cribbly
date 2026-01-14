@@ -56,7 +56,7 @@ templ Game(props getGameProps) {
 				@scoreInput("")
 				@button.Button(button.Props{
 					Attributes: map[string]any{
-						"data-on:click": dstar.SendPutf("/games/%s", props.gameID),
+						"data-on:click": dstar.SendPutf("/games/%s?fromID=%s", props.gameID, props.fromID),
 					},
 				}) {
 					Submit Score

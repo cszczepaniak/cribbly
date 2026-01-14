@@ -20,6 +20,9 @@ type getGameProps struct {
 	complete     bool
 	scores       [2]games.Score
 	team1, team2 teams.Team
+
+	// if we came from a team's page, used to redirect back to it
+	fromID string
 }
 
 func (h Handler) GetGame(w http.ResponseWriter, r *http.Request) error {
@@ -46,6 +49,7 @@ func (h Handler) GetGame(w http.ResponseWriter, r *http.Request) error {
 		scores:   g,
 		team1:    team1,
 		team2:    team2,
+		fromID:   r.URL.Query().Get("fromID"),
 	}).Render(r.Context(), w)
 }
 
@@ -94,6 +98,13 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	fromID := r.URL.Query().Get("fromID")
+	if fromID != "" {
+		// Show the team's games again.
+		return datastar.NewSSE(w, r).Redirectf("/teams/%s/games", fromID)
+	}
+
+	// For some reason we don't have the fromID, just show the completed game.
 	return datastar.NewSSE(w, r).Redirectf("/games/%s", gameID)
 }
 

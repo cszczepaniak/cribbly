@@ -203,7 +203,7 @@ func Games(team teams.Team, games []game) templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							var templ_7745c5c3_Var13 templ.SafeURL = templ.URL(fmt.Sprintf("/games/%s", g.id))
+							var templ_7745c5c3_Var13 templ.SafeURL = templ.URL(fmt.Sprintf("/games/%s?fromID=%s", g.id, team.ID))
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var13)))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err

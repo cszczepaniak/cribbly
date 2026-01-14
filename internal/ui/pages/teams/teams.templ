@@ -30,7 +30,7 @@ templ Games(team teams.Team, games []game) {
 								</p>
 							} else {
 								<a
-									href={ templ.URL(fmt.Sprintf("/games/%s", g.id)) }
+									href={ templ.URL(fmt.Sprintf("/games/%s?fromID=%s", g.id, team.ID)) }
 									class="hover:cursor-pointer"
 								>
 									@button.Button(button.Props{
