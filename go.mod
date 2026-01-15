@@ -9,6 +9,7 @@ require (
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/cszczepaniak/go-sqlbuilder v0.0.7
 	github.com/google/uuid v1.6.0
+	github.com/jaswdr/faker/v2 v2.9.1
 	github.com/ncruces/go-sqlite3 v0.25.0
 	github.com/starfederation/datastar-go v1.1.0
 	github.com/stretchr/testify v1.10.0

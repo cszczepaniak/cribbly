@@ -3,7 +3,7 @@ package players
 import (
 	"net/http"
 
-	"github.com/google/uuid"
+	"github.com/jaswdr/faker/v2"
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -60,9 +60,12 @@ func (h PlayersHandler) GenerateRandomPlayers(w http.ResponseWriter, r *http.Req
 		return err
 	}
 
+	fake := faker.New()
+
 	for range signals.Num {
-		name := "Player " + uuid.NewString()
-		_, err := h.PlayerService.Create(r.Context(), name)
+		firstName := fake.Person().FirstName()
+		lastName := fake.Person().LastName()
+		_, err := h.PlayerService.Create(r.Context(), firstName+" "+lastName)
 		if err != nil {
 			return err
 		}
