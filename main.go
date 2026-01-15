@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
@@ -71,6 +72,18 @@ func main() {
 	err = userService.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	seedUser, seedPass := os.Getenv("SEED_USER"), os.Getenv("SEED_PASSWORD")
+	if seedUser != "" && seedPass != "" {
+		passwordHash, err := argon2id.CreateHash(seedPass, argon2id.DefaultParams)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = userService.CreateUser(context.Background(), seedUser, passwordHash)
+		if err != nil {
+			log.Println("could not seed user:", err)
+		}
 	}
 
 	cfg := server.Config{
