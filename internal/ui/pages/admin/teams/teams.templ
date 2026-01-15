@@ -12,9 +12,10 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
 )
 
-templ index(ts []teams.Team) {
+templ index(ts []teams.Team, playersByTeam map[string][]players.Player) {
 	@admincomponents.Shell(admincomponents.Teams) {
 		<h1 class="text-3xl font-semibold text-foreground">Teams Registration</h1>
 		@button.Button(button.Props{
@@ -25,31 +26,71 @@ templ index(ts []teams.Team) {
 		}) {
 			Create New Team
 		}
-		@teamTable(ts)
+		@teamGrid(ts, playersByTeam)
 		@editDialog()
+		@confirmDeleteDialog()
 	}
 }
 
-templ editDialog() {
-	@dialog.Dialog(dialog.Props{
-		ID: "edit-modal",
-	}) {
-		@dialog.Content() {
-			@dialog.Title() {
-				Edit Team
-			}
-			@form.Item() {
-				@form.Label() {
-					Team Name
-				}
-				@editNameInput("")
-				@dialog.Close() {
-					@editSaveButton("")
-				}
-			}
-			@emptyTeamListing()
+templ teamName(id, name string) {
+	<span id={ "team-name-" + id }>{ name }</span>
+}
+
+templ teamPlayersList(teamID string, players []players.Player) {
+	<ul id={ "team-players-list-" + teamID } class="text-muted-foreground">
+		for _, p := range players {
+			<li>{ p.Name }</li>
 		}
-	}
+	</ul>
+}
+
+templ teamGrid(ts []teams.Team, playersByTeam map[string][]players.Player) {
+	<div id="team-grid" class="flex flex-row items-stretch flex-wrap my-4">
+		for _, t := range ts {
+			@card.Card(card.Props{
+				ID:    teamItemID(t.ID),
+				Class: "w-full lg:w-auto lg:min-w-md mr-4 mt-4",
+			}) {
+				@card.Header() {
+					<div class="flex items-center justify-between">
+						@teamName(t.ID, t.Name)
+						<div>
+							@dialog.Trigger(dialog.TriggerProps{
+								For: "edit-modal",
+							}) {
+								@button.Button(button.Props{
+									Size:    button.SizeIcon,
+									Variant: button.VariantGhost,
+									Attributes: utils.Attrs(
+										utils.DataOnClick(dstar.SendGetf("/admin/teams/edit/%s", t.ID)),
+									),
+								}) {
+									@icon.Pencil()
+								}
+							}
+							@dialog.Trigger(dialog.TriggerProps{
+								For: "delete-modal",
+							}) {
+								@button.Button(button.Props{
+									Size:    button.SizeIcon,
+									Class:   "text-destructive",
+									Variant: button.VariantGhost,
+									Attributes: utils.Attrs(
+										utils.DataOnClick(dstar.SendGetf("/admin/teams/delete/%s", t.ID)),
+									),
+								}) {
+									@icon.Trash2()
+								}
+							}
+						</div>
+					</div>
+				}
+				@card.Content() {
+					@teamPlayersList(t.ID, playersByTeam[t.ID])
+				}
+			}
+		}
+	</div>
 }
 
 templ editNameInput(placeholder string) {
@@ -75,58 +116,25 @@ templ editSaveButton(id string) {
 	}
 }
 
-templ teamTable(teams []teams.Team) {
-	<div id="table" class="mt-4">
-		@table.Table() {
-			@table.Body(table.BodyProps{
-				ID: "team-list",
-			}) {
-				for _, team := range teams {
-					@teamRow(team)
+templ editDialog() {
+	@dialog.Dialog(dialog.Props{
+		ID: "edit-modal",
+	}) {
+		@dialog.Content() {
+			@dialog.Title() {
+				Edit Team
+			}
+			@form.Item() {
+				@form.Label() {
+					Team Name
+				}
+				@editNameInput("")
+				@dialog.Close() {
+					@editSaveButton("")
 				}
 			}
+			@emptyTeamListing()
 		}
-	</div>
-}
-
-templ teamRow(team teams.Team) {
-	@table.Row(table.RowProps{
-		Class: "flex flex-row items-center",
-		ID:    tableRowID(team.ID),
-	}) {
-		@table.Cell(table.CellProps{
-			Class: "flex flex-row",
-		}) {
-			@dialog.Trigger(dialog.TriggerProps{
-				For: "edit-modal",
-			}) {
-				@button.Button(button.Props{
-					Variant: button.VariantGhost,
-					Attributes: utils.Attrs(
-						utils.DataOnClick(dstar.SendGetf("/admin/teams/edit/%s", team.ID)),
-					),
-				}) {
-					@icon.Pencil()
-				}
-			}
-			@button.Button(button.Props{
-				Variant: button.VariantGhost,
-				Attributes: utils.Attrs(
-					utils.DataOnClick(dstar.SendDeletef("/admin/teams/%s", team.ID)),
-				),
-			}) {
-				@icon.Trash2()
-			}
-		}
-		@teamName(team.ID, team.Name)
-	}
-}
-
-templ teamName(id, name string) {
-	@table.Cell(table.CellProps{
-		ID: "table-row-name-" + id,
-	}) {
-		{ name }
 	}
 }
 
@@ -193,4 +201,37 @@ templ teamListing(teamID string, available, onThisOne []players.Player) {
 			}
 		}
 	</div>
+}
+
+templ confirmDeleteTitle(teamName string) {
+	@dialog.Title(dialog.TitleProps{
+		ID: "confirm-delete-title",
+	}) {
+		Really delete { teamName }?
+	}
+}
+
+templ confirmDeleteButton(teamID string) {
+	@button.Button(button.Props{
+		ID:      "confirm-delete-button",
+		Variant: button.VariantDestructive,
+		Attributes: utils.Attrs(
+			utils.DataOnClick(dstar.SendDeletef("/admin/teams/%s", teamID)),
+		),
+	}) {
+		Yes, really!
+	}
+}
+
+templ confirmDeleteDialog() {
+	@dialog.Dialog(dialog.Props{
+		ID: "delete-modal",
+	}) {
+		@dialog.Content() {
+			@confirmDeleteTitle("")
+			@dialog.Close() {
+				@confirmDeleteButton("")
+			}
+		}
+	}
 }

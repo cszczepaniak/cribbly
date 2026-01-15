@@ -20,7 +20,16 @@ func (h TeamsHandler) Index(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return index(teams).Render(r.Context(), w)
+	playersByTeam := make(map[string][]players.Player, len(teams))
+	for _, team := range teams {
+		players, err := h.PlayerService.GetForTeam(r.Context(), team.ID)
+		if err != nil {
+			return err
+		}
+		playersByTeam[team.ID] = players
+	}
+
+	return index(teams, playersByTeam).Render(r.Context(), w)
 }
 
 func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
@@ -52,6 +61,22 @@ func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	return sse.PatchElementTempl(teamListing(id, availablePlayers, onThisTeam))
 }
 
+func (h TeamsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+	team, err := h.TeamService.Get(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	err = sse.PatchElementTempl(confirmDeleteTitle(team.Name))
+	if err != nil {
+		return err
+	}
+
+	return sse.PatchElementTempl(confirmDeleteButton(team.ID))
+}
+
 func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 	_, err := h.TeamService.Create(r.Context())
 	if err != nil {
@@ -63,8 +88,17 @@ func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	playersByTeam := make(map[string][]players.Player, len(teams))
+	for _, team := range teams {
+		players, err := h.PlayerService.GetForTeam(r.Context(), team.ID)
+		if err != nil {
+			return err
+		}
+		playersByTeam[team.ID] = players
+	}
+
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(teamTable(teams))
+	return sse.PatchElementTempl(teamGrid(teams, playersByTeam))
 }
 
 func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -75,7 +109,7 @@ func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.RemoveElementByID(tableRowID(id))
+	return sse.RemoveElementByID(teamItemID(id))
 }
 
 type signals struct {
@@ -108,8 +142,11 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
 		sse := datastar.NewSSE(w, r)
+		err = sse.PatchElementTempl(teamPlayersList(teamID, onThisTeam))
+		if err != nil {
+			return err
+		}
 		return sse.PatchElementTempl(teamListing(teamID, available, onThisTeam))
 	}
 
@@ -137,6 +174,6 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func tableRowID(teamID string) string {
-	return "table-row-" + teamID
+func teamItemID(teamID string) string {
+	return "team-" + teamID
 }
