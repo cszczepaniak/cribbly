@@ -7,7 +7,6 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
 type TeamsHandler struct {
@@ -42,15 +41,15 @@ func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	err = sse.PatchElementTempl(admincomponents.EditNameInput(team.Name))
+	err = sse.PatchElementTempl(editNameInput(team.Name))
 	if err != nil {
 		return err
 	}
-	err = sse.PatchElementTempl(admincomponents.EditSaveButton[teams.Team](id))
+	err = sse.PatchElementTempl(editSaveButton(id))
 	if err != nil {
 		return err
 	}
-	return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](id, availablePlayers, onThisTeam))
+	return sse.PatchElementTempl(teamListing(id, availablePlayers, onThisTeam))
 }
 
 func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
@@ -65,7 +64,7 @@ func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(admincomponents.TeamOrDivisionTable(teams))
+	return sse.PatchElementTempl(teamTable(teams))
 }
 
 func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -76,7 +75,7 @@ func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.RemoveElementByID(admincomponents.TableRowID(id))
+	return sse.RemoveElementByID(tableRowID(id))
 }
 
 type signals struct {
@@ -86,13 +85,14 @@ type signals struct {
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	teamID := r.PathValue("id")
 
-	a := admincomponents.GetAssignmentForEdit(r)
-	if a != (admincomponents.Assignment{}) {
+	assign := r.FormValue("assign")
+	unassign := r.FormValue("unassign")
+	if assign != "" || unassign != "" {
 		var err error
-		if a.Assign != "" {
-			err = h.PlayerService.AssignToTeam(r.Context(), a.Assign, teamID)
+		if assign != "" {
+			err = h.PlayerService.AssignToTeam(r.Context(), assign, teamID)
 		} else {
-			err = h.PlayerService.UnassignFromTeam(r.Context(), a.Unassign)
+			err = h.PlayerService.UnassignFromTeam(r.Context(), unassign)
 		}
 		if err != nil {
 			return err
@@ -110,7 +110,7 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 
 		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
 		sse := datastar.NewSSE(w, r)
-		return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](teamID, available, onThisTeam))
+		return sse.PatchElementTempl(teamListing(teamID, available, onThisTeam))
 	}
 
 	var sigs signals
@@ -127,7 +127,7 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 
 		sse := datastar.NewSSE(w, r)
 
-		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(teamID, sigs.Name))
+		err = sse.PatchElementTempl(teamName(teamID, sigs.Name))
 		if err != nil {
 			return err
 		}
@@ -135,4 +135,8 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return nil
+}
+
+func tableRowID(teamID string) string {
+	return "table-row-" + teamID
 }

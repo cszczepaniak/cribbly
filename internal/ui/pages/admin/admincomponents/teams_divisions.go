@@ -121,34 +121,12 @@ func unassignURL[U playerOrTeam](teamOrDivID string, item U) string {
 	}
 }
 
-func saveURL[T teamOrDiv](val T) string {
-	switch t := any(val).(type) {
-	case teams.Team:
-		return "/admin/teams/" + t.ID
-	case divisions.Division:
-		return "/admin/divisions/" + t.ID
-	default:
-		panic("unreachable")
-	}
-}
-
 func itemName[U playerOrTeam](item U) string {
 	switch t := any(item).(type) {
 	case players.Player:
 		return t.Name
 	case teams.Team:
 		return t.Name
-	default:
-		panic("unreachable")
-	}
-}
-
-func itemOrDivID[T teamOrDiv](item T) string {
-	switch t := any(item).(type) {
-	case teams.Team:
-		return t.ID
-	case divisions.Division:
-		return t.ID
 	default:
 		panic("unreachable")
 	}

@@ -3,10 +3,194 @@ package teams
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+	"github.com/cszczepaniak/cribbly/internal/persistence/players"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 )
 
 templ index(ts []teams.Team) {
 	@admincomponents.Shell(admincomponents.Teams) {
-		@admincomponents.TeamOrDivisionPage(ts)
+		<h1 class="text-3xl font-semibold text-foreground">Teams Registration</h1>
+		@button.Button(button.Props{
+			Class: "mt-4",
+			Attributes: utils.Attrs(
+				utils.DataOnClick(dstar.SendPostf("/admin/teams")),
+			),
+		}) {
+			Create New Team
+		}
+		@teamTable(ts)
+		@editDialog()
 	}
+}
+
+templ editDialog() {
+	@dialog.Dialog(dialog.Props{
+		ID: "edit-modal",
+	}) {
+		@dialog.Content() {
+			@dialog.Title() {
+				Edit Team
+			}
+			@form.Item() {
+				@form.Label() {
+					Team Name
+				}
+				@editNameInput("")
+				@dialog.Close() {
+					@editSaveButton("")
+				}
+			}
+			@emptyTeamListing()
+		}
+	}
+}
+
+templ editNameInput(placeholder string) {
+	<div id="edit-input">
+		@input.Input(input.Props{
+			Placeholder: placeholder,
+			Attributes: utils.Attrs(
+				utils.DataBind("name"),
+			),
+		})
+	</div>
+}
+
+templ editSaveButton(id string) {
+	@button.Button(button.Props{
+		ID:    "edit-button",
+		Class: "mt-2",
+		Attributes: utils.Attrs(
+			utils.DataOnClick(dstar.SendPutf("/admin/teams/%s", id)),
+		),
+	}) {
+		Save Name
+	}
+}
+
+templ teamTable(teams []teams.Team) {
+	<div id="table" class="mt-4">
+		@table.Table() {
+			@table.Body(table.BodyProps{
+				ID: "team-list",
+			}) {
+				for _, team := range teams {
+					@teamRow(team)
+				}
+			}
+		}
+	</div>
+}
+
+templ teamRow(team teams.Team) {
+	@table.Row(table.RowProps{
+		Class: "flex flex-row items-center",
+		ID:    tableRowID(team.ID),
+	}) {
+		@table.Cell(table.CellProps{
+			Class: "flex flex-row",
+		}) {
+			@dialog.Trigger(dialog.TriggerProps{
+				For: "edit-modal",
+			}) {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendGetf("/admin/teams/edit/%s", team.ID)),
+					),
+				}) {
+					@icon.Pencil()
+				}
+			}
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: utils.Attrs(
+					utils.DataOnClick(dstar.SendDeletef("/admin/teams/%s", team.ID)),
+				),
+			}) {
+				@icon.Trash2()
+			}
+		}
+		@teamName(team.ID, team.Name)
+	}
+}
+
+templ teamName(id, name string) {
+	@table.Cell(table.CellProps{
+		ID: "table-row-name-" + id,
+	}) {
+		{ name }
+	}
+}
+
+templ emptyTeamListing() {
+	<div id="team-listing"></div>
+}
+
+templ teamListing(teamID string, available, onThisOne []players.Player) {
+	<div id="team-listing">
+		@table.Table() {
+			@table.Header() {
+				@table.Head() {
+					Players
+				}
+			}
+			@table.Body() {
+				for _, item := range onThisOne {
+					@table.Row() {
+						@table.Cell(table.CellProps{
+							Class: "flex flex-row justify-between items-center",
+						}) {
+							<div class="text-sm font-medium text-foreground">{ item.Name }</div>
+							@button.Button(button.Props{
+								Class:    "text-destructive hover:text-destructive hover:bg-background",
+								Variant:  button.VariantGhost,
+								Disabled: len(available) == 0,
+								Attributes: utils.Attrs(
+									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, item.ID)),
+								),
+							}) {
+								@icon.CircleMinus()
+							}
+						}
+					}
+				}
+			}
+		}
+		@table.Table() {
+			@table.Header() {
+				@table.Head() {
+					Available Players
+				}
+			}
+			@table.Body() {
+				for _, player := range available {
+					@table.Row() {
+						@table.Cell(table.CellProps{
+							Class: "flex flex-row justify-between items-center",
+						}) {
+							<div class="text-sm font-medium text-foreground">{ player.Name }</div>
+							@button.Button(button.Props{
+								Class:    "hover:text-foreground hover:bg-background",
+								Variant:  button.VariantGhost,
+								Disabled: len(onThisOne) >= 2,
+								Attributes: utils.Attrs(
+									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?assign=%s", teamID, player.ID)),
+								),
+							}) {
+								@icon.CirclePlus()
+							}
+						}
+					}
+				}
+			}
+		}
+	</div>
 }

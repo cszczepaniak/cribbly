@@ -3,6 +3,7 @@ package utils
 
 import (
 	"fmt"
+	"maps"
 	"time"
 
 	"crypto/rand"
@@ -42,11 +43,40 @@ func IfElse[T any](condition bool, trueValue T, falseValue T) T {
 func MergeAttributes(attrs ...templ.Attributes) templ.Attributes {
 	merged := templ.Attributes{}
 	for _, attr := range attrs {
-		for k, v := range attr {
-			merged[k] = v
-		}
+		maps.Copy(merged, attr)
 	}
 	return merged
+}
+
+type Attr struct {
+	Key   string
+	Value any
+}
+
+func DataBind(name string) Attr {
+	return Attr{
+		Key:   "data-bind",
+		Value: name,
+	}
+}
+
+func DataOn(event, action string) Attr {
+	return Attr{
+		Key:   "data-on:" + event,
+		Value: action,
+	}
+}
+
+func DataOnClick(action string) Attr {
+	return DataOn("click", action)
+}
+
+func Attrs(attrs ...Attr) templ.Attributes {
+	res := make(templ.Attributes, len(attrs))
+	for _, attr := range attrs {
+		res[attr.Key] = attr.Value
+	}
+	return res
 }
 
 // RandomID generates a random ID string.
