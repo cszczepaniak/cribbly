@@ -578,7 +578,7 @@ func devTools() templ.Component {
 					templ_7745c5c3_Err = button.Button(button.Props{
 						Class: "my-4",
 						Attributes: map[string]any{
-							"data-on:click": dstar.SendPostf("/admin/players"),
+							"data-on:click": dstar.SendDeletef("/admin/players"),
 						},
 						Variant: button.VariantDestructive,
 					}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var24), templ_7745c5c3_Buffer)

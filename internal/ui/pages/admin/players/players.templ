@@ -101,7 +101,7 @@ templ devTools() {
 				@button.Button(button.Props{
 					Class: "my-4",
 					Attributes: map[string]any{
-						"data-on:click": dstar.SendPostf("/admin/players"),
+						"data-on:click": dstar.SendDeletef("/admin/players"),
 					},
 					Variant: button.VariantDestructive,
 				}) {
