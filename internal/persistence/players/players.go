@@ -6,10 +6,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/column"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/sel"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
@@ -31,19 +30,17 @@ func (p Player) Name() string {
 }
 
 type Repository struct {
-	db *sql.DB
-	b  *sqlbuilder.Builder
+	repo.Base
 }
 
 func NewRepository(db *sql.DB) Repository {
 	return Repository{
-		db: db,
-		b:  sqlbuilder.New(formatter.Sqlite{}),
+		Base: repo.NewBase(db),
 	}
 }
 
 func (s Repository) Init(ctx context.Context) error {
-	_, err := s.b.CreateTable("Players").
+	_, err := s.Builder.CreateTable("Players").
 		IfNotExists().
 		Columns(
 			column.VarChar("ID", 36).PrimaryKey(),
@@ -51,14 +48,14 @@ func (s Repository) Init(ctx context.Context) error {
 			column.VarChar("LastName", 255),
 			column.VarChar("TeamID", 36).DefaultNull(),
 		).
-		Exec(s.db)
+		ExecContext(ctx, s.DB)
 	return err
 }
 
 func (s Repository) GetAll(ctx context.Context) ([]Player, error) {
 	return scanPlayers(
 		s.selectPlayers().
-			QueryContext(ctx, s.db),
+			QueryContext(ctx, s.DB),
 	)
 }
 
@@ -67,7 +64,7 @@ func (s Repository) GetFreeAgents(ctx context.Context) ([]Player, error) {
 	return scanPlayers(
 		s.selectPlayers().
 			Where(filter.IsNull("TeamID")).
-			QueryContext(ctx, s.db),
+			QueryContext(ctx, s.DB),
 	)
 }
 
@@ -76,19 +73,19 @@ func (s Repository) GetForTeam(ctx context.Context, teamID string) ([]Player, er
 	return scanPlayers(
 		s.selectPlayers().
 			Where(filter.Equals("TeamID", teamID)).
-			QueryContext(ctx, s.db),
+			QueryContext(ctx, s.DB),
 	)
 }
 
 // AssignToTeam assigns the given player to the given team.
 func (s Repository) AssignToTeam(ctx context.Context, playerID, teamID string) error {
-	res, err := s.b.UpdateTable("Players").
+	res, err := s.Builder.UpdateTable("Players").
 		SetFieldTo("TeamID", teamID).
 		WhereAll(
 			filter.Equals("ID", playerID),
 			filter.IsNull("TeamID"),
 		).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	if err != nil {
 		return err
 	}
@@ -111,10 +108,10 @@ func (s Repository) AssignToTeam(ctx context.Context, playerID, teamID string) e
 }
 
 func (s Repository) UnassignFromTeam(ctx context.Context, id string) error {
-	_, err := s.b.UpdateTable("Players").
+	_, err := s.Builder.UpdateTable("Players").
 		SetFieldToNull("TeamID").
 		Where(filter.Equals("ID", id)).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	return err
 }
 
@@ -125,10 +122,10 @@ func (s Repository) Create(ctx context.Context, firstName, lastName string) (str
 		return "", errors.New("must have a first and last name")
 	}
 
-	_, err := s.b.InsertIntoTable("Players").
+	_, err := s.Builder.InsertIntoTable("Players").
 		Fields("ID", "FirstName", "LastName").
 		Values(id, firstName, lastName).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	if err != nil {
 		return "", err
 	}
@@ -137,14 +134,14 @@ func (s Repository) Create(ctx context.Context, firstName, lastName string) (str
 }
 
 func (s Repository) Delete(ctx context.Context, id string) error {
-	_, err := s.b.DeleteFromTable("Players").
+	_, err := s.Builder.DeleteFromTable("Players").
 		Where(filter.Equals("ID", id)).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	return err
 }
 
 func (s Repository) selectPlayers() *sel.Builder {
-	return s.b.SelectFrom(table.Named("Players")).
+	return s.Builder.SelectFrom(table.Named("Players")).
 		Columns("ID", "FirstName", "LastName", "TeamID")
 }
 

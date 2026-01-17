@@ -8,6 +8,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/google/uuid"
 )
 
@@ -17,17 +18,17 @@ var (
 )
 
 type Repository struct {
-	db *sql.DB
+	repo.Base
 }
 
 func NewRepository(db *sql.DB) Repository {
 	return Repository{
-		db: db,
+		Base: repo.NewBase(db),
 	}
 }
 
 func (s Repository) Init(ctx context.Context) error {
-	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Users (
+	_, err := s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Users (
 			Username TEXT,
 			PasswordHash BLOB,
 			
@@ -37,7 +38,7 @@ func (s Repository) Init(ctx context.Context) error {
 		return err
 	}
 
-	_, err = s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Sessions (
+	_, err = s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Sessions (
 			ID TEXT,
 			Username TEXT,
 			Expires DATETIME,
@@ -52,7 +53,7 @@ type User struct {
 }
 
 func (s Repository) GetAll(ctx context.Context) ([]User, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT Username FROM Users`)
+	rows, err := s.DB.QueryContext(ctx, `SELECT Username FROM Users`)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func (s Repository) GetAll(ctx context.Context) ([]User, error) {
 
 // CreateUser creates the given user.
 func (s Repository) CreateUser(ctx context.Context, username, passwordHash string) error {
-	_, err := s.db.ExecContext(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
+	_, err := s.DB.ExecContext(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func (s Repository) CreateUser(ctx context.Context, username, passwordHash strin
 // GetPassword returns the persisted hash of the password for the given user.
 func (s Repository) GetPassword(ctx context.Context, username string) (string, error) {
 	var pw string
-	err := s.db.QueryRowContext(
+	err := s.DB.QueryRowContext(
 		ctx,
 		`SELECT PasswordHash FROM Users WHERE Username = ?`,
 		username,
@@ -107,18 +108,18 @@ func (s Repository) GetPassword(ctx context.Context, username string) (string, e
 }
 
 func (s Repository) ChangePassword(ctx context.Context, username, newPassHash string) error {
-	_, err := s.db.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, newPassHash, username)
+	_, err := s.DB.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, newPassHash, username)
 	return err
 }
 
 func (s Repository) DeleteUser(ctx context.Context, username string) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM Users WHERE Username = ?`, username)
+	_, err := s.DB.ExecContext(ctx, `DELETE FROM Users WHERE Username = ?`, username)
 	return err
 }
 
 func (s Repository) CreateSession(ctx context.Context, username string, expiresIn time.Duration) (string, error) {
 	var exists bool
-	err := s.db.QueryRowContext(
+	err := s.DB.QueryRowContext(
 		ctx,
 		`SELECT EXISTS(SELECT 1 FROM Users WHERE Username = ?)`,
 		username,
@@ -133,7 +134,7 @@ func (s Repository) CreateSession(ctx context.Context, username string, expiresI
 
 	id := uuid.NewString()
 	deadline := time.Now().Add(expiresIn)
-	_, err = s.db.ExecContext(
+	_, err = s.DB.ExecContext(
 		ctx,
 		`INSERT INTO Sessions (ID, Username, Expires) VALUES (?, ?, ?)`,
 		id, username, deadline,
@@ -160,7 +161,7 @@ func (s Repository) GetSession(ctx context.Context, sessionID string) (Session, 
 		ID: sessionID,
 	}
 
-	err := s.db.QueryRowContext(
+	err := s.DB.QueryRowContext(
 		ctx,
 		`SELECT Username, Expires FROM Sessions WHERE ID = ?`,
 		sessionID,
@@ -174,7 +175,7 @@ func (s Repository) GetSession(ctx context.Context, sessionID string) (Session, 
 	}
 
 	if sesh.Expired() {
-		_, deleteErr := s.db.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
+		_, deleteErr := s.DB.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
 		return Session{}, errors.Join(ErrSessionExpired, deleteErr)
 	}
 

@@ -4,10 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/column"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
 )
@@ -18,25 +17,23 @@ type Division struct {
 }
 
 type Repository struct {
-	db *sql.DB
-	b  *sqlbuilder.Builder
+	repo.Base
 }
 
 func NewRepository(db *sql.DB) Repository {
 	return Repository{
-		db: db,
-		b:  sqlbuilder.New(formatter.Sqlite{}),
+		Base: repo.NewBase(db),
 	}
 }
 
 func (s Repository) Init(ctx context.Context) error {
-	_, err := s.b.CreateTable("Divisions").
+	_, err := s.Builder.CreateTable("Divisions").
 		IfNotExists().
 		Columns(
 			column.VarChar("ID", 36).PrimaryKey(),
 			column.VarChar("Name", 255),
 		).
-		Exec(s.db)
+		ExecContext(ctx, s.DB)
 	return err
 }
 
@@ -46,10 +43,10 @@ func (s Repository) Create(ctx context.Context) (Division, error) {
 		Name: "Unnamed Division",
 	}
 
-	_, err := s.b.InsertIntoTable("Divisions").
+	_, err := s.Builder.InsertIntoTable("Divisions").
 		Fields("ID", "Name").
 		Values(division.ID, division.Name).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	if err != nil {
 		return Division{}, err
 	}
@@ -58,25 +55,25 @@ func (s Repository) Create(ctx context.Context) (Division, error) {
 }
 
 func (s Repository) Delete(ctx context.Context, id string) error {
-	_, err := s.b.DeleteFromTable("Divisions").
+	_, err := s.Builder.DeleteFromTable("Divisions").
 		Where(filter.Equals("ID", id)).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	return err
 }
 
 func (s Repository) Rename(ctx context.Context, id, newName string) error {
-	_, err := s.b.UpdateTable("Divisions").
+	_, err := s.Builder.UpdateTable("Divisions").
 		SetFieldTo("Name", newName).
 		Where(filter.Equals("ID", id)).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	return err
 }
 
 func (s Repository) Get(ctx context.Context, id string) (Division, error) {
-	row, err := s.b.SelectFrom(table.Named("Divisions")).
+	row, err := s.Builder.SelectFrom(table.Named("Divisions")).
 		Columns("ID", "Name").
 		Where(filter.Equals("ID", id)).
-		QueryRowContext(ctx, s.db)
+		QueryRowContext(ctx, s.DB)
 	if err != nil {
 		return Division{}, err
 	}
@@ -91,9 +88,9 @@ func (s Repository) Get(ctx context.Context, id string) (Division, error) {
 }
 
 func (s Repository) GetAll(ctx context.Context) ([]Division, error) {
-	rows, err := s.b.SelectFrom(table.Named("Divisions")).
+	rows, err := s.Builder.SelectFrom(table.Named("Divisions")).
 		Columns("ID", "Name").
-		QueryContext(ctx, s.db)
+		QueryContext(ctx, s.DB)
 	if err != nil {
 		return nil, err
 	}

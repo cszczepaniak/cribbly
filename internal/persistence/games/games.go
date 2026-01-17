@@ -6,9 +6,8 @@ import (
 	"errors"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
-	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
 )
@@ -25,21 +24,19 @@ type Game struct {
 }
 
 type Repository struct {
-	db *sql.DB
-	b  *sqlbuilder.Builder
-	n  *notifier.Notifier
+	repo.Base
+	n *notifier.Notifier
 }
 
 func NewRepository(db *sql.DB, n *notifier.Notifier) Repository {
 	return Repository{
-		db: db,
-		b:  sqlbuilder.New(formatter.Sqlite{}),
-		n:  n,
+		Base: repo.NewBase(db),
+		n:    n,
 	}
 }
 
 func (s Repository) Init(ctx context.Context) error {
-	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Scores (
+	_, err := s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Scores (
 			GameID VARCHAR(36),
 			TeamID VARCHAR(36),
 			Score SMALLINT,
@@ -52,11 +49,11 @@ func (s Repository) Init(ctx context.Context) error {
 func (s Repository) Create(ctx context.Context, teamID1, teamID2 string) (_ string, err error) {
 	id := uuid.NewString()
 
-	_, err = s.b.InsertIntoTable("Scores").
+	_, err = s.Builder.InsertIntoTable("Scores").
 		Fields("GameID", "TeamID", "Score").
 		Values(id, teamID1, 0).
 		Values(id, teamID2, 0).
-		ExecContext(ctx, s.db)
+		ExecContext(ctx, s.DB)
 	if err != nil {
 		return "", err
 	}
@@ -65,10 +62,10 @@ func (s Repository) Create(ctx context.Context, teamID1, teamID2 string) (_ stri
 }
 
 func (s Repository) UpdateScore(ctx context.Context, gameID, teamID string, score int) error {
-	_, err := s.b.UpdateTable("Scores").SetFieldTo("Score", score).WhereAll(
+	_, err := s.Builder.UpdateTable("Scores").SetFieldTo("Score", score).WhereAll(
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
-	).ExecContext(ctx, s.db)
+	).ExecContext(ctx, s.DB)
 	if err != nil {
 		return err
 	}
@@ -84,16 +81,12 @@ func (s Repository) UpdateScores(
 	team1Score int,
 	team2ID string,
 	team2Score int,
-) (finalErr error) {
-	tx, err := s.db.BeginTx(ctx, nil)
+) error {
+	tx, cancel, err := s.Base.EnsureTx(ctx)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if r := recover(); r != nil || finalErr != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	defer cancel()
 
 	mustUpdateOneRow := func(res sql.Result, err error) error {
 		n, err := res.RowsAffected()
@@ -138,10 +131,10 @@ func (s Repository) UpdateScores(
 }
 
 func (s Repository) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
-	row, err := s.b.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
+	row, err := s.Builder.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
-	).QueryRowContext(ctx, s.db)
+	).QueryRowContext(ctx, s.DB)
 	if err != nil {
 		return 0, err
 	}
@@ -156,7 +149,7 @@ func (s Repository) GetScore(ctx context.Context, gameID, teamID string) (int, e
 }
 
 func (s Repository) GetAll(ctx context.Context) ([]Score, error) {
-	rows, err := s.b.SelectFrom(table.Named("Scores")).Columns("GameID", "TeamID", "Score").QueryContext(ctx, s.db)
+	rows, err := s.Builder.SelectFrom(table.Named("Scores")).Columns("GameID", "TeamID", "Score").QueryContext(ctx, s.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -177,12 +170,12 @@ func (s Repository) GetAll(ctx context.Context) ([]Score, error) {
 }
 
 func (s Repository) DeleteAll(ctx context.Context) error {
-	_, err := s.b.DeleteFromTable("Scores").ExecContext(ctx, s.db)
+	_, err := s.Builder.DeleteFromTable("Scores").ExecContext(ctx, s.DB)
 	return err
 }
 
 func (s Repository) Get(ctx context.Context, id string) ([2]Score, error) {
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.DB.QueryContext(ctx, `
 		SELECT GameID, TeamID, Score FROM Scores WHERE GameID = ? ORDER BY TeamID`,
 		id,
 	)
@@ -217,7 +210,7 @@ func (s Repository) Get(ctx context.Context, id string) ([2]Score, error) {
 }
 
 func (s Repository) GetForTeam(ctx context.Context, teamID string) (map[string][2]Score, error) {
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.DB.QueryContext(ctx, `
 		SELECT GameID, TeamID, Score FROM Scores WHERE GameID IN (
 			SELECT GameID FROM Scores WHERE TeamID = ?
 		) ORDER BY GameID, TeamID
@@ -272,7 +265,7 @@ type Standing struct {
 }
 
 func (s Repository) GetStandings(ctx context.Context) ([]Standing, error) {
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.DB.QueryContext(ctx, `
 		SELECT
 			TeamID,
 			t.Name,
