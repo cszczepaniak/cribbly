@@ -26,6 +26,11 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
+func (s Repository) WithTx(tx *sql.Tx) Repository {
+	s.Base = s.Base.WithTx(tx)
+	return s
+}
+
 func (s Repository) Init(ctx context.Context) error {
 	_, err := s.Builder.CreateTable("Divisions").
 		IfNotExists().
