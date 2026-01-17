@@ -10,10 +10,10 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 )
 
-var sessionKey = struct{}{}
+type sessionKey struct{}
 
 func GetSession(ctx context.Context) users.Session {
-	return ctx.Value(sessionKey).(users.Session)
+	return ctx.Value(sessionKey{}).(users.Session)
 }
 
 // TODO: share this type somewhere (can't be server pkg because that'd cause an import cycle)
@@ -57,7 +57,7 @@ func AuthenticationMiddleware(userRepo users.Repository) func(next handler) hand
 				return nil
 			}
 
-			ctx := context.WithValue(r.Context(), sessionKey, sesh)
+			ctx := context.WithValue(r.Context(), sessionKey{}, sesh)
 			r = r.WithContext(ctx)
 
 			return next(w, r)
