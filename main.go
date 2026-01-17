@@ -12,6 +12,7 @@ import (
 
 	"github.com/alexedwards/argon2id"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
+	"github.com/cszczepaniak/cribbly/internal/persistence"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -87,6 +88,7 @@ func main() {
 	}
 
 	cfg := server.Config{
+		Transactor:          persistence.NewTransactor(db),
 		PlayerRepo:          playerRepo,
 		TeamRepo:            teamRepo,
 		DivisionRepo:        divisionRepo,

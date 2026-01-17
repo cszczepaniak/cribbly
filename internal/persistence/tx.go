@@ -9,8 +9,20 @@ type Transactor struct {
 	db *sql.DB
 }
 
-func (t Transactor) Begin(ctx context.Context) (*sql.Tx, error) {
-	return t.db.BeginTx(ctx, nil)
+func NewTransactor(db *sql.DB) Transactor {
+	return Transactor{
+		db: db,
+	}
+}
+
+func (t Transactor) Begin(ctx context.Context) (*sql.Tx, func(), error) {
+	ctx, cancel := context.WithCancel(ctx)
+	tx, err := t.db.BeginTx(ctx, nil)
+	if err != nil {
+		cancel()
+		return nil, nil, err
+	}
+	return tx, cancel, nil
 }
 
 type Execer interface {
