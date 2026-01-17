@@ -3,10 +3,205 @@ package divisions
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 )
 
 templ index(ds []divisions.Division) {
 	@admincomponents.Shell(admincomponents.Divisions) {
-		@admincomponents.TeamOrDivisionPage(ds)
+		@teamOrDivisionPage(ds)
 	}
+}
+
+templ teamOrDivisionPage(divisions []divisions.Division) {
+	<h1 class="text-3xl font-semibold text-foreground">Divisions Registration</h1>
+	@button.Button(button.Props{
+		Class: "mt-4",
+		Attributes: map[string]any{
+			"data-on:click": dstar.SendPostf("/admin/divisions"),
+		},
+	}) {
+		Create New Division
+	}
+	@divisionTable(divisions)
+	@editDialog()
+}
+
+templ editDialog() {
+	@dialog.Dialog(dialog.Props{
+		ID: "edit-dialog",
+	}) {
+		@dialog.Content() {
+			@dialog.Title() {
+				Edit Division
+			}
+			@form.Item() {
+				@form.Label() {
+					Division Name
+				}
+				@editNameInput("")
+				@dialog.Close() {
+					@editSaveButton("")
+				}
+			}
+			@emptyItemsListing()
+		}
+	}
+}
+
+templ editNameInput(placeholder string) {
+	<div id="edit-input">
+		@input.Input(input.Props{
+			Placeholder: placeholder,
+			Attributes: map[string]any{
+				"data-bind": "name",
+			},
+		})
+	</div>
+}
+
+templ editSaveButton(id string) {
+	@button.Button(button.Props{
+		ID:    "edit-button",
+		Class: "mt-2",
+		Attributes: map[string]any{
+			"data-on:click": dstar.SendPutf("/admin/divisions/%s", id),
+		},
+	}) {
+		Save Name
+	}
+}
+
+templ divisionTable(items []divisions.Division) {
+	<div id="table" class="mt-4">
+		@table.Table() {
+			@table.Body(table.BodyProps{
+				ID: "team-list",
+			}) {
+				for _, item := range items {
+					@divisionRow(item)
+				}
+			}
+		}
+	</div>
+}
+
+templ divisionRow(val divisions.Division) {
+	@table.Row(table.RowProps{
+		Class: "flex flex-row items-center",
+		ID:    "table-row-" + val.ID,
+	}) {
+		@table.Cell(table.CellProps{
+			Class: "flex flex-row",
+		}) {
+			@dialog.Trigger(dialog.TriggerProps{
+				For: "edit-dialog",
+			}) {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendGetf("/admin/divisions/edit/%s", val.ID),
+					},
+				}) {
+					@icon.Pencil()
+				}
+			}
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: map[string]any{
+					"data-on:click": dstar.SendDeletef("/admin/divisions/%s", val.ID),
+				},
+			}) {
+				@icon.Trash2()
+			}
+		}
+		@divisionName(val.ID, val.Name)
+	}
+}
+
+templ divisionName(id, name string) {
+	@table.Cell(table.CellProps{
+		ID: "table-name-" + id,
+	}) {
+		{ name }
+	}
+}
+
+templ emptyItemsListing() {
+	<div id="items-listing" class="max-h-1/2"></div>
+}
+
+templ itemsListing(divisionID string, available, onThisOne []teams.Team) {
+	<div id="items-listing" class="max-h-[60svh] flex flex-col space-y-4">
+		<div class="h-1/2 grow overflow-y-auto">
+			@table.Table() {
+				@table.Header(table.HeaderProps{
+					Class: "sticky -top-px bg-background",
+				}) {
+					@table.Head() {
+						Teams
+					}
+				}
+				@table.Body() {
+					for _, team := range onThisOne {
+						@table.Row() {
+							@table.Cell(table.CellProps{
+								Class: "flex flex-row justify-between items-center",
+							}) {
+								<div class="text-sm font-medium text-foreground">{ team.Name }</div>
+								@button.Button(button.Props{
+									Class:   "text-destructive hover:text-destructive hover:bg-background",
+									Variant: button.VariantGhost,
+									Attributes: map[string]any{
+										"data-on:click": dstar.SendPutf("/admin/divisions/%s?unassign=%s", divisionID, team.ID),
+									},
+								}) {
+									@icon.CircleMinus()
+								}
+							}
+						}
+					}
+				}
+			}
+		</div>
+		@separator.Separator()
+		<div class="h-1/2 overflow-y-auto">
+			@table.Table() {
+				@table.Header(table.HeaderProps{
+					Class: "sticky -top-px bg-background",
+				}) {
+					@table.Head() {
+						Available Teams
+					}
+				}
+				@table.Body() {
+					for _, team := range available {
+						@table.Row() {
+							@table.Cell(table.CellProps{
+								Class: "flex flex-row justify-between items-center",
+							}) {
+								<div class="text-sm font-medium text-foreground">{ team.Name }</div>
+								@button.Button(button.Props{
+									Class:   "hover:text-foreground hover:bg-background",
+									Variant: button.VariantGhost,
+									Attributes: map[string]any{
+										"data-on:click": dstar.SendPutf("/admin/divisions/%s?assign=%s", divisionID, team.ID),
+									},
+								}) {
+									@icon.CirclePlus()
+								}
+							}
+						}
+					}
+				}
+			}
+		</div>
+	</div>
 }

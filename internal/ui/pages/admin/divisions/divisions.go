@@ -8,7 +8,6 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
 type DivisionsHandler struct {
@@ -43,15 +42,15 @@ func (h DivisionsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	err = sse.PatchElementTempl(admincomponents.EditNameInput(division.Name))
+	err = sse.PatchElementTempl(editNameInput(division.Name))
 	if err != nil {
 		return err
 	}
-	err = sse.PatchElementTempl(admincomponents.EditSaveButton[divisions.Division](id))
+	err = sse.PatchElementTempl(editSaveButton(id))
 	if err != nil {
 		return err
 	}
-	return sse.PatchElementTempl(admincomponents.ItemsListing[teams.Team](id, availableTeams, inThisDivision))
+	return sse.PatchElementTempl(itemsListing(id, availableTeams, inThisDivision))
 }
 
 func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
@@ -60,13 +59,13 @@ func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	teams, err := h.DivisionRepo.GetAll(r.Context())
+	divisions, err := h.DivisionRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(admincomponents.TeamOrDivisionTable(teams))
+	return sse.PatchElementTempl(divisionTable(divisions))
 }
 
 func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -87,13 +86,14 @@ type signals struct {
 func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	divisionID := r.PathValue("id")
 
-	a := admincomponents.GetAssignmentForEdit(r)
-	if a != (admincomponents.Assignment{}) {
+	assign := r.URL.Query().Get("assign")
+	unassign := r.URL.Query().Get("unassign")
+	if assign != "" || unassign != "" {
 		var err error
-		if a.Assign != "" {
-			err = h.TeamRepo.AssignToDivision(r.Context(), a.Assign, divisionID)
+		if assign != "" {
+			err = h.TeamRepo.AssignToDivision(r.Context(), assign, divisionID)
 		} else {
-			err = h.TeamRepo.UnassignFromDivision(r.Context(), a.Unassign)
+			err = h.TeamRepo.UnassignFromDivision(r.Context(), unassign)
 		}
 		if err != nil {
 			return err
@@ -111,7 +111,7 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 
 		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
 		sse := datastar.NewSSE(w, r)
-		return sse.PatchElementTempl(admincomponents.ItemsListing[divisions.Division](divisionID, available, inThisDivision))
+		return sse.PatchElementTempl(itemsListing(divisionID, available, inThisDivision))
 	}
 
 	var sigs signals
@@ -128,7 +128,7 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 
 		sse := datastar.NewSSE(w, r)
 
-		err = sse.PatchElementTempl(admincomponents.TeamOrDivisionName(divisionID, sigs.Name))
+		err = sse.PatchElementTempl(divisionName(divisionID, sigs.Name))
 		if err != nil {
 			return err
 		}
