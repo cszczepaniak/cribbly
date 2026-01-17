@@ -20,9 +20,14 @@ var (
 )
 
 type Player struct {
-	ID     string
-	Name   string
-	TeamID string
+	ID        string
+	FirstName string
+	LastName  string
+	TeamID    string
+}
+
+func (p Player) Name() string {
+	return p.FirstName + " " + p.LastName
 }
 
 type Service struct {
@@ -42,7 +47,8 @@ func (s Service) Init(ctx context.Context) error {
 		IfNotExists().
 		Columns(
 			column.VarChar("ID", 36).PrimaryKey(),
-			column.VarChar("Name", 255),
+			column.VarChar("FirstName", 255),
+			column.VarChar("LastName", 255),
 			column.VarChar("TeamID", 36).DefaultNull(),
 		).
 		Exec(s.db)
@@ -112,12 +118,16 @@ func (s Service) UnassignFromTeam(ctx context.Context, id string) error {
 	return err
 }
 
-func (s Service) Create(ctx context.Context, name string) (string, error) {
+func (s Service) Create(ctx context.Context, firstName, lastName string) (string, error) {
 	id := uuid.NewString()
 
+	if firstName == "" || lastName == "" {
+		return "", errors.New("must have a first and last name")
+	}
+
 	_, err := s.b.InsertIntoTable("Players").
-		Fields("ID", "Name").
-		Values(id, name).
+		Fields("ID", "FirstName", "LastName").
+		Values(id, firstName, lastName).
 		ExecContext(ctx, s.db)
 	if err != nil {
 		return "", err
@@ -135,7 +145,7 @@ func (s Service) Delete(ctx context.Context, id string) error {
 
 func (s Service) selectPlayers() *sel.Builder {
 	return s.b.SelectFrom(table.Named("Players")).
-		Columns("ID", "Name", "TeamID")
+		Columns("ID", "FirstName", "LastName", "TeamID")
 }
 
 func scanPlayers(rows *sql.Rows, err error) ([]Player, error) {
@@ -148,7 +158,7 @@ func scanPlayers(rows *sql.Rows, err error) ([]Player, error) {
 	for rows.Next() {
 		var p Player
 		var teamID sql.Null[string]
-		err := rows.Scan(&p.ID, &p.Name, &teamID)
+		err := rows.Scan(&p.ID, &p.FirstName, &p.LastName, &teamID)
 		if err != nil {
 			return nil, err
 		}

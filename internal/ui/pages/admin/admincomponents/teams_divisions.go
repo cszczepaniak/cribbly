@@ -124,7 +124,7 @@ func unassignURL[U playerOrTeam](teamOrDivID string, item U) string {
 func itemName[U playerOrTeam](item U) string {
 	switch t := any(item).(type) {
 	case players.Player:
-		return t.Name
+		return t.Name()
 	case teams.Team:
 		return t.Name
 	default:

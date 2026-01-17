@@ -18,11 +18,21 @@ templ playerRegistrationPage(players []players.Player) {
 		<h1 class="my-4 text-3xl font-semibold text-foreground">Player Registration</h1>
 		@form.Item() {
 			@form.Label() {
-				Player Name
+				First Name
 			}
 			@input.Input(input.Props{
 				Attributes: map[string]any{
-					"data-bind": "name",
+					"data-bind": "first_name",
+				},
+			})
+		}
+		@form.Item() {
+			@form.Label() {
+				Last Name
+			}
+			@input.Input(input.Props{
+				Attributes: map[string]any{
+					"data-bind": "last_name",
 				},
 			})
 		}
@@ -63,7 +73,7 @@ templ playerTable(players []players.Player) {
 					}) {
 						@icon.Trash2()
 					}
-					<span>{ p.Name }</span>
+					<span>{ p.Name() }</span>
 				}
 			}
 		}

@@ -16,11 +16,11 @@ func TestPlayerService(t *testing.T) {
 
 	require.NoError(t, s.Init(t.Context()))
 
-	id1, err := s.Create(t.Context(), "Mario Mario")
+	id1, err := s.Create(t.Context(), "Mario", "Mario")
 	require.NoError(t, err)
-	id2, err := s.Create(t.Context(), "Luigi")
+	id2, err := s.Create(t.Context(), "Luigi", "Mario")
 	require.NoError(t, err)
-	id3, err := s.Create(t.Context(), "Waluigi")
+	id3, err := s.Create(t.Context(), "Waluigi", "Wario")
 	require.NoError(t, err)
 
 	players, err := s.GetAll(t.Context())
@@ -29,14 +29,17 @@ func TestPlayerService(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]Player{{
-			ID:   id1,
-			Name: "Mario Mario",
+			ID:        id1,
+			FirstName: "Mario",
+			LastName:  "Mario",
 		}, {
-			ID:   id2,
-			Name: "Luigi",
+			ID:        id2,
+			FirstName: "Luigi",
+			LastName:  "Mario",
 		}, {
-			ID:   id3,
-			Name: "Waluigi",
+			ID:        id3,
+			FirstName: "Waluigi",
+			LastName:  "Wario",
 		}},
 		players,
 	)
@@ -48,9 +51,9 @@ func TestAssigningPlayers(t *testing.T) {
 
 	require.NoError(t, s.Init(t.Context()))
 
-	id1, err := s.Create(t.Context(), "Mario Mario")
+	id1, err := s.Create(t.Context(), "Mario", "Mario")
 	require.NoError(t, err)
-	id2, err := s.Create(t.Context(), "Luigi")
+	id2, err := s.Create(t.Context(), "Luigi", "Mario")
 	require.NoError(t, err)
 
 	players, err := s.GetFreeAgents(t.Context())
@@ -59,11 +62,13 @@ func TestAssigningPlayers(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]Player{{
-			ID:   id1,
-			Name: "Mario Mario",
+			ID:        id1,
+			FirstName: "Mario",
+			LastName:  "Mario",
 		}, {
-			ID:   id2,
-			Name: "Luigi",
+			ID:        id2,
+			FirstName: "Luigi",
+			LastName:  "Mario",
 		}},
 		players,
 	)
@@ -80,8 +85,9 @@ func TestAssigningPlayers(t *testing.T) {
 	require.Len(t, players, 1)
 	assert.Equal(t,
 		Player{
-			ID:   id2,
-			Name: "Luigi",
+			ID:        id2,
+			FirstName: "Luigi",
+			LastName:  "Mario",
 		},
 		players[0],
 	)
@@ -92,9 +98,10 @@ func TestAssigningPlayers(t *testing.T) {
 	require.Len(t, players, 1)
 	assert.Equal(t,
 		Player{
-			ID:     id1,
-			Name:   "Mario Mario",
-			TeamID: teamID,
+			ID:        id1,
+			FirstName: "Mario",
+			LastName:  "Mario",
+			TeamID:    teamID,
 		},
 		players[0],
 	)
@@ -112,11 +119,13 @@ func TestAssigningPlayers(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]Player{{
-			ID:   id1,
-			Name: "Mario Mario",
+			ID:        id1,
+			FirstName: "Mario",
+			LastName:  "Mario",
 		}, {
-			ID:   id2,
-			Name: "Luigi",
+			ID:        id2,
+			FirstName: "Luigi",
+			LastName:  "Mario",
 		}},
 		players,
 	)

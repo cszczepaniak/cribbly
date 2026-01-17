@@ -25,13 +25,14 @@ func (h PlayersHandler) RegistrationPage(w http.ResponseWriter, r *http.Request)
 
 func (h PlayersHandler) PostPlayer(w http.ResponseWriter, r *http.Request) error {
 	var signals struct {
-		Name string `json:"name"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
 	}
 	if err := datastar.ReadSignals(r, &signals); err != nil {
 		return err
 	}
 
-	_, err := h.PlayerService.Create(r.Context(), signals.Name)
+	_, err := h.PlayerService.Create(r.Context(), signals.FirstName, signals.LastName)
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,8 @@ func (h PlayersHandler) PostPlayer(w http.ResponseWriter, r *http.Request) error
 
 	sse := datastar.NewSSE(w, r)
 
-	signals.Name = ""
+	signals.FirstName = ""
+	signals.LastName = ""
 	err = sse.MarshalAndPatchSignals(signals)
 	if err != nil {
 		return err
@@ -65,7 +67,7 @@ func (h PlayersHandler) GenerateRandomPlayers(w http.ResponseWriter, r *http.Req
 	for range signals.Num {
 		firstName := fake.Person().FirstName()
 		lastName := fake.Person().LastName()
-		_, err := h.PlayerService.Create(r.Context(), firstName+" "+lastName)
+		_, err := h.PlayerService.Create(r.Context(), firstName, lastName)
 		if err != nil {
 			return err
 		}
