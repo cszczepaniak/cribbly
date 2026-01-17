@@ -2,10 +2,12 @@ package server
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 	"path"
 	"slices"
 	"strings"
+	"time"
 )
 
 type handler = func(http.ResponseWriter, *http.Request) error
@@ -47,7 +49,10 @@ func (r *router) Group(prefix string, mw ...middleware) *router {
 
 func handleWithError(fn func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method, r.URL)
+		slog.Info("http.start", "method", r.Method, "url", r.URL)
+		defer func(t0 time.Time) {
+			slog.Info("http.complete", "method", r.Method, "url", r.URL, "dur", time.Since(t0))
+		}(time.Now())
 
 		err := fn(w, r)
 		if err != nil {
@@ -55,7 +60,5 @@ func handleWithError(fn func(w http.ResponseWriter, r *http.Request) error) http
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		log.Println(r.Method, r.URL, "COMPLETE")
 	}
 }

@@ -112,8 +112,50 @@ func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	return sse.RemoveElementByID(teamItemID(id))
 }
 
-type signals struct {
-	Name string `json:"name"`
+func (h TeamsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
+	players, err := h.PlayerService.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	for _, p := range players {
+		err := h.PlayerService.UnassignFromTeam(r.Context(), p.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = h.TeamService.DeleteAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	return datastar.NewSSE(w, r).Redirect("/admin/teams")
+}
+
+func (h TeamsHandler) Generate(w http.ResponseWriter, r *http.Request) error {
+	players, err := h.PlayerService.GetFreeAgents(r.Context())
+	if err != nil {
+		return err
+	}
+
+	for len(players) >= 2 {
+		team, err := h.TeamService.Create(r.Context())
+		if err != nil {
+			return err
+		}
+
+		for i := range 2 {
+			err = h.PlayerService.AssignToTeam(r.Context(), players[i].ID, team.ID)
+			if err != nil {
+				return err
+			}
+		}
+
+		players = players[2:]
+	}
+
+	return datastar.NewSSE(w, r).Redirect("/admin/teams")
 }
 
 func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
@@ -150,7 +192,10 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		return sse.PatchElementTempl(teamListing(teamID, available, onThisTeam))
 	}
 
-	var sigs signals
+	var sigs struct {
+		Name string `json:"name"`
+	}
+
 	err := datastar.ReadSignals(r, &sigs)
 	if err != nil {
 		return err
@@ -168,7 +213,8 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		if err != nil {
 			return err
 		}
-		return sse.MarshalAndPatchSignals(signals{Name: ""})
+		sigs.Name = ""
+		return sse.MarshalAndPatchSignals(sigs)
 	}
 
 	return nil

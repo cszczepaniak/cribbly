@@ -73,6 +73,12 @@ func (s Service) Delete(ctx context.Context, id string) error {
 	return err
 }
 
+func (s Service) DeleteAll(ctx context.Context) error {
+	_, err := s.b.DeleteFromTable("Teams").
+		ExecContext(ctx, s.db)
+	return err
+}
+
 func (s Service) Rename(ctx context.Context, id, newName string) error {
 	_, err := s.b.UpdateTable("Teams").
 		SetFieldTo("Name", newName).

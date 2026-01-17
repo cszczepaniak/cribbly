@@ -13,6 +13,8 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 )
 
 templ index(ts []teams.Team, playersByTeam map[string][]players.Player) {
@@ -27,6 +29,7 @@ templ index(ts []teams.Team, playersByTeam map[string][]players.Player) {
 			Create New Team
 		}
 		@teamGrid(ts, playersByTeam)
+		@devTools()
 		@editDialog()
 		@confirmDeleteDialog()
 	}
@@ -39,7 +42,7 @@ templ teamName(id, name string) {
 templ teamPlayersList(teamID string, players []players.Player) {
 	<ul id={ "team-players-list-" + teamID } class="text-muted-foreground">
 		for _, p := range players {
-			<li>{ p.Name }</li>
+			<li>{ p.Name() }</li>
 		}
 	</ul>
 }
@@ -151,18 +154,18 @@ templ teamListing(teamID string, available, onThisOne []players.Player) {
 				}
 			}
 			@table.Body() {
-				for _, item := range onThisOne {
+				for _, player := range onThisOne {
 					@table.Row() {
 						@table.Cell(table.CellProps{
 							Class: "flex flex-row justify-between items-center",
 						}) {
-							<div class="text-sm font-medium text-foreground">{ item.Name }</div>
+							<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
 							@button.Button(button.Props{
 								Class:    "text-destructive hover:text-destructive hover:bg-background",
 								Variant:  button.VariantGhost,
 								Disabled: len(available) == 0,
 								Attributes: utils.Attrs(
-									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, item.ID)),
+									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, player.ID)),
 								),
 							}) {
 								@icon.CircleMinus()
@@ -184,7 +187,7 @@ templ teamListing(teamID string, available, onThisOne []players.Player) {
 						@table.Cell(table.CellProps{
 							Class: "flex flex-row justify-between items-center",
 						}) {
-							<div class="text-sm font-medium text-foreground">{ player.Name }</div>
+							<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
 							@button.Button(button.Props{
 								Class:    "hover:text-foreground hover:bg-background",
 								Variant:  button.VariantGhost,
@@ -231,6 +234,36 @@ templ confirmDeleteDialog() {
 			@confirmDeleteTitle("")
 			@dialog.Close() {
 				@confirmDeleteButton("")
+			}
+		}
+	}
+}
+
+templ devTools() {
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				Dev Tools
+			}
+			@accordion.Content() {
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendPostf("/admin/teams/generate"),
+					},
+				}) {
+					Generate Teams
+				}
+				@separator.Separator()
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: map[string]any{
+						"data-on:click": dstar.SendDeletef("/admin/teams"),
+					},
+					Variant: button.VariantDestructive,
+				}) {
+					Delete All Teams
+				}
 			}
 		}
 	}
