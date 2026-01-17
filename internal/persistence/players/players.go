@@ -145,7 +145,7 @@ func (s Repository) UnassignFromTeam(ctx context.Context, teamID string, playerI
 	res, err := s.Builder.UpdateTable("Players").
 		SetFieldToNull("TeamID").
 		WhereAll(
-			filter.In("ID", slices.Collect(playerIDs)),
+			filter.In("ID", slices.Collect(playerIDs)...),
 			filter.Equals("TeamID", teamID),
 		).
 		ExecContext(ctx, s.DB)

@@ -169,7 +169,7 @@ func (s Service) UnassignPlayerFromTeam(ctx context.Context, playerID, teamID st
 		return Team{}, err
 	}
 
-	err = s.playerRepo.UnassignFromTeam(ctx, playerID, moreiter.Of(teamID))
+	err = s.playerRepo.UnassignFromTeam(ctx, teamID, moreiter.Of(playerID))
 	if err != nil {
 		return Team{}, err
 	}
