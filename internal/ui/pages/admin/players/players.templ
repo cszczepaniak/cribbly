@@ -66,7 +66,8 @@ templ playerTable(players []players.Player) {
 					Class: "flex flex-row items-center space-x-2",
 				}) {
 					@button.Button(button.Props{
-						Variant: button.VariantGhost,
+						Variant:  button.VariantGhost,
+						Disabled: p.TeamID != "",
 						Attributes: map[string]any{
 							"data-on:click": dstar.SendDeletef("/admin/players/%s", p.ID),
 						},
