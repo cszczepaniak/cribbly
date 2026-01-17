@@ -146,62 +146,70 @@ templ emptyTeamListing() {
 }
 
 templ teamListing(teamID string, available, onThisOne []players.Player) {
-	<div id="team-listing">
-		@table.Table() {
-			@table.Header() {
-				@table.Head() {
-					Players
+	<div id="team-listing" class="max-h-[60svh] flex flex-col space-y-4">
+		<div class="h-1/3 grow overflow-y-auto">
+			@table.Table() {
+				@table.Header(table.HeaderProps{
+					Class: "sticky -top-px bg-background",
+				}) {
+					@table.Head() {
+						Players
+					}
 				}
-			}
-			@table.Body() {
-				for _, player := range onThisOne {
-					@table.Row() {
-						@table.Cell(table.CellProps{
-							Class: "flex flex-row justify-between items-center",
-						}) {
-							<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
-							@button.Button(button.Props{
-								Class:   "text-destructive hover:text-destructive hover:bg-background",
-								Variant: button.VariantGhost,
-								Attributes: utils.Attrs(
-									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, player.ID)),
-								),
+				@table.Body() {
+					for _, player := range onThisOne {
+						@table.Row() {
+							@table.Cell(table.CellProps{
+								Class: "flex flex-row justify-between items-center",
 							}) {
-								@icon.CircleMinus()
+								<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
+								@button.Button(button.Props{
+									Class:   "text-destructive hover:text-destructive hover:bg-background",
+									Variant: button.VariantGhost,
+									Attributes: utils.Attrs(
+										utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, player.ID)),
+									),
+								}) {
+									@icon.CircleMinus()
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-		@table.Table() {
-			@table.Header() {
-				@table.Head() {
-					Available Players
+		</div>
+		<div class="h-2/3 grow overflow-y-auto">
+			@table.Table() {
+				@table.Header(table.HeaderProps{
+					Class: "sticky -top-px bg-background",
+				}) {
+					@table.Head() {
+						Available Players
+					}
 				}
-			}
-			@table.Body() {
-				for _, player := range available {
-					@table.Row() {
-						@table.Cell(table.CellProps{
-							Class: "flex flex-row justify-between items-center",
-						}) {
-							<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
-							@button.Button(button.Props{
-								Class:    "hover:text-foreground hover:bg-background",
-								Variant:  button.VariantGhost,
-								Disabled: len(onThisOne) >= 2,
-								Attributes: utils.Attrs(
-									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?assign=%s", teamID, player.ID)),
-								),
+				@table.Body() {
+					for _, player := range available {
+						@table.Row() {
+							@table.Cell(table.CellProps{
+								Class: "flex flex-row justify-between items-center",
 							}) {
-								@icon.CirclePlus()
+								<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
+								@button.Button(button.Props{
+									Class:    "hover:text-foreground hover:bg-background",
+									Variant:  button.VariantGhost,
+									Disabled: len(onThisOne) >= 2,
+									Attributes: utils.Attrs(
+										utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?assign=%s", teamID, player.ID)),
+									),
+								}) {
+									@icon.CirclePlus()
+								}
 							}
 						}
 					}
 				}
 			}
-		}
+		</div>
 	</div>
 }
 

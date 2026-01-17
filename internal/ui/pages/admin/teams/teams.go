@@ -123,7 +123,7 @@ func (h TeamsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
 
 	for _, p := range players {
 		if p.TeamID != "" {
-			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, moreiter.Of(p.TeamID))
+			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.TeamID, moreiter.Of(p.ID))
 			if err != nil {
 				return err
 			}
