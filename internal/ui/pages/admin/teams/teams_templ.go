@@ -913,9 +913,8 @@ func teamListing(teamID string, available, onThisOne []players.Player) templ.Com
 								return nil
 							})
 							templ_7745c5c3_Err = button.Button(button.Props{
-								Class:    "text-destructive hover:text-destructive hover:bg-background",
-								Variant:  button.VariantGhost,
-								Disabled: len(available) == 0,
+								Class:   "text-destructive hover:text-destructive hover:bg-background",
+								Variant: button.VariantGhost,
 								Attributes: utils.Attrs(
 									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, player.ID)),
 								),
@@ -1050,7 +1049,7 @@ func teamListing(teamID string, available, onThisOne []players.Player) templ.Com
 							var templ_7745c5c3_Var44 string
 							templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(player.Name())
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 190, Col: 71}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 189, Col: 71}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 							if templ_7745c5c3_Err != nil {
@@ -1164,7 +1163,7 @@ func confirmDeleteTitle(teamName string) templ.Component {
 			var templ_7745c5c3_Var48 string
 			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(teamName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 213, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/teams/teams.templ`, Line: 212, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {

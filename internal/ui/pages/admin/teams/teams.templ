@@ -161,9 +161,8 @@ templ teamListing(teamID string, available, onThisOne []players.Player) {
 						}) {
 							<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
 							@button.Button(button.Props{
-								Class:    "text-destructive hover:text-destructive hover:bg-background",
-								Variant:  button.VariantGhost,
-								Disabled: len(available) == 0,
+								Class:   "text-destructive hover:text-destructive hover:bg-background",
+								Variant: button.VariantGhost,
 								Attributes: utils.Attrs(
 									utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, player.ID)),
 								),
