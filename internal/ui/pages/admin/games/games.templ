@@ -13,8 +13,9 @@ import (
 
 templ index(games []game) {
 	@admincomponents.Shell(admincomponents.Games) {
-		<h1 class="my-4 text-3xl font-semibold text-foreground">Prelim Games</h1>
+		<h1 class="text-3xl font-semibold text-foreground">Prelim Games</h1>
 		@button.Button(button.Props{
+			Class: "my-4",
 			Attributes: map[string]any{
 				"data-on:click": dstar.SendPostf("/admin/games/generate"),
 			},
