@@ -64,6 +64,20 @@ func (s Repository) GetAll(ctx context.Context) ([]Player, error) {
 	)
 }
 
+func (s Repository) GetFreeAgent(ctx context.Context, id string) (Player, error) {
+	row, err := s.selectPlayers().
+		WhereAll(
+			filter.Equals("ID", id),
+			filter.IsNull("TeamID"),
+		).
+		QueryRowContext(ctx, s.DB)
+	if err != nil {
+		return Player{}, err
+	}
+
+	return scanPlayer(row)
+}
+
 // GetFreeAgents returns all players who are not assigned to a team.
 func (s Repository) GetFreeAgents(ctx context.Context) ([]Player, error) {
 	return scanPlayers(
@@ -112,12 +126,28 @@ func (s Repository) AssignToTeam(ctx context.Context, playerID, teamID string) e
 	return nil
 }
 
-func (s Repository) UnassignFromTeam(ctx context.Context, id string) error {
-	_, err := s.Builder.UpdateTable("Players").
+func (s Repository) UnassignFromTeam(ctx context.Context, playerID, teamID string) error {
+	res, err := s.Builder.UpdateTable("Players").
 		SetFieldToNull("TeamID").
-		Where(filter.Equals("ID", id)).
+		WhereAll(
+			filter.Equals("ID", playerID),
+			filter.Equals("TeamID", teamID),
+		).
 		ExecContext(ctx, s.DB)
-	return err
+	if err != nil {
+		return err
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if n != 1 {
+		return errors.New("player wasn't on the team")
+	}
+
+	return nil
 }
 
 func (s Repository) Create(ctx context.Context, firstName, lastName string) (string, error) {
@@ -158,15 +188,10 @@ func scanPlayers(rows *sql.Rows, err error) ([]Player, error) {
 
 	var players []Player
 	for rows.Next() {
-		var p Player
-		var teamID sql.Null[string]
-		err := rows.Scan(&p.ID, &p.FirstName, &p.LastName, &teamID)
+		p, err := scanPlayer(rows)
 		if err != nil {
 			return nil, err
 		}
-
-		// If the team ID was null, V will be an empty string.
-		p.TeamID = teamID.V
 
 		players = append(players, p)
 	}
@@ -176,4 +201,17 @@ func scanPlayers(rows *sql.Rows, err error) ([]Player, error) {
 	}
 
 	return players, nil
+}
+
+func scanPlayer(scanner interface{ Scan(...any) error }) (Player, error) {
+	var p Player
+	var teamID sql.Null[string]
+	err := scanner.Scan(&p.ID, &p.FirstName, &p.LastName, &teamID)
+	if err != nil {
+		return Player{}, err
+	}
+
+	// If the team ID was null, return empty string.
+	p.TeamID = teamID.V
+	return p, nil
 }

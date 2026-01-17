@@ -51,10 +51,10 @@ func (s Repository) Init(ctx context.Context) error {
 	return err
 }
 
-func (s Repository) Create(ctx context.Context) (Team, error) {
+func (s Repository) Create(ctx context.Context, name string) (Team, error) {
 	team := Team{
 		ID:   uuid.NewString(),
-		Name: "Unnamed Team",
+		Name: name,
 	}
 
 	_, err := s.Builder.InsertIntoTable("Teams").

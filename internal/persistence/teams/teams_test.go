@@ -15,11 +15,11 @@ func TestTeamsRepo(t *testing.T) {
 	s := NewRepository(db)
 	require.NoError(t, s.Init(t.Context()))
 
-	team1, err := s.Create(t.Context())
+	team1, err := s.Create(t.Context(), "team1")
 	require.NoError(t, err)
-	team2, err := s.Create(t.Context())
+	team2, err := s.Create(t.Context(), "team2")
 	require.NoError(t, err)
-	team3, err := s.Create(t.Context())
+	team3, err := s.Create(t.Context(), "team3")
 	require.NoError(t, err)
 
 	teams, err := s.GetAll(t.Context())
@@ -51,9 +51,9 @@ func TestTeamsRepo_Rename(t *testing.T) {
 	s := NewRepository(db)
 	require.NoError(t, s.Init(t.Context()))
 
-	team, err := s.Create(t.Context())
+	team, err := s.Create(t.Context(), "team")
 	require.NoError(t, err)
-	assert.Equal(t, "Unnamed Team", team.Name)
+	assert.Equal(t, "team", team.Name)
 
 	require.NoError(t, s.Rename(t.Context(), team.ID, "New Name"))
 

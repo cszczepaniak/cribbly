@@ -89,9 +89,11 @@ func (h PlayersHandler) DeleteAllPlayers(w http.ResponseWriter, r *http.Request)
 	}
 
 	for _, p := range players {
-		err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID)
-		if err != nil {
-			return err
+		if p.TeamID != "" {
+			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, p.TeamID)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = h.PlayerRepo.Delete(r.Context(), p.ID)
@@ -107,7 +109,7 @@ func (h PlayersHandler) DeleteAllPlayers(w http.ResponseWriter, r *http.Request)
 func (h PlayersHandler) DeletePlayer(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	err := h.PlayerRepo.UnassignFromTeam(r.Context(), id)
+	err := h.PlayerRepo.UnassignFromTeam(r.Context(), id, "TODO")
 	if err != nil {
 		return err
 	}

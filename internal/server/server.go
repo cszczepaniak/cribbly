@@ -81,8 +81,9 @@ func setupAdminRoutes(cfg Config, r *router) {
 	playersRouter.Handle("DELETE /", ph.DeleteAllPlayers)
 
 	th := teams.TeamsHandler{
-		PlayerRepo: cfg.PlayerRepo,
-		TeamRepo:   cfg.TeamRepo,
+		PlayerRepo:  cfg.PlayerRepo,
+		TeamRepo:    cfg.TeamRepo,
+		TeamService: cfg.TeamService(),
 	}
 	teamsRouter := adminRouter.Group("/teams")
 	teamsRouter.Handle("GET /", th.Index)

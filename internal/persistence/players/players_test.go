@@ -110,8 +110,14 @@ func TestAssigningPlayers(t *testing.T) {
 	err = s.AssignToTeam(t.Context(), mario.ID, teamID)
 	assert.ErrorIs(t, err, ErrPlayerAlreadyOnATeam)
 
+	// Unassigning mario from a different team is an error.
+	require.Error(t, s.UnassignFromTeam(t.Context(), mario.ID, "not the team"))
+
 	// Unassigning mario should make him a free agent again.
-	require.NoError(t, s.UnassignFromTeam(t.Context(), mario.ID))
+	require.NoError(t, s.UnassignFromTeam(t.Context(), mario.ID, teamID))
+
+	// Unassigning mario again is an error.
+	require.Error(t, s.UnassignFromTeam(t.Context(), mario.ID, teamID))
 
 	players, err = s.GetFreeAgents(t.Context())
 	require.NoError(t, err)

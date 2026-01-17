@@ -7,11 +7,13 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	teamservice "github.com/cszczepaniak/cribbly/internal/service/teams"
 )
 
 type TeamsHandler struct {
-	PlayerRepo players.Repository
-	TeamRepo   teams.Repository
+	PlayerRepo  players.Repository
+	TeamRepo    teams.Repository
+	TeamService teamservice.Service
 }
 
 func (h TeamsHandler) Index(w http.ResponseWriter, r *http.Request) error {
@@ -78,7 +80,7 @@ func (h TeamsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) erro
 }
 
 func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
-	_, err := h.TeamRepo.Create(r.Context())
+	_, err := h.TeamRepo.Create(r.Context(), "Unnamed Team")
 	if err != nil {
 		return err
 	}
@@ -119,9 +121,11 @@ func (h TeamsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for _, p := range players {
-		err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID)
-		if err != nil {
-			return err
+		if p.TeamID != "" {
+			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, p.TeamID)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -140,13 +144,13 @@ func (h TeamsHandler) Generate(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	for len(players) >= 2 {
-		team, err := h.TeamRepo.Create(r.Context())
+		team, err := h.TeamService.CreateTeam(r.Context())
 		if err != nil {
 			return err
 		}
 
 		for i := range 2 {
-			err = h.PlayerRepo.AssignToTeam(r.Context(), players[i].ID, team.ID)
+			_, err = h.TeamService.AssignPlayerToTeam(r.Context(), players[i].ID, team.ID)
 			if err != nil {
 				return err
 			}
@@ -164,11 +168,12 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	assign := r.FormValue("assign")
 	unassign := r.FormValue("unassign")
 	if assign != "" || unassign != "" {
+		var team teamservice.Team
 		var err error
 		if assign != "" {
-			err = h.PlayerRepo.AssignToTeam(r.Context(), assign, teamID)
+			team, err = h.TeamService.AssignPlayerToTeam(r.Context(), assign, teamID)
 		} else {
-			err = h.PlayerRepo.UnassignFromTeam(r.Context(), unassign)
+			team, err = h.TeamService.UnassignPlayerFromTeam(r.Context(), unassign, teamID)
 		}
 		if err != nil {
 			return err
@@ -185,6 +190,10 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		}
 
 		sse := datastar.NewSSE(w, r)
+		err = sse.PatchElementTempl(teamName(teamID, team.Name))
+		if err != nil {
+			return err
+		}
 		err = sse.PatchElementTempl(teamPlayersList(teamID, onThisTeam))
 		if err != nil {
 			return err

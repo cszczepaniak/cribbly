@@ -8,6 +8,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
+	teamservice "github.com/cszczepaniak/cribbly/internal/service/teams"
 )
 
 type Config struct {
@@ -18,4 +19,8 @@ type Config struct {
 	GameRepo            games.Repository
 	UserRepo            users.Repository
 	ScoreUpdateNotifier *notifier.Notifier
+}
+
+func (cfg Config) TeamService() teamservice.Service {
+	return teamservice.New(cfg.Transactor, cfg.PlayerRepo, cfg.TeamRepo)
 }
