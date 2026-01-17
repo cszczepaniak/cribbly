@@ -14,7 +14,7 @@ templ adminPage() {
 
 templ loginPage() {
 	@components.Shell() {
-		<div class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
+		<form data-on:submit={ dstar.SendPostf("/admin/login") } class="flex flex-col space-y-4 py-4 max-w-md mx-auto">
 			<h1 class="text-5xl text-center">Admin Sign In</h1>
 			<p class="text-muted-foreground text-center italic">
 				If you aren't an admin, you can click <a
@@ -39,13 +39,11 @@ templ loginPage() {
 				},
 			})
 			@button.Button(button.Props{
-				Attributes: map[string]any{
-					"data-on:click": dstar.SendPostf("/admin/login"),
-				},
+				Type: button.TypeSubmit,
 			}) {
 				Login
 			}
-		</div>
+		</form>
 	}
 }
 
