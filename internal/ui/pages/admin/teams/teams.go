@@ -5,6 +5,7 @@ import (
 
 	"github.com/starfederation/datastar-go/datastar"
 
+	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	teamservice "github.com/cszczepaniak/cribbly/internal/service/teams"
@@ -122,7 +123,7 @@ func (h TeamsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
 
 	for _, p := range players {
 		if p.TeamID != "" {
-			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, p.TeamID)
+			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, moreiter.Of(p.TeamID))
 			if err != nil {
 				return err
 			}

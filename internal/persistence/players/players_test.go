@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
 
@@ -111,13 +112,13 @@ func TestAssigningPlayers(t *testing.T) {
 	assert.ErrorIs(t, err, ErrPlayerAlreadyOnATeam)
 
 	// Unassigning mario from a different team is an error.
-	require.Error(t, s.UnassignFromTeam(t.Context(), mario.ID, "not the team"))
+	require.Error(t, s.UnassignFromTeam(t.Context(), "not the team", moreiter.Of(mario.ID)))
 
 	// Unassigning mario should make him a free agent again.
-	require.NoError(t, s.UnassignFromTeam(t.Context(), mario.ID, teamID))
+	require.NoError(t, s.UnassignFromTeam(t.Context(), teamID, moreiter.Of(mario.ID)))
 
 	// Unassigning mario again is an error.
-	require.Error(t, s.UnassignFromTeam(t.Context(), mario.ID, teamID))
+	require.Error(t, s.UnassignFromTeam(t.Context(), teamID, moreiter.Of(mario.ID)))
 
 	players, err = s.GetFreeAgents(t.Context())
 	require.NoError(t, err)

@@ -6,6 +6,7 @@ import (
 	"github.com/jaswdr/faker/v2"
 	"github.com/starfederation/datastar-go/datastar"
 
+	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 )
 
@@ -90,7 +91,7 @@ func (h PlayersHandler) DeleteAllPlayers(w http.ResponseWriter, r *http.Request)
 
 	for _, p := range players {
 		if p.TeamID != "" {
-			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, p.TeamID)
+			err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID, moreiter.Of(p.TeamID))
 			if err != nil {
 				return err
 			}
@@ -109,12 +110,7 @@ func (h PlayersHandler) DeleteAllPlayers(w http.ResponseWriter, r *http.Request)
 func (h PlayersHandler) DeletePlayer(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	err := h.PlayerRepo.UnassignFromTeam(r.Context(), id, "TODO")
-	if err != nil {
-		return err
-	}
-
-	err = h.PlayerRepo.Delete(r.Context(), id)
+	err := h.PlayerRepo.Delete(r.Context(), id)
 	if err != nil {
 		return err
 	}

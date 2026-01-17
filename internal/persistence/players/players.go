@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"iter"
+	"slices"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/column"
@@ -62,6 +64,19 @@ func (s Repository) GetAll(ctx context.Context) ([]Player, error) {
 		s.selectPlayers().
 			QueryContext(ctx, s.DB),
 	)
+}
+
+func (s Repository) Get(ctx context.Context, id string) (Player, error) {
+	row, err := s.selectPlayers().
+		WhereAll(
+			filter.Equals("ID", id),
+		).
+		QueryRowContext(ctx, s.DB)
+	if err != nil {
+		return Player{}, err
+	}
+
+	return scanPlayer(row)
 }
 
 func (s Repository) GetFreeAgent(ctx context.Context, id string) (Player, error) {
@@ -126,11 +141,11 @@ func (s Repository) AssignToTeam(ctx context.Context, playerID, teamID string) e
 	return nil
 }
 
-func (s Repository) UnassignFromTeam(ctx context.Context, playerID, teamID string) error {
+func (s Repository) UnassignFromTeam(ctx context.Context, teamID string, playerIDs iter.Seq[string]) error {
 	res, err := s.Builder.UpdateTable("Players").
 		SetFieldToNull("TeamID").
 		WhereAll(
-			filter.Equals("ID", playerID),
+			filter.In("ID", slices.Collect(playerIDs)),
 			filter.Equals("TeamID", teamID),
 		).
 		ExecContext(ctx, s.DB)

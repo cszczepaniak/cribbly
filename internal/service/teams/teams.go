@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 
+	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -79,16 +81,20 @@ func (s Service) DeleteTeam(ctx context.Context, id string) error {
 	}
 	defer cancel()
 
-	players, err := s.playerRepo.GetForTeam(ctx, id)
+	playersOnTeam, err := s.playerRepo.GetForTeam(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	for _, p := range players {
-		err := s.playerRepo.UnassignFromTeam(ctx, p.ID, id)
-		if err != nil {
-			return err
-		}
+	err = s.playerRepo.UnassignFromTeam(
+		ctx,
+		id,
+		moreiter.Map(slices.Values(playersOnTeam), func(p players.Player) string {
+			return p.ID
+		}),
+	)
+	if err != nil {
+		return err
 	}
 
 	err = s.teamRepo.Delete(ctx, id)
@@ -163,7 +169,7 @@ func (s Service) UnassignPlayerFromTeam(ctx context.Context, playerID, teamID st
 		return Team{}, err
 	}
 
-	err = s.playerRepo.UnassignFromTeam(ctx, playerID, teamID)
+	err = s.playerRepo.UnassignFromTeam(ctx, playerID, moreiter.Of(teamID))
 	if err != nil {
 		return Team{}, err
 	}
