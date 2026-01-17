@@ -72,6 +72,33 @@ func (s Service) CreateTeam(ctx context.Context) (Team, error) {
 	}, nil
 }
 
+func (s Service) DeleteTeam(ctx context.Context, id string) error {
+	s, tx, cancel, err := s.begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+
+	players, err := s.playerRepo.GetForTeam(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	for _, p := range players {
+		err := s.playerRepo.UnassignFromTeam(ctx, p.ID, id)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = s.teamRepo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func (s Service) AssignPlayerToTeam(ctx context.Context, playerID, teamID string) (Team, error) {
 	s, tx, cancel, err := s.begin(ctx)
 	if err != nil {

@@ -105,7 +105,7 @@ func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 
 func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	err := h.TeamRepo.Delete(r.Context(), id)
+	err := h.TeamService.DeleteTeam(r.Context(), id)
 	if err != nil {
 		return err
 	}
