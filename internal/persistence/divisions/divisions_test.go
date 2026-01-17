@@ -10,9 +10,9 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
 
-func TestDivisionsService(t *testing.T) {
+func TestDivisionsRepo(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewRepository(db)
 	require.NoError(t, s.Init(t.Context()))
 
 	division1, err := s.Create(t.Context())
@@ -46,9 +46,9 @@ func TestDivisionsService(t *testing.T) {
 	assert.ErrorIs(t, err, sql.ErrNoRows)
 }
 
-func TestDivisionsService_Rename(t *testing.T) {
+func TestDivisionsRepo_Rename(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewRepository(db)
 	require.NoError(t, s.Init(t.Context()))
 
 	division, err := s.Create(t.Context())

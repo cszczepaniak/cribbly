@@ -10,19 +10,19 @@ import (
 )
 
 type TeamsHandler struct {
-	PlayerService players.Service
-	TeamService   teams.Service
+	PlayerRepo players.Repository
+	TeamRepo   teams.Repository
 }
 
 func (h TeamsHandler) Index(w http.ResponseWriter, r *http.Request) error {
-	teams, err := h.TeamService.GetAll(r.Context())
+	teams, err := h.TeamRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
 
 	playersByTeam := make(map[string][]players.Player, len(teams))
 	for _, team := range teams {
-		players, err := h.PlayerService.GetForTeam(r.Context(), team.ID)
+		players, err := h.PlayerRepo.GetForTeam(r.Context(), team.ID)
 		if err != nil {
 			return err
 		}
@@ -34,17 +34,17 @@ func (h TeamsHandler) Index(w http.ResponseWriter, r *http.Request) error {
 
 func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	team, err := h.TeamService.Get(r.Context(), id)
+	team, err := h.TeamRepo.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	availablePlayers, err := h.PlayerService.GetFreeAgents(r.Context())
+	availablePlayers, err := h.PlayerRepo.GetFreeAgents(r.Context())
 	if err != nil {
 		return err
 	}
 
-	onThisTeam, err := h.PlayerService.GetForTeam(r.Context(), id)
+	onThisTeam, err := h.PlayerRepo.GetForTeam(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 
 func (h TeamsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	team, err := h.TeamService.Get(r.Context(), id)
+	team, err := h.TeamRepo.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -78,19 +78,19 @@ func (h TeamsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) erro
 }
 
 func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
-	_, err := h.TeamService.Create(r.Context())
+	_, err := h.TeamRepo.Create(r.Context())
 	if err != nil {
 		return err
 	}
 
-	teams, err := h.TeamService.GetAll(r.Context())
+	teams, err := h.TeamRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
 
 	playersByTeam := make(map[string][]players.Player, len(teams))
 	for _, team := range teams {
-		players, err := h.PlayerService.GetForTeam(r.Context(), team.ID)
+		players, err := h.PlayerRepo.GetForTeam(r.Context(), team.ID)
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 
 func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	err := h.TeamService.Delete(r.Context(), id)
+	err := h.TeamRepo.Delete(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -113,19 +113,19 @@ func (h TeamsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h TeamsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
-	players, err := h.PlayerService.GetAll(r.Context())
+	players, err := h.PlayerRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
 
 	for _, p := range players {
-		err := h.PlayerService.UnassignFromTeam(r.Context(), p.ID)
+		err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = h.TeamService.DeleteAll(r.Context())
+	err = h.TeamRepo.DeleteAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -134,19 +134,19 @@ func (h TeamsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h TeamsHandler) Generate(w http.ResponseWriter, r *http.Request) error {
-	players, err := h.PlayerService.GetFreeAgents(r.Context())
+	players, err := h.PlayerRepo.GetFreeAgents(r.Context())
 	if err != nil {
 		return err
 	}
 
 	for len(players) >= 2 {
-		team, err := h.TeamService.Create(r.Context())
+		team, err := h.TeamRepo.Create(r.Context())
 		if err != nil {
 			return err
 		}
 
 		for i := range 2 {
-			err = h.PlayerService.AssignToTeam(r.Context(), players[i].ID, team.ID)
+			err = h.PlayerRepo.AssignToTeam(r.Context(), players[i].ID, team.ID)
 			if err != nil {
 				return err
 			}
@@ -166,20 +166,20 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	if assign != "" || unassign != "" {
 		var err error
 		if assign != "" {
-			err = h.PlayerService.AssignToTeam(r.Context(), assign, teamID)
+			err = h.PlayerRepo.AssignToTeam(r.Context(), assign, teamID)
 		} else {
-			err = h.PlayerService.UnassignFromTeam(r.Context(), unassign)
+			err = h.PlayerRepo.UnassignFromTeam(r.Context(), unassign)
 		}
 		if err != nil {
 			return err
 		}
 
-		onThisTeam, err := h.PlayerService.GetForTeam(r.Context(), teamID)
+		onThisTeam, err := h.PlayerRepo.GetForTeam(r.Context(), teamID)
 		if err != nil {
 			return err
 		}
 
-		available, err := h.PlayerService.GetFreeAgents(r.Context())
+		available, err := h.PlayerRepo.GetFreeAgents(r.Context())
 		if err != nil {
 			return err
 		}
@@ -202,7 +202,7 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if sigs.Name != "" {
-		err := h.TeamService.Rename(r.Context(), teamID, sigs.Name)
+		err := h.TeamRepo.Rename(r.Context(), teamID, sigs.Name)
 		if err != nil {
 			return err
 		}

@@ -10,9 +10,9 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
 
-func TestPlayerService(t *testing.T) {
+func TestPlayerRepo(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewRepository(db)
 
 	require.NoError(t, s.Init(t.Context()))
 
@@ -47,7 +47,7 @@ func TestPlayerService(t *testing.T) {
 
 func TestAssigningPlayers(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewRepository(db)
 
 	require.NoError(t, s.Init(t.Context()))
 

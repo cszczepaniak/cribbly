@@ -16,17 +16,17 @@ var (
 	ErrSessionExpired = errors.New("session expired")
 )
 
-type Service struct {
+type Repository struct {
 	db *sql.DB
 }
 
-func NewService(db *sql.DB) Service {
-	return Service{
+func NewRepository(db *sql.DB) Repository {
+	return Repository{
 		db: db,
 	}
 }
 
-func (s Service) Init(ctx context.Context) error {
+func (s Repository) Init(ctx context.Context) error {
 	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Users (
 			Username TEXT,
 			PasswordHash BLOB,
@@ -51,7 +51,7 @@ type User struct {
 	Name string
 }
 
-func (s Service) GetAll(ctx context.Context) ([]User, error) {
+func (s Repository) GetAll(ctx context.Context) ([]User, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT Username FROM Users`)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (s Service) GetAll(ctx context.Context) ([]User, error) {
 }
 
 // CreateUser creates the given user.
-func (s Service) CreateUser(ctx context.Context, username, passwordHash string) error {
+func (s Repository) CreateUser(ctx context.Context, username, passwordHash string) error {
 	_, err := s.db.ExecContext(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (s Service) CreateUser(ctx context.Context, username, passwordHash string) 
 }
 
 // GetPassword returns the persisted hash of the password for the given user.
-func (s Service) GetPassword(ctx context.Context, username string) (string, error) {
+func (s Repository) GetPassword(ctx context.Context, username string) (string, error) {
 	var pw string
 	err := s.db.QueryRowContext(
 		ctx,
@@ -106,17 +106,17 @@ func (s Service) GetPassword(ctx context.Context, username string) (string, erro
 	return pw, nil
 }
 
-func (s Service) ChangePassword(ctx context.Context, username, newPassHash string) error {
+func (s Repository) ChangePassword(ctx context.Context, username, newPassHash string) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, newPassHash, username)
 	return err
 }
 
-func (s Service) DeleteUser(ctx context.Context, username string) error {
+func (s Repository) DeleteUser(ctx context.Context, username string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM Users WHERE Username = ?`, username)
 	return err
 }
 
-func (s Service) CreateSession(ctx context.Context, username string, expiresIn time.Duration) (string, error) {
+func (s Repository) CreateSession(ctx context.Context, username string, expiresIn time.Duration) (string, error) {
 	var exists bool
 	err := s.db.QueryRowContext(
 		ctx,
@@ -155,7 +155,7 @@ func (s Session) Expired() bool {
 	return time.Now().After(s.expires)
 }
 
-func (s Service) GetSession(ctx context.Context, sessionID string) (Session, error) {
+func (s Repository) GetSession(ctx context.Context, sessionID string) (Session, error) {
 	sesh := Session{
 		ID: sessionID,
 	}

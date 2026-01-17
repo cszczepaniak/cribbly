@@ -10,11 +10,11 @@ import (
 )
 
 type PlayersHandler struct {
-	PlayerService players.Service
+	PlayerRepo players.Repository
 }
 
 func (h PlayersHandler) RegistrationPage(w http.ResponseWriter, r *http.Request) error {
-	players, err := h.PlayerService.GetAll(r.Context())
+	players, err := h.PlayerRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -32,12 +32,12 @@ func (h PlayersHandler) PostPlayer(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	_, err := h.PlayerService.Create(r.Context(), signals.FirstName, signals.LastName)
+	_, err := h.PlayerRepo.Create(r.Context(), signals.FirstName, signals.LastName)
 	if err != nil {
 		return err
 	}
 
-	players, err := h.PlayerService.GetAll(r.Context())
+	players, err := h.PlayerRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -67,13 +67,13 @@ func (h PlayersHandler) GenerateRandomPlayers(w http.ResponseWriter, r *http.Req
 	for range signals.Num {
 		firstName := fake.Person().FirstName()
 		lastName := fake.Person().LastName()
-		_, err := h.PlayerService.Create(r.Context(), firstName, lastName)
+		_, err := h.PlayerRepo.Create(r.Context(), firstName, lastName)
 		if err != nil {
 			return err
 		}
 	}
 
-	players, err := h.PlayerService.GetAll(r.Context())
+	players, err := h.PlayerRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -83,18 +83,18 @@ func (h PlayersHandler) GenerateRandomPlayers(w http.ResponseWriter, r *http.Req
 }
 
 func (h PlayersHandler) DeleteAllPlayers(w http.ResponseWriter, r *http.Request) error {
-	players, err := h.PlayerService.GetAll(r.Context())
+	players, err := h.PlayerRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
 
 	for _, p := range players {
-		err := h.PlayerService.UnassignFromTeam(r.Context(), p.ID)
+		err := h.PlayerRepo.UnassignFromTeam(r.Context(), p.ID)
 		if err != nil {
 			return err
 		}
 
-		err = h.PlayerService.Delete(r.Context(), p.ID)
+		err = h.PlayerRepo.Delete(r.Context(), p.ID)
 		if err != nil {
 			return err
 		}
@@ -107,17 +107,17 @@ func (h PlayersHandler) DeleteAllPlayers(w http.ResponseWriter, r *http.Request)
 func (h PlayersHandler) DeletePlayer(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	err := h.PlayerService.UnassignFromTeam(r.Context(), id)
+	err := h.PlayerRepo.UnassignFromTeam(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	err = h.PlayerService.Delete(r.Context(), id)
+	err = h.PlayerRepo.Delete(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	players, err := h.PlayerService.GetAll(r.Context())
+	players, err := h.PlayerRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}

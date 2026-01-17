@@ -12,7 +12,7 @@ import (
 )
 
 type ProfileHandler struct {
-	UserService users.Service
+	UserRepo users.Repository
 }
 
 func (h ProfileHandler) Index(w http.ResponseWriter, r *http.Request) error {
@@ -41,7 +41,7 @@ func (h ProfileHandler) ChangePassword(w http.ResponseWriter, r *http.Request) e
 		return err
 	}
 
-	err = h.UserService.ChangePassword(r.Context(), sesh.Username, hash)
+	err = h.UserRepo.ChangePassword(r.Context(), sesh.Username, hash)
 	if err != nil {
 		return err
 	}

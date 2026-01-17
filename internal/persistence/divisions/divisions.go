@@ -17,19 +17,19 @@ type Division struct {
 	Name string
 }
 
-type Service struct {
+type Repository struct {
 	db *sql.DB
 	b  *sqlbuilder.Builder
 }
 
-func NewService(db *sql.DB) Service {
-	return Service{
+func NewRepository(db *sql.DB) Repository {
+	return Repository{
 		db: db,
 		b:  sqlbuilder.New(formatter.Sqlite{}),
 	}
 }
 
-func (s Service) Init(ctx context.Context) error {
+func (s Repository) Init(ctx context.Context) error {
 	_, err := s.b.CreateTable("Divisions").
 		IfNotExists().
 		Columns(
@@ -40,7 +40,7 @@ func (s Service) Init(ctx context.Context) error {
 	return err
 }
 
-func (s Service) Create(ctx context.Context) (Division, error) {
+func (s Repository) Create(ctx context.Context) (Division, error) {
 	division := Division{
 		ID:   uuid.NewString(),
 		Name: "Unnamed Division",
@@ -57,14 +57,14 @@ func (s Service) Create(ctx context.Context) (Division, error) {
 	return division, nil
 }
 
-func (s Service) Delete(ctx context.Context, id string) error {
+func (s Repository) Delete(ctx context.Context, id string) error {
 	_, err := s.b.DeleteFromTable("Divisions").
 		Where(filter.Equals("ID", id)).
 		ExecContext(ctx, s.db)
 	return err
 }
 
-func (s Service) Rename(ctx context.Context, id, newName string) error {
+func (s Repository) Rename(ctx context.Context, id, newName string) error {
 	_, err := s.b.UpdateTable("Divisions").
 		SetFieldTo("Name", newName).
 		Where(filter.Equals("ID", id)).
@@ -72,7 +72,7 @@ func (s Service) Rename(ctx context.Context, id, newName string) error {
 	return err
 }
 
-func (s Service) Get(ctx context.Context, id string) (Division, error) {
+func (s Repository) Get(ctx context.Context, id string) (Division, error) {
 	row, err := s.b.SelectFrom(table.Named("Divisions")).
 		Columns("ID", "Name").
 		Where(filter.Equals("ID", id)).
@@ -90,7 +90,7 @@ func (s Service) Get(ctx context.Context, id string) (Division, error) {
 	return division, nil
 }
 
-func (s Service) GetAll(ctx context.Context) ([]Division, error) {
+func (s Repository) GetAll(ctx context.Context) ([]Division, error) {
 	rows, err := s.b.SelectFrom(table.Named("Divisions")).
 		Columns("ID", "Name").
 		QueryContext(ctx, s.db)

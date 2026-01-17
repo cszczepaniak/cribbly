@@ -8,8 +8,8 @@ import (
 )
 
 type Handler struct {
-	GameService games.Service
-	TeamService teams.Service
+	GameRepo games.Repository
+	TeamRepo teams.Repository
 }
 
 type team struct {
@@ -44,24 +44,24 @@ func (g game) complete() bool {
 func (h Handler) GetGames(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	t, err := h.TeamService.Get(r.Context(), id)
+	t, err := h.TeamRepo.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	gs, err := h.GameService.GetForTeam(r.Context(), id)
+	gs, err := h.GameRepo.GetForTeam(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
 	var games []game
 	for gameID, scores := range gs {
-		team1, err := h.TeamService.Get(r.Context(), scores[0].TeamID)
+		team1, err := h.TeamRepo.Get(r.Context(), scores[0].TeamID)
 		if err != nil {
 			return err
 		}
 
-		team2, err := h.TeamService.Get(r.Context(), scores[1].TeamID)
+		team2, err := h.TeamRepo.Get(r.Context(), scores[1].TeamID)
 		if err != nil {
 			return err
 		}

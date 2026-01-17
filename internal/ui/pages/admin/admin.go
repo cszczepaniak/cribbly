@@ -13,7 +13,7 @@ import (
 )
 
 type AdminHandler struct {
-	UserService users.Service
+	UserRepo users.Repository
 }
 
 func Index(w http.ResponseWriter, r *http.Request) error {
@@ -52,7 +52,7 @@ func (h AdminHandler) DoLogin(w http.ResponseWriter, r *http.Request) error {
 		return sse.PatchElementTempl(loginError("Invalid credentials"))
 	}
 
-	pwHash, err := h.UserService.GetPassword(r.Context(), signals.Username)
+	pwHash, err := h.UserRepo.GetPassword(r.Context(), signals.Username)
 	if err != nil {
 		if errors.Is(err, users.ErrUnknownUser) {
 			return badLogin()
@@ -71,7 +71,7 @@ func (h AdminHandler) DoLogin(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	// TODO: decide on session lifetime
-	sessionID, err := h.UserService.CreateSession(r.Context(), signals.Username, 24*time.Hour)
+	sessionID, err := h.UserRepo.CreateSession(r.Context(), signals.Username, 24*time.Hour)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (h AdminHandler) Register(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	err = h.UserService.CreateUser(r.Context(), signals.Username, hash)
+	err = h.UserRepo.CreateUser(r.Context(), signals.Username, hash)
 	if err != nil {
 		log.Println("registration error:", err)
 		return badLogin("Error with registration. Contact an admin for help.", true)

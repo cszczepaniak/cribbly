@@ -44,32 +44,32 @@ func main() {
 
 	scoreUpdateNotifier := &notifier.Notifier{}
 
-	playerService := players.NewService(db)
-	err = playerService.Init(ctx)
+	playerRepo := players.NewRepository(db)
+	err = playerRepo.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	teamService := teams.NewService(db)
-	err = teamService.Init(ctx)
+	teamRepo := teams.NewRepository(db)
+	err = teamRepo.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	divisionService := divisions.NewService(db)
-	err = divisionService.Init(ctx)
+	divisionRepo := divisions.NewRepository(db)
+	err = divisionRepo.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	gameService := games.NewService(db, scoreUpdateNotifier)
-	err = gameService.Init(ctx)
+	gameRepo := games.NewRepository(db, scoreUpdateNotifier)
+	err = gameRepo.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userService := users.NewService(db)
-	err = userService.Init(ctx)
+	userRepo := users.NewRepository(db)
+	err = userRepo.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,18 +80,18 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = userService.CreateUser(context.Background(), seedUser, passwordHash)
+		err = userRepo.CreateUser(context.Background(), seedUser, passwordHash)
 		if err != nil {
 			log.Println("could not seed user:", err)
 		}
 	}
 
 	cfg := server.Config{
-		PlayerService:       playerService,
-		TeamService:         teamService,
-		DivisionService:     divisionService,
-		GameService:         gameService,
-		UserService:         userService,
+		PlayerRepo:          playerRepo,
+		TeamRepo:            teamRepo,
+		DivisionRepo:        divisionRepo,
+		GameRepo:            gameRepo,
+		UserRepo:            userRepo,
 		ScoreUpdateNotifier: scoreUpdateNotifier,
 	}
 

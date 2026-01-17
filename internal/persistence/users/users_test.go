@@ -12,7 +12,7 @@ import (
 
 func TestUsers(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewRepository(db)
 	require.NoError(t, s.Init(t.Context()))
 
 	err := s.CreateUser(t.Context(), "mario", "secret")
@@ -46,7 +46,7 @@ func TestUsers(t *testing.T) {
 
 func TestSessions(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db)
+	s := NewRepository(db)
 	require.NoError(t, s.Init(t.Context()))
 
 	// User must exist

@@ -10,11 +10,11 @@ import (
 )
 
 type UsersHandler struct {
-	UserService users.Service
+	UserRepo users.Repository
 }
 
 func (h UsersHandler) Index(w http.ResponseWriter, r *http.Request) error {
-	users, err := h.UserService.GetAll(r.Context())
+	users, err := h.UserRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -36,12 +36,12 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("missing username or password")
 	}
 
-	err = h.UserService.CreateUser(r.Context(), signals.Username, signals.Password)
+	err = h.UserRepo.CreateUser(r.Context(), signals.Username, signals.Password)
 	if err != nil {
 		return err
 	}
 
-	users, err := h.UserService.GetAll(r.Context())
+	users, err := h.UserRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -52,12 +52,12 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) error {
 
 func (h UsersHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	name := r.PathValue("name")
-	err := h.UserService.DeleteUser(r.Context(), name)
+	err := h.UserRepo.DeleteUser(r.Context(), name)
 	if err != nil {
 		return err
 	}
 
-	users, err := h.UserService.GetAll(r.Context())
+	users, err := h.UserRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}

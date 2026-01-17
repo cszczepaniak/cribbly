@@ -8,12 +8,12 @@ import (
 )
 
 type Handler struct {
-	DivisionService divisions.Service
-	TeamService     teams.Service
+	DivisionRepo divisions.Repository
+	TeamRepo     teams.Repository
 }
 
 func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
-	ds, err := h.DivisionService.GetAll(r.Context())
+	ds, err := h.DivisionRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -23,12 +23,12 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 
 func (h Handler) GetDivisions(w http.ResponseWriter, r *http.Request) error {
 	divisionID := r.PathValue("id")
-	d, err := h.DivisionService.Get(r.Context(), divisionID)
+	d, err := h.DivisionRepo.Get(r.Context(), divisionID)
 	if err != nil {
 		return err
 	}
 
-	ts, err := h.TeamService.GetForDivision(r.Context(), divisionID)
+	ts, err := h.TeamRepo.GetForDivision(r.Context(), divisionID)
 	if err != nil {
 		return err
 	}

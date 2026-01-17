@@ -12,7 +12,7 @@ import (
 func TestGames(t *testing.T) {
 	n := &notifier.Notifier{}
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db, n)
+	s := NewRepository(db, n)
 	require.NoError(t, s.Init(t.Context()))
 
 	t1 := "a"
@@ -77,7 +77,7 @@ func TestGames(t *testing.T) {
 func TestGames_Notifications(t *testing.T) {
 	n := &notifier.Notifier{}
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db, n)
+	s := NewRepository(db, n)
 	require.NoError(t, s.Init(t.Context()))
 
 	t1 := "a"
@@ -105,7 +105,7 @@ func TestGames_Notifications(t *testing.T) {
 func TestGames_UpdateScores_TeamsMustExistForGame(t *testing.T) {
 	n := &notifier.Notifier{}
 	db := sqlite.NewInMemoryForTest(t)
-	s := NewService(db, n)
+	s := NewRepository(db, n)
 	require.NoError(t, s.Init(t.Context()))
 
 	t1 := "a"

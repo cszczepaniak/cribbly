@@ -10,8 +10,8 @@ import (
 )
 
 type Handler struct {
-	GameService         games.Service
-	TeamService         teams.Service
+	GameRepo            games.Repository
+	TeamRepo            teams.Repository
 	ScoreUpdateNotifier *notifier.Notifier
 }
 
@@ -60,17 +60,17 @@ func (p getGameProps) getLosingScore() int {
 func (h Handler) GetGame(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
-	g, err := h.GameService.Get(r.Context(), id)
+	g, err := h.GameRepo.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	team1, err := h.TeamService.Get(r.Context(), g[0].TeamID)
+	team1, err := h.TeamRepo.Get(r.Context(), g[0].TeamID)
 	if err != nil {
 		return err
 	}
 
-	team2, err := h.TeamService.Get(r.Context(), g[1].TeamID)
+	team2, err := h.TeamRepo.Get(r.Context(), g[1].TeamID)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 		return sse.PatchElementTempl(scoreInput("Losing score must be between 1 and 120."))
 	}
 
-	scores, err := h.GameService.Get(r.Context(), gameID)
+	scores, err := h.GameRepo.Get(r.Context(), gameID)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 		losingID = scores[0].TeamID
 	}
 
-	err = h.GameService.UpdateScores(r.Context(), gameID, signals.WinningTeamID, 121, losingID, signals.LoserScore)
+	err = h.GameRepo.UpdateScores(r.Context(), gameID, signals.WinningTeamID, 121, losingID, signals.LoserScore)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h Handler) StandingsPage(w http.ResponseWriter, r *http.Request) error {
-	s, err := h.GameService.GetStandings(r.Context())
+	s, err := h.GameRepo.GetStandings(r.Context())
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (h Handler) StreamStandings(w http.ResponseWriter, r *http.Request) error {
 		case <-r.Context().Done():
 			return nil
 		case <-notify:
-			s, err := h.GameService.GetStandings(r.Context())
+			s, err := h.GameRepo.GetStandings(r.Context())
 			if err != nil {
 				return err
 			}

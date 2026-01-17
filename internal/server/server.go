@@ -31,21 +31,21 @@ func Setup(cfg Config) http.Handler {
 	setupAdminRoutes(cfg, r)
 
 	dh := pubdiv.Handler{
-		DivisionService: cfg.DivisionService,
-		TeamService:     cfg.TeamService,
+		DivisionRepo: cfg.DivisionRepo,
+		TeamRepo:     cfg.TeamRepo,
 	}
 	r.Handle("GET /divisions", dh.Index)
 	r.Handle("GET /divisions/{id}", dh.GetDivisions)
 
 	th := pubteam.Handler{
-		GameService: cfg.GameService,
-		TeamService: cfg.TeamService,
+		GameRepo: cfg.GameRepo,
+		TeamRepo: cfg.TeamRepo,
 	}
 	r.Handle("GET /teams/{id}/games", th.GetGames)
 
 	gh := pubgame.Handler{
-		GameService:         cfg.GameService,
-		TeamService:         cfg.TeamService,
+		GameRepo:            cfg.GameRepo,
+		TeamRepo:            cfg.TeamRepo,
 		ScoreUpdateNotifier: cfg.ScoreUpdateNotifier,
 	}
 	r.Handle("GET /games/{id}", gh.GetGame)
@@ -60,18 +60,18 @@ func setupAdminRoutes(cfg Config, r *router) {
 	// NOTE: these two admin routes must be registered without using the admin router because they
 	// must _not_ have the auth middleware attached to them.
 	ah := admin.AdminHandler{
-		UserService: cfg.UserService,
+		UserRepo: cfg.UserRepo,
 	}
 	r.Handle("GET /admin/login", admin.LoginPage)
 	r.Handle("POST /admin/login", ah.DoLogin)
 	r.Handle("GET /admin/register", admin.RegisterPage)
 	r.Handle("POST /admin/register", ah.Register)
 
-	adminRouter := r.Group("/admin", adminmiddleware.AuthenticationMiddleware(cfg.UserService))
+	adminRouter := r.Group("/admin", adminmiddleware.AuthenticationMiddleware(cfg.UserRepo))
 	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{
-		PlayerService: cfg.PlayerService,
+		PlayerRepo: cfg.PlayerRepo,
 	}
 	playersRouter := adminRouter.Group("/players")
 	playersRouter.Handle("GET /", ph.RegistrationPage)
@@ -81,8 +81,8 @@ func setupAdminRoutes(cfg Config, r *router) {
 	playersRouter.Handle("DELETE /", ph.DeleteAllPlayers)
 
 	th := teams.TeamsHandler{
-		PlayerService: cfg.PlayerService,
-		TeamService:   cfg.TeamService,
+		PlayerRepo: cfg.PlayerRepo,
+		TeamRepo:   cfg.TeamRepo,
 	}
 	teamsRouter := adminRouter.Group("/teams")
 	teamsRouter.Handle("GET /", th.Index)
@@ -95,8 +95,8 @@ func setupAdminRoutes(cfg Config, r *router) {
 	teamsRouter.Handle("DELETE /", th.DeleteAll)
 
 	dh := divisions.DivisionsHandler{
-		TeamService:     cfg.TeamService,
-		DivisionService: cfg.DivisionService,
+		TeamRepo:     cfg.TeamRepo,
+		DivisionRepo: cfg.DivisionRepo,
 	}
 	divisionsRouter := adminRouter.Group("/divisions")
 	divisionsRouter.Handle("GET /", dh.Index)
@@ -106,9 +106,9 @@ func setupAdminRoutes(cfg Config, r *router) {
 	divisionsRouter.Handle("DELETE /{id}", dh.Delete)
 
 	gh := games.Handler{
-		DivisionService: cfg.DivisionService,
-		TeamService:     cfg.TeamService,
-		GameService:     cfg.GameService,
+		DivisionRepo: cfg.DivisionRepo,
+		TeamRepo:     cfg.TeamRepo,
+		GameRepo:     cfg.GameRepo,
 	}
 	gamesRouter := adminRouter.Group("/games")
 	gamesRouter.Handle("GET /", gh.Index)
@@ -118,7 +118,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
 
 	uh := users.UsersHandler{
-		UserService: cfg.UserService,
+		UserRepo: cfg.UserRepo,
 	}
 	usersRouter := adminRouter.Group("/users")
 	usersRouter.Handle("GET /", uh.Index)
@@ -126,7 +126,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	usersRouter.Handle("DELETE /{name}", uh.Delete)
 
 	pph := profile.ProfileHandler{
-		UserService: cfg.UserService,
+		UserRepo: cfg.UserRepo,
 	}
 	profileRouter := adminRouter.Group("/profile")
 	profileRouter.Handle("GET /", pph.Index)

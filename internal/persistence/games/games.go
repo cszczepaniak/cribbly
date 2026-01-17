@@ -24,21 +24,21 @@ type Game struct {
 	Scores [2]Score
 }
 
-type Service struct {
+type Repository struct {
 	db *sql.DB
 	b  *sqlbuilder.Builder
 	n  *notifier.Notifier
 }
 
-func NewService(db *sql.DB, n *notifier.Notifier) Service {
-	return Service{
+func NewRepository(db *sql.DB, n *notifier.Notifier) Repository {
+	return Repository{
 		db: db,
 		b:  sqlbuilder.New(formatter.Sqlite{}),
 		n:  n,
 	}
 }
 
-func (s Service) Init(ctx context.Context) error {
+func (s Repository) Init(ctx context.Context) error {
 	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Scores (
 			GameID VARCHAR(36),
 			TeamID VARCHAR(36),
@@ -49,7 +49,7 @@ func (s Service) Init(ctx context.Context) error {
 	return err
 }
 
-func (s Service) Create(ctx context.Context, teamID1, teamID2 string) (_ string, err error) {
+func (s Repository) Create(ctx context.Context, teamID1, teamID2 string) (_ string, err error) {
 	id := uuid.NewString()
 
 	_, err = s.b.InsertIntoTable("Scores").
@@ -64,7 +64,7 @@ func (s Service) Create(ctx context.Context, teamID1, teamID2 string) (_ string,
 	return id, nil
 }
 
-func (s Service) UpdateScore(ctx context.Context, gameID, teamID string, score int) error {
+func (s Repository) UpdateScore(ctx context.Context, gameID, teamID string, score int) error {
 	_, err := s.b.UpdateTable("Scores").SetFieldTo("Score", score).WhereAll(
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
@@ -77,7 +77,7 @@ func (s Service) UpdateScore(ctx context.Context, gameID, teamID string, score i
 	return nil
 }
 
-func (s Service) UpdateScores(
+func (s Repository) UpdateScores(
 	ctx context.Context,
 	gameID string,
 	team1ID string,
@@ -137,7 +137,7 @@ func (s Service) UpdateScores(
 	return nil
 }
 
-func (s Service) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
+func (s Repository) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
 	row, err := s.b.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
@@ -155,7 +155,7 @@ func (s Service) GetScore(ctx context.Context, gameID, teamID string) (int, erro
 	return score, nil
 }
 
-func (s Service) GetAll(ctx context.Context) ([]Score, error) {
+func (s Repository) GetAll(ctx context.Context) ([]Score, error) {
 	rows, err := s.b.SelectFrom(table.Named("Scores")).Columns("GameID", "TeamID", "Score").QueryContext(ctx, s.db)
 	if err != nil {
 		return nil, err
@@ -176,12 +176,12 @@ func (s Service) GetAll(ctx context.Context) ([]Score, error) {
 	return scores, nil
 }
 
-func (s Service) DeleteAll(ctx context.Context) error {
+func (s Repository) DeleteAll(ctx context.Context) error {
 	_, err := s.b.DeleteFromTable("Scores").ExecContext(ctx, s.db)
 	return err
 }
 
-func (s Service) Get(ctx context.Context, id string) ([2]Score, error) {
+func (s Repository) Get(ctx context.Context, id string) ([2]Score, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT GameID, TeamID, Score FROM Scores WHERE GameID = ? ORDER BY TeamID`,
 		id,
@@ -216,7 +216,7 @@ func (s Service) Get(ctx context.Context, id string) ([2]Score, error) {
 	return res, nil
 }
 
-func (s Service) GetForTeam(ctx context.Context, teamID string) (map[string][2]Score, error) {
+func (s Repository) GetForTeam(ctx context.Context, teamID string) (map[string][2]Score, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT GameID, TeamID, Score FROM Scores WHERE GameID IN (
 			SELECT GameID FROM Scores WHERE TeamID = ?
@@ -271,7 +271,7 @@ type Standing struct {
 	TotalScore int
 }
 
-func (s Service) GetStandings(ctx context.Context) ([]Standing, error) {
+func (s Repository) GetStandings(ctx context.Context) ([]Standing, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT
 			TeamID,

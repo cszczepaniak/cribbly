@@ -19,7 +19,7 @@ func GetSession(ctx context.Context) users.Session {
 // TODO: share this type somewhere (can't be server pkg because that'd cause an import cycle)
 type handler = func(http.ResponseWriter, *http.Request) error
 
-func AuthenticationMiddleware(userService users.Service) func(next handler) handler {
+func AuthenticationMiddleware(userRepo users.Repository) func(next handler) handler {
 	return func(next handler) handler {
 		return func(w http.ResponseWriter, r *http.Request) error {
 			cookie, err := r.Cookie("session")
@@ -43,7 +43,7 @@ func AuthenticationMiddleware(userService users.Service) func(next handler) hand
 			}
 
 			// TODO: in-memory caching of sessions to avoid a DB call for each request
-			sesh, err := userService.GetSession(r.Context(), cookie.Value)
+			sesh, err := userRepo.GetSession(r.Context(), cookie.Value)
 			if err != nil {
 				if errors.Is(err, users.ErrSessionExpired) {
 					clearCookieAndRedirect()

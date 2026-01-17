@@ -25,19 +25,19 @@ type Team struct {
 	DivisionID string
 }
 
-type Service struct {
+type Repository struct {
 	db *sql.DB
 	b  *sqlbuilder.Builder
 }
 
-func NewService(db *sql.DB) Service {
-	return Service{
+func NewRepository(db *sql.DB) Repository {
+	return Repository{
 		db: db,
 		b:  sqlbuilder.New(formatter.Sqlite{}),
 	}
 }
 
-func (s Service) Init(ctx context.Context) error {
+func (s Repository) Init(ctx context.Context) error {
 	_, err := s.b.CreateTable("Teams").
 		IfNotExists().
 		Columns(
@@ -49,7 +49,7 @@ func (s Service) Init(ctx context.Context) error {
 	return err
 }
 
-func (s Service) Create(ctx context.Context) (Team, error) {
+func (s Repository) Create(ctx context.Context) (Team, error) {
 	team := Team{
 		ID:   uuid.NewString(),
 		Name: "Unnamed Team",
@@ -66,20 +66,20 @@ func (s Service) Create(ctx context.Context) (Team, error) {
 	return team, nil
 }
 
-func (s Service) Delete(ctx context.Context, id string) error {
+func (s Repository) Delete(ctx context.Context, id string) error {
 	_, err := s.b.DeleteFromTable("Teams").
 		Where(filter.Equals("ID", id)).
 		ExecContext(ctx, s.db)
 	return err
 }
 
-func (s Service) DeleteAll(ctx context.Context) error {
+func (s Repository) DeleteAll(ctx context.Context) error {
 	_, err := s.b.DeleteFromTable("Teams").
 		ExecContext(ctx, s.db)
 	return err
 }
 
-func (s Service) Rename(ctx context.Context, id, newName string) error {
+func (s Repository) Rename(ctx context.Context, id, newName string) error {
 	_, err := s.b.UpdateTable("Teams").
 		SetFieldTo("Name", newName).
 		Where(filter.Equals("ID", id)).
@@ -87,7 +87,7 @@ func (s Service) Rename(ctx context.Context, id, newName string) error {
 	return err
 }
 
-func (s Service) Get(ctx context.Context, id string) (Team, error) {
+func (s Repository) Get(ctx context.Context, id string) (Team, error) {
 	row, err := s.b.SelectFrom(table.Named("Teams")).
 		Columns("ID", "Name").
 		Where(filter.Equals("ID", id)).
@@ -105,7 +105,7 @@ func (s Service) Get(ctx context.Context, id string) (Team, error) {
 	return team, nil
 }
 
-func (s Service) GetAll(ctx context.Context) ([]Team, error) {
+func (s Repository) GetAll(ctx context.Context) ([]Team, error) {
 	return scanTeams(
 		s.selectTeams().
 			QueryContext(ctx, s.db),
@@ -113,7 +113,7 @@ func (s Service) GetAll(ctx context.Context) ([]Team, error) {
 }
 
 // GetWithoutDivision returns all teams that are not assigned to a division.
-func (s Service) GetWithoutDivision(ctx context.Context) ([]Team, error) {
+func (s Repository) GetWithoutDivision(ctx context.Context) ([]Team, error) {
 	return scanTeams(
 		s.selectTeams().
 			Where(filter.IsNull("DivisionID")).
@@ -122,7 +122,7 @@ func (s Service) GetWithoutDivision(ctx context.Context) ([]Team, error) {
 }
 
 // GetForDivision returns the teams in the given division.
-func (s Service) GetForDivision(ctx context.Context, divisionID string) ([]Team, error) {
+func (s Repository) GetForDivision(ctx context.Context, divisionID string) ([]Team, error) {
 	return scanTeams(
 		s.selectTeams().
 			Where(filter.Equals("DivisionID", divisionID)).
@@ -131,7 +131,7 @@ func (s Service) GetForDivision(ctx context.Context, divisionID string) ([]Team,
 }
 
 // AssignToDivision assigns the given team to the given division.
-func (s Service) AssignToDivision(ctx context.Context, teamID, divisionID string) error {
+func (s Repository) AssignToDivision(ctx context.Context, teamID, divisionID string) error {
 	res, err := s.b.UpdateTable("Teams").
 		SetFieldTo("DivisionID", divisionID).
 		WhereAll(
@@ -160,12 +160,12 @@ func (s Service) AssignToDivision(ctx context.Context, teamID, divisionID string
 	return nil
 }
 
-func (s Service) selectTeams() *sel.Builder {
+func (s Repository) selectTeams() *sel.Builder {
 	return s.b.SelectFrom(table.Named("Teams")).
 		Columns("ID", "Name", "DivisionID")
 }
 
-func (s Service) UnassignFromDivision(ctx context.Context, id string) error {
+func (s Repository) UnassignFromDivision(ctx context.Context, id string) error {
 	_, err := s.b.UpdateTable("Teams").
 		SetFieldToNull("DivisionID").
 		Where(filter.Equals("ID", id)).

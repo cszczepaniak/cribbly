@@ -16,9 +16,9 @@ import (
 )
 
 type Handler struct {
-	DivisionService divisions.Service
-	TeamService     teams.Service
-	GameService     games.Service
+	DivisionRepo divisions.Repository
+	TeamRepo     teams.Repository
+	GameRepo     games.Repository
 }
 
 func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
@@ -31,7 +31,7 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h Handler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
-	err := h.GameService.DeleteAll(r.Context())
+	err := h.GameRepo.DeleteAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (h Handler) Edit(w http.ResponseWriter, r *http.Request) error {
 	gameID := r.URL.Query().Get("gameID")
 	teamID := r.URL.Query().Get("teamID")
 
-	score, err := h.GameService.GetScore(r.Context(), gameID, teamID)
+	score, err := h.GameRepo.GetScore(r.Context(), gameID, teamID)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (h Handler) Save(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	err = h.GameService.UpdateScore(r.Context(), gameID, teamID, score)
+	err = h.GameRepo.UpdateScore(r.Context(), gameID, teamID, score)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ type game struct {
 }
 
 func (h Handler) generatePrelimGames(ctx context.Context) error {
-	allTeams, err := h.TeamService.GetAll(ctx)
+	allTeams, err := h.TeamRepo.GetAll(ctx)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func (h Handler) generatePrelimGames(ctx context.Context) error {
 		}
 
 		for _, pair := range pairs {
-			_, err := h.GameService.Create(ctx, pair[0].ID, pair[1].ID)
+			_, err := h.GameRepo.Create(ctx, pair[0].ID, pair[1].ID)
 			if err != nil {
 				return err
 			}
@@ -218,7 +218,7 @@ func (h Handler) getAllGames(ctx context.Context) ([]game, error) {
 	// mapping in-memory), but it keeps the database logic simple... let's do it this way until we
 	// know we need something better?
 
-	scores, err := h.GameService.GetAll(ctx)
+	scores, err := h.GameRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (h Handler) getAllGames(ctx context.Context) ([]game, error) {
 		scoresByGame[s.GameID] = append(scoresByGame[s.GameID], s)
 	}
 
-	daTeams, err := h.TeamService.GetAll(ctx)
+	daTeams, err := h.TeamRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func (h Handler) getAllGames(ctx context.Context) ([]game, error) {
 		teamsByID[t.ID] = t
 	}
 
-	daDivisions, err := h.DivisionService.GetAll(ctx)
+	daDivisions, err := h.DivisionRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -12,12 +12,12 @@ import (
 )
 
 type DivisionsHandler struct {
-	TeamService     teams.Service
-	DivisionService divisions.Service
+	TeamRepo     teams.Repository
+	DivisionRepo divisions.Repository
 }
 
 func (h DivisionsHandler) Index(w http.ResponseWriter, r *http.Request) error {
-	divisions, err := h.DivisionService.GetAll(r.Context())
+	divisions, err := h.DivisionRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -27,17 +27,17 @@ func (h DivisionsHandler) Index(w http.ResponseWriter, r *http.Request) error {
 
 func (h DivisionsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	division, err := h.DivisionService.Get(r.Context(), id)
+	division, err := h.DivisionRepo.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	availableTeams, err := h.TeamService.GetWithoutDivision(r.Context())
+	availableTeams, err := h.TeamRepo.GetWithoutDivision(r.Context())
 	if err != nil {
 		return err
 	}
 
-	inThisDivision, err := h.TeamService.GetForDivision(r.Context(), id)
+	inThisDivision, err := h.TeamRepo.GetForDivision(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -55,12 +55,12 @@ func (h DivisionsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
-	_, err := h.DivisionService.Create(r.Context())
+	_, err := h.DivisionRepo.Create(r.Context())
 	if err != nil {
 		return err
 	}
 
-	teams, err := h.DivisionService.GetAll(r.Context())
+	teams, err := h.DivisionRepo.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 
 func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	err := h.DivisionService.Delete(r.Context(), id)
+	err := h.DivisionRepo.Delete(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -91,20 +91,20 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	if a != (admincomponents.Assignment{}) {
 		var err error
 		if a.Assign != "" {
-			err = h.TeamService.AssignToDivision(r.Context(), a.Assign, divisionID)
+			err = h.TeamRepo.AssignToDivision(r.Context(), a.Assign, divisionID)
 		} else {
-			err = h.TeamService.UnassignFromDivision(r.Context(), a.Unassign)
+			err = h.TeamRepo.UnassignFromDivision(r.Context(), a.Unassign)
 		}
 		if err != nil {
 			return err
 		}
 
-		inThisDivision, err := h.TeamService.GetForDivision(r.Context(), divisionID)
+		inThisDivision, err := h.TeamRepo.GetForDivision(r.Context(), divisionID)
 		if err != nil {
 			return err
 		}
 
-		available, err := h.TeamService.GetWithoutDivision(r.Context())
+		available, err := h.TeamRepo.GetWithoutDivision(r.Context())
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if sigs.Name != "" {
-		err := h.DivisionService.Rename(r.Context(), divisionID, sigs.Name)
+		err := h.DivisionRepo.Rename(r.Context(), divisionID, sigs.Name)
 		if err != nil {
 			return err
 		}

@@ -30,19 +30,19 @@ func (p Player) Name() string {
 	return p.FirstName + " " + p.LastName
 }
 
-type Service struct {
+type Repository struct {
 	db *sql.DB
 	b  *sqlbuilder.Builder
 }
 
-func NewService(db *sql.DB) Service {
-	return Service{
+func NewRepository(db *sql.DB) Repository {
+	return Repository{
 		db: db,
 		b:  sqlbuilder.New(formatter.Sqlite{}),
 	}
 }
 
-func (s Service) Init(ctx context.Context) error {
+func (s Repository) Init(ctx context.Context) error {
 	_, err := s.b.CreateTable("Players").
 		IfNotExists().
 		Columns(
@@ -55,7 +55,7 @@ func (s Service) Init(ctx context.Context) error {
 	return err
 }
 
-func (s Service) GetAll(ctx context.Context) ([]Player, error) {
+func (s Repository) GetAll(ctx context.Context) ([]Player, error) {
 	return scanPlayers(
 		s.selectPlayers().
 			QueryContext(ctx, s.db),
@@ -63,7 +63,7 @@ func (s Service) GetAll(ctx context.Context) ([]Player, error) {
 }
 
 // GetFreeAgents returns all players who are not assigned to a team.
-func (s Service) GetFreeAgents(ctx context.Context) ([]Player, error) {
+func (s Repository) GetFreeAgents(ctx context.Context) ([]Player, error) {
 	return scanPlayers(
 		s.selectPlayers().
 			Where(filter.IsNull("TeamID")).
@@ -72,7 +72,7 @@ func (s Service) GetFreeAgents(ctx context.Context) ([]Player, error) {
 }
 
 // GetForTeam returns the players assigned to the given team.
-func (s Service) GetForTeam(ctx context.Context, teamID string) ([]Player, error) {
+func (s Repository) GetForTeam(ctx context.Context, teamID string) ([]Player, error) {
 	return scanPlayers(
 		s.selectPlayers().
 			Where(filter.Equals("TeamID", teamID)).
@@ -81,7 +81,7 @@ func (s Service) GetForTeam(ctx context.Context, teamID string) ([]Player, error
 }
 
 // AssignToTeam assigns the given player to the given team.
-func (s Service) AssignToTeam(ctx context.Context, playerID, teamID string) error {
+func (s Repository) AssignToTeam(ctx context.Context, playerID, teamID string) error {
 	res, err := s.b.UpdateTable("Players").
 		SetFieldTo("TeamID", teamID).
 		WhereAll(
@@ -110,7 +110,7 @@ func (s Service) AssignToTeam(ctx context.Context, playerID, teamID string) erro
 	return nil
 }
 
-func (s Service) UnassignFromTeam(ctx context.Context, id string) error {
+func (s Repository) UnassignFromTeam(ctx context.Context, id string) error {
 	_, err := s.b.UpdateTable("Players").
 		SetFieldToNull("TeamID").
 		Where(filter.Equals("ID", id)).
@@ -118,7 +118,7 @@ func (s Service) UnassignFromTeam(ctx context.Context, id string) error {
 	return err
 }
 
-func (s Service) Create(ctx context.Context, firstName, lastName string) (string, error) {
+func (s Repository) Create(ctx context.Context, firstName, lastName string) (string, error) {
 	id := uuid.NewString()
 
 	if firstName == "" || lastName == "" {
@@ -136,14 +136,14 @@ func (s Service) Create(ctx context.Context, firstName, lastName string) (string
 	return id, nil
 }
 
-func (s Service) Delete(ctx context.Context, id string) error {
+func (s Repository) Delete(ctx context.Context, id string) error {
 	_, err := s.b.DeleteFromTable("Players").
 		Where(filter.Equals("ID", id)).
 		ExecContext(ctx, s.db)
 	return err
 }
 
-func (s Service) selectPlayers() *sel.Builder {
+func (s Repository) selectPlayers() *sel.Builder {
 	return s.b.SelectFrom(table.Named("Players")).
 		Columns("ID", "FirstName", "LastName", "TeamID")
 }

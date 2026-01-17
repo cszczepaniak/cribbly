@@ -10,10 +10,10 @@ import (
 )
 
 type Config struct {
-	PlayerService       players.Service
-	TeamService         teams.Service
-	DivisionService     divisions.Service
-	GameService         games.Service
-	UserService         users.Service
+	PlayerRepo          players.Repository
+	TeamRepo            teams.Repository
+	DivisionRepo        divisions.Repository
+	GameRepo            games.Repository
+	UserRepo            users.Repository
 	ScoreUpdateNotifier *notifier.Notifier
 }
