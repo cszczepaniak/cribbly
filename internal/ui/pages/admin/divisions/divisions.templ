@@ -11,48 +11,26 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
+	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 )
 
-templ index(ds []divisions.Division) {
+templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
 	@admincomponents.Shell(admincomponents.Divisions) {
-		@teamOrDivisionPage(ds)
-	}
-}
-
-templ teamOrDivisionPage(divisions []divisions.Division) {
-	<h1 class="text-3xl font-semibold text-foreground">Divisions Registration</h1>
-	@button.Button(button.Props{
-		Class: "mt-4",
-		Attributes: map[string]any{
-			"data-on:click": dstar.SendPostf("/admin/divisions"),
-		},
-	}) {
-		Create New Division
-	}
-	@divisionTable(divisions)
-	@editDialog()
-}
-
-templ editDialog() {
-	@dialog.Dialog(dialog.Props{
-		ID: "edit-dialog",
-	}) {
-		@dialog.Content() {
-			@dialog.Title() {
-				Edit Division
-			}
-			@form.Item() {
-				@form.Label() {
-					Division Name
-				}
-				@editNameInput("")
-				@dialog.Close() {
-					@editSaveButton("")
-				}
-			}
-			@emptyItemsListing()
+		<h1 class="text-3xl font-semibold text-foreground">Divisions Registration</h1>
+		@button.Button(button.Props{
+			Class: "mt-4",
+			Attributes: map[string]any{
+				"data-on:click": dstar.SendPostf("/admin/divisions"),
+			},
+		}) {
+			Create New Division
 		}
+		@divisionGrid(ds, teamsByDivision)
+		@confirmDeleteDialog()
 	}
 }
 
@@ -79,129 +57,252 @@ templ editSaveButton(id string) {
 	}
 }
 
-templ divisionTable(items []divisions.Division) {
-	<div id="table" class="mt-4">
-		@table.Table() {
-			@table.Body(table.BodyProps{
-				ID: "team-list",
+templ divisionName(id, name string) {
+	<span id={ "team-name-" + id }>{ name }</span>
+}
+
+templ divisionGrid(divisions []divisions.Division, teamsByDivision map[string][]teams.Team) {
+	<div id="division-grid" class="flex flex-row items-stretch flex-wrap my-4">
+		for _, d := range divisions {
+			@card.Card(card.Props{
+				ID:    "division-" + d.ID,
+				Class: "w-full lg:w-auto lg:min-w-md mr-4 mt-4",
 			}) {
-				for _, item := range items {
-					@divisionRow(item)
+				@card.Header() {
+					<div class="flex items-center justify-between">
+						@divisionName(d.ID, d.Name)
+						<div>
+							@button.Button(button.Props{
+								Size:    button.SizeIcon,
+								Variant: button.VariantGhost,
+								Href:    fmt.Sprintf("/admin/divisions/%s", d.ID),
+							}) {
+								@icon.Pencil()
+							}
+							@dialog.Trigger(dialog.TriggerProps{
+								For: "delete-modal",
+							}) {
+								@button.Button(button.Props{
+									Size:    button.SizeIcon,
+									Class:   "text-destructive",
+									Variant: button.VariantGhost,
+									Attributes: utils.Attrs(
+										utils.DataOnClick(dstar.SendGetf("/admin/divisions/%s/delete", d.ID)),
+									),
+								}) {
+									@icon.Trash2()
+								}
+							}
+						</div>
+					</div>
+				}
+				@card.Content() {
+					{{ teams := teamsByDivision[d.ID] }}
+					if len(teams)== 0 {
+						No teams yet!
+					} else {
+						<ul>
+							for _, team := range teamsByDivision[d.ID] {
+								<li>{ team.Name }</li>
+							}
+						</ul>
+					}
 				}
 			}
 		}
 	</div>
 }
 
-templ divisionRow(val divisions.Division) {
-	@table.Row(table.RowProps{
-		Class: "flex flex-row items-center",
-		ID:    "table-row-" + val.ID,
-	}) {
-		@table.Cell(table.CellProps{
-			Class: "flex flex-row",
+templ editDivision(division divisionservice.Division, availableTeams []teams.Team) {
+	@admincomponents.Shell(admincomponents.Teams) {
+		<h1 class="text-3xl font-semibold text-foreground">Edit Division</h1>
+		@button.Button(button.Props{
+			Class:   "p-0 has-[>svg]:px-0",
+			Href:    "/admin/divisions",
+			Variant: button.VariantGhost,
 		}) {
-			@dialog.Trigger(dialog.TriggerProps{
-				For: "edit-dialog",
-			}) {
+			@icon.ChevronLeft()
+			Back to Divisions
+		}
+		@editDivisionDetails(division, availableTeams)
+	}
+}
+
+templ editDivisionTitle(division divisionservice.Division) {
+	<h2 id="division-name" class="text-3xl text-foreground my-4">
+		@divisionName(division.ID, division.Name)
+		@button.Button(button.Props{
+			Variant: button.VariantGhost,
+			Size:    button.SizeLg,
+			Attributes: utils.Attrs(
+				utils.DataOnClick(dstar.SendGetf("/admin/divisions/%s/editname", division.ID)),
+			),
+		}) {
+			@icon.Pencil()
+		}
+	</h2>
+}
+
+templ editDivisionInput(division divisionservice.Division) {
+	<div id="division-name" class="flex flex-row items-center">
+		<div class="w-fit mt-3 mb-4 -ml-3">
+			@input.Input(input.Props{
+				Value: division.Name,
+				Class: "h-fit md:text-3xl",
+				Attributes: utils.Attrs(
+					utils.DataBind("name"),
+				),
+			})
+		</div>
+		@button.Button(button.Props{
+			Variant: button.VariantGhost,
+			Size:    button.SizeLg,
+			Attributes: utils.Attrs(
+				utils.DataOnClick(dstar.SendPutf("/admin/divisions/%s/savename", division.ID)),
+			),
+		}) {
+			@icon.Check()
+		}
+	</div>
+}
+
+templ editDivisionDetails(division divisionservice.Division, availableTeams []teams.Team) {
+	<div id="edit-team-details">
+		@editDivisionTitle(division)
+		@editDivisionSize(division)
+		@divisionTeamList(division)
+		@availableTeamsTable(division, availableTeams)
+	</div>
+}
+
+templ divisionTeamList(division divisionservice.Division) {
+	<div id="division-team-list" class="grid grid-cols-5 gap-x-4 w-fit place-items-center">
+		for i := range division.Size {
+			<p class="w-full font-semibold text-lg text-left py-1">Team { fmt.Sprint(i+1) }:</p>
+			if i >= len(division.Teams) {
+				// We need to pad out the grid to get the next label in the right spot.
+				<div class="col-span-4"></div>
+			} else if i < len(division.Teams) {
+				{{ t := division.Teams[i] }}
+				<p class="w-full text-left col-span-3">{ t.Name }</p>
 				@button.Button(button.Props{
 					Variant: button.VariantGhost,
-					Attributes: map[string]any{
-						"data-on:click": dstar.SendGetf("/admin/divisions/edit/%s", val.ID),
-					},
+					Class:   "text-destructive",
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendPutf("/admin/divisions/%s?unassign=%s", division.ID, t.ID)),
+					),
 				}) {
-					@icon.Pencil()
+					@icon.CircleMinus()
 				}
-			}
-			@button.Button(button.Props{
-				Variant: button.VariantGhost,
-				Attributes: map[string]any{
-					"data-on:click": dstar.SendDeletef("/admin/divisions/%s", val.ID),
-				},
-			}) {
-				@icon.Trash2()
 			}
 		}
-		@divisionName(val.ID, val.Name)
-	}
-}
-
-templ divisionName(id, name string) {
-	@table.Cell(table.CellProps{
-		ID: "table-name-" + id,
-	}) {
-		{ name }
-	}
-}
-
-templ emptyItemsListing() {
-	<div id="items-listing" class="max-h-1/2"></div>
-}
-
-templ itemsListing(divisionID string, available, onThisOne []teams.Team) {
-	<div id="items-listing" class="max-h-[60svh] flex flex-col space-y-4">
-		<div class="h-1/2 grow overflow-y-auto">
-			@table.Table() {
-				@table.Header(table.HeaderProps{
-					Class: "sticky -top-px bg-background",
-				}) {
-					@table.Head() {
-						Teams
-					}
-				}
-				@table.Body() {
-					for _, team := range onThisOne {
-						@table.Row() {
-							@table.Cell(table.CellProps{
-								Class: "flex flex-row justify-between items-center",
-							}) {
-								<div class="text-sm font-medium text-foreground">{ team.Name }</div>
-								@button.Button(button.Props{
-									Class:   "text-destructive hover:text-destructive hover:bg-background",
-									Variant: button.VariantGhost,
-									Attributes: map[string]any{
-										"data-on:click": dstar.SendPutf("/admin/divisions/%s?unassign=%s", divisionID, team.ID),
-									},
-								}) {
-									@icon.CircleMinus()
-								}
-							}
-						}
-					}
-				}
-			}
-		</div>
-		@separator.Separator()
-		<div class="h-1/2 overflow-y-auto">
-			@table.Table() {
-				@table.Header(table.HeaderProps{
-					Class: "sticky -top-px bg-background",
-				}) {
-					@table.Head() {
-						Available Teams
-					}
-				}
-				@table.Body() {
-					for _, team := range available {
-						@table.Row() {
-							@table.Cell(table.CellProps{
-								Class: "flex flex-row justify-between items-center",
-							}) {
-								<div class="text-sm font-medium text-foreground">{ team.Name }</div>
-								@button.Button(button.Props{
-									Class:   "hover:text-foreground hover:bg-background",
-									Variant: button.VariantGhost,
-									Attributes: map[string]any{
-										"data-on:click": dstar.SendPutf("/admin/divisions/%s?assign=%s", divisionID, team.ID),
-									},
-								}) {
-									@icon.CirclePlus()
-								}
-							}
-						}
-					}
-				}
-			}
-		</div>
 	</div>
+}
+
+templ editDivisionSize(division divisionservice.Division) {
+	<div id="edit-division-size" class="w-fit">
+		@form.Item(form.ItemProps{
+			Class: "mb-4",
+		}) {
+			@form.Label() {
+				Division Size
+			}
+			@selectbox.SelectBox(selectbox.Props{
+				Multiple: false,
+			}) {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					Attributes: utils.Attrs(
+						utils.DataBind("size"),
+						utils.DataOn("change", dstar.SendPutf("/admin/divisions/%s/savesize", division.ID)),
+					),
+				}) {
+					@selectbox.Value()
+				}
+				@selectbox.Content(selectbox.ContentProps{
+					NoSearch: true,
+				}) {
+					@selectbox.Item(selectbox.ItemProps{
+						Value:    "4",
+						Selected: division.Size == 4,
+					}) {
+						4
+					}
+					@selectbox.Item(selectbox.ItemProps{
+						Value:    "6",
+						Selected: division.Size == 6,
+					}) {
+						6
+					}
+				}
+			}
+		}
+	</div>
+}
+
+templ availableTeamsTable(division divisionservice.Division, availableTeams []teams.Team) {
+	@table.Table(table.Props{
+		ID:    "available-players-table",
+		Class: "mt-8",
+	}) {
+		@table.Header(table.HeaderProps{
+			Class: "sticky -top-px bg-background text-lg",
+		}) {
+			@table.Head() {
+				Available Teams
+			}
+		}
+		@table.Body() {
+			for _, team := range availableTeams {
+				@table.Row() {
+					@table.Cell(table.CellProps{
+						Class: "flex flex-row justify-between items-center",
+					}) {
+						<div class="text-sm font-medium text-foreground">{ team.Name }</div>
+						@button.Button(button.Props{
+							Class:   "hover:text-foreground hover:bg-background",
+							Variant: button.VariantGhost,
+							Attributes: utils.Attrs(
+								utils.DataOnClick(dstar.SendPutf("/admin/divisions/%s?assign=%s", division.ID, team.ID)),
+							),
+						}) {
+							@icon.CirclePlus()
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+templ confirmDeleteTitle(divisionName string) {
+	@dialog.Title(dialog.TitleProps{
+		ID: "confirm-delete-title",
+	}) {
+		Really delete { divisionName }?
+	}
+}
+
+templ confirmDeleteButton(divisionID string) {
+	@button.Button(button.Props{
+		ID:      "confirm-delete-button",
+		Variant: button.VariantDestructive,
+		Attributes: utils.Attrs(
+			utils.DataOnClick(dstar.SendDeletef("/admin/divisions/%s", divisionID)),
+		),
+	}) {
+		Yes, really!
+	}
+}
+
+templ confirmDeleteDialog() {
+	@dialog.Dialog(dialog.Props{
+		ID: "delete-modal",
+	}) {
+		@dialog.Content() {
+			@confirmDeleteTitle("")
+			@dialog.Close() {
+				@confirmDeleteButton("")
+			}
+		}
+	}
 }

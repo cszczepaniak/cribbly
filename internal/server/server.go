@@ -102,10 +102,14 @@ func setupAdminRoutes(cfg Config, r *router) {
 	}
 	divisionsRouter := adminRouter.Group("/divisions")
 	divisionsRouter.Handle("GET /", dh.Index)
-	divisionsRouter.Handle("GET /edit/{id}", dh.Edit)
+	divisionsRouter.Handle("GET /{id}", dh.EditPage)
 	divisionsRouter.Handle("POST /", dh.Create)
 	divisionsRouter.Handle("PUT /{id}", dh.Save)
-	divisionsRouter.Handle("DELETE /{id}", dh.Delete)
+	divisionsRouter.Handle("GET /{id}/delete", dh.Delete)
+	divisionsRouter.Handle("DELETE /{id}", dh.ConfirmDelete)
+	divisionsRouter.Handle("GET /{id}/editname", dh.EditName)
+	divisionsRouter.Handle("PUT /{id}/savename", dh.SaveName)
+	divisionsRouter.Handle("PUT /{id}/savesize", dh.SaveSize)
 
 	gh := games.Handler{
 		DivisionRepo: cfg.DivisionRepo,

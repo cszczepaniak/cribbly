@@ -1,18 +1,20 @@
 package divisions
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
 )
 
 type DivisionsHandler struct {
-	TeamRepo     teams.Repository
-	DivisionRepo divisions.Repository
+	TeamRepo        teams.Repository
+	DivisionRepo    divisions.Repository
+	DivisionService divisionservice.Service
 }
 
 func (h DivisionsHandler) Index(w http.ResponseWriter, r *http.Request) error {
@@ -21,12 +23,21 @@ func (h DivisionsHandler) Index(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return index(divisions).Render(r.Context(), w)
+	teamsByDivision := make(map[string][]teams.Team, len(divisions))
+	for _, division := range divisions {
+		teams, err := h.TeamRepo.GetForDivision(r.Context(), division.ID)
+		if err != nil {
+			return err
+		}
+		teamsByDivision[division.ID] = teams
+	}
+
+	return index(divisions, teamsByDivision).Render(r.Context(), w)
 }
 
-func (h DivisionsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
+func (h DivisionsHandler) EditPage(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	division, err := h.DivisionRepo.Get(r.Context(), id)
+	division, err := h.DivisionService.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -36,21 +47,85 @@ func (h DivisionsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	inThisDivision, err := h.TeamRepo.GetForDivision(r.Context(), id)
+	return editDivision(division, availableTeams).Render(r.Context(), w)
+}
+
+func (h DivisionsHandler) EditName(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+	division, err := h.DivisionService.Get(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
 	sse := datastar.NewSSE(w, r)
-	err = sse.PatchElementTempl(editNameInput(division.Name))
+	return sse.PatchElementTempl(editDivisionInput(division))
+}
+
+func (h DivisionsHandler) SaveName(w http.ResponseWriter, r *http.Request) error {
+	var signals struct {
+		Name string `json:"name"`
+	}
+	err := datastar.ReadSignals(r, &signals)
 	if err != nil {
 		return err
 	}
-	err = sse.PatchElementTempl(editSaveButton(id))
+
+	id := r.PathValue("id")
+	// TODO: better display for validation errors
+	if signals.Name == "" {
+		return errors.New("division name can't be empty")
+	}
+
+	err = h.DivisionRepo.Rename(r.Context(), id, signals.Name)
 	if err != nil {
 		return err
 	}
-	return sse.PatchElementTempl(itemsListing(id, availableTeams, inThisDivision))
+
+	division, err := h.DivisionService.Get(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(editDivisionTitle(division))
+}
+
+func (h DivisionsHandler) SaveSize(w http.ResponseWriter, r *http.Request) error {
+	var signals struct {
+		Size string `json:"size"`
+	}
+	err := datastar.ReadSignals(r, &signals)
+	if err != nil {
+		return err
+	}
+
+	division, err := h.DivisionService.Get(r.Context(), r.PathValue("id"))
+	if err != nil {
+		return err
+	}
+
+	switch signals.Size {
+	case "4":
+		if division.Size == 4 {
+			return nil
+		}
+		division.Size = 4
+	case "6":
+		if division.Size == 6 {
+			return nil
+		}
+		division.Size = 6
+	default:
+		return errors.New("invalid division size")
+	}
+
+	err = h.DivisionRepo.UpdateSize(r.Context(), r.PathValue("id"), division.Size)
+	if err != nil {
+		return nil
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.PatchElementTempl(divisionTeamList(division))
 }
 
 func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
@@ -64,11 +139,35 @@ func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	teamsByDivision := make(map[string][]teams.Team, len(divisions))
+	for _, division := range divisions {
+		teams, err := h.TeamRepo.GetForDivision(r.Context(), division.ID)
+		if err != nil {
+			return err
+		}
+		teamsByDivision[division.ID] = teams
+	}
+
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(divisionTable(divisions))
+	return sse.PatchElementTempl(divisionGrid(divisions, teamsByDivision))
 }
 
 func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+	division, err := h.DivisionRepo.Get(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	err = sse.PatchElementTempl(confirmDeleteTitle(division.Name))
+	if err != nil {
+		return err
+	}
+	return sse.PatchElementTempl(confirmDeleteButton(division.ID))
+}
+
+func (h DivisionsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	err := h.DivisionRepo.Delete(r.Context(), id)
 	if err != nil {
@@ -76,7 +175,7 @@ func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.RemoveElementByID(fmt.Sprintf("table-row-%s", id))
+	return sse.Redirect("/admin/divisions")
 }
 
 type signals struct {
@@ -99,7 +198,7 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		inThisDivision, err := h.TeamRepo.GetForDivision(r.Context(), divisionID)
+		division, err := h.DivisionService.Get(r.Context(), divisionID)
 		if err != nil {
 			return err
 		}
@@ -109,9 +208,8 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		// If we're unassigning a team, we'll keep the modal open (by not redirecting).
 		sse := datastar.NewSSE(w, r)
-		return sse.PatchElementTempl(itemsListing(divisionID, available, inThisDivision))
+		return sse.PatchElementTempl(editDivisionDetails(division, available))
 	}
 
 	var sigs signals
