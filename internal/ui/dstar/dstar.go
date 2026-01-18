@@ -20,5 +20,7 @@ func SendPutf(url string, args ...any) string {
 
 func send(name, url string, args ...any) string {
 	url = fmt.Sprintf(url, args...)
-	return fmt.Sprintf("@%s('%s')", name, url)
+	// Setting requestCancellation allows requests to finish even if they were cancelled, which
+	// happens if the element that triggered the event is removed from the DOM.
+	return fmt.Sprintf("@%s('%s', { requestCancellation: 'disabled' })", name, url)
 }
