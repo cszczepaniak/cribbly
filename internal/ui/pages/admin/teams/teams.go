@@ -67,7 +67,7 @@ func (h TeamsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) erro
 }
 
 func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
-	_, err := h.TeamRepo.Create(r.Context(), "Unnamed Team")
+	team, err := h.TeamRepo.Create(r.Context(), "Unnamed Team")
 	if err != nil {
 		return err
 	}
@@ -87,6 +87,7 @@ func (h TeamsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
+	return sse.Redirectf("/admin/teams/%s", team.ID)
 	return sse.PatchElementTempl(teamGrid(teams, playersByTeam))
 }
 

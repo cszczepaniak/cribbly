@@ -122,7 +122,10 @@ templ playersOnTeam(team teamsservice.Team, availablePlayers []players.Player) {
 	<div id="players-on-team" class="grid grid-cols-4 gap-x-4 w-fit place-items-center">
 		for i := range 2 {
 			<p class="w-full font-semibold text-lg text-left py-1">Player { fmt.Sprint(i+1) }:</p>
-			if i < len(team.Players) {
+			if len(team.Players) == 0 {
+				// We need to pad out the grid to get the next label in the right spot.
+				<div class="col-span-3"></div>
+			} else if i < len(team.Players) {
 				{{ p := team.Players[i] }}
 				<p class="w-full text-left col-span-2">{ p.FirstName } { p.LastName }</p>
 				@button.Button(button.Props{
