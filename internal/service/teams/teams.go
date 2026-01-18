@@ -130,6 +130,7 @@ func (s Service) AssignPlayerToTeam(ctx context.Context, playerID, teamID string
 	if err != nil {
 		return Team{}, err
 	}
+	team.Players = playersOnTeam
 
 	switch len(playersOnTeam) {
 	case 0:
@@ -178,6 +179,7 @@ func (s Service) UnassignPlayerFromTeam(ctx context.Context, playerID, teamID st
 	if err != nil {
 		return Team{}, err
 	}
+	team.Players = playersOnTeam
 
 	switch len(playersOnTeam) {
 	case 0:
