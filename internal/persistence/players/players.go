@@ -163,8 +163,10 @@ func (s Repository) UnassignFromTeam(ctx context.Context, teamID string, playerI
 		return err
 	}
 
-	if n != 1 {
-		return errors.New("player wasn't on the team")
+	if int(n) != len(players) {
+		// TODO: maybe we should just be okay with removing players that aren't on the team (which
+		// is a no-op).
+		return errors.New("all given players must be on the team")
 	}
 
 	return nil
