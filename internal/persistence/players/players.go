@@ -142,10 +142,15 @@ func (s Repository) AssignToTeam(ctx context.Context, playerID, teamID string) e
 }
 
 func (s Repository) UnassignFromTeam(ctx context.Context, teamID string, playerIDs iter.Seq[string]) error {
+	players := slices.Collect(playerIDs)
+	if len(players) == 0 {
+		return nil
+	}
+
 	res, err := s.Builder.UpdateTable("Players").
 		SetFieldToNull("TeamID").
 		WhereAll(
-			filter.In("ID", slices.Collect(playerIDs)...),
+			filter.In("ID", players...),
 			filter.Equals("TeamID", teamID),
 		).
 		ExecContext(ctx, s.DB)
