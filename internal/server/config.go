@@ -8,6 +8,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
+	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
 	teamservice "github.com/cszczepaniak/cribbly/internal/service/teams"
 )
 
@@ -23,4 +24,8 @@ type Config struct {
 
 func (cfg Config) TeamService() teamservice.Service {
 	return teamservice.New(cfg.Transactor, cfg.PlayerRepo, cfg.TeamRepo)
+}
+
+func (cfg Config) DivisionService() divisionservice.Service {
+	return divisionservice.New(cfg.Transactor, cfg.TeamRepo, cfg.DivisionRepo)
 }

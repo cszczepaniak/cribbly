@@ -96,8 +96,9 @@ func setupAdminRoutes(cfg Config, r *router) {
 	teamsRouter.Handle("DELETE /", th.DeleteAll)
 
 	dh := divisions.DivisionsHandler{
-		TeamRepo:     cfg.TeamRepo,
-		DivisionRepo: cfg.DivisionRepo,
+		TeamRepo:        cfg.TeamRepo,
+		DivisionRepo:    cfg.DivisionRepo,
+		DivisionService: cfg.DivisionService(),
 	}
 	divisionsRouter := adminRouter.Group("/divisions")
 	divisionsRouter.Handle("GET /", dh.Index)
