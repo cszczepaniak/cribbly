@@ -2,12 +2,11 @@ package teams
 
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	teamsservice "github.com/cszczepaniak/cribbly/internal/service/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -15,6 +14,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
+	"fmt"
 )
 
 templ index(ts []teams.Team, playersByTeam map[string][]players.Player) {
@@ -30,7 +30,6 @@ templ index(ts []teams.Team, playersByTeam map[string][]players.Player) {
 		}
 		@teamGrid(ts, playersByTeam)
 		@devTools()
-		@editDialog()
 		@confirmDeleteDialog()
 	}
 }
@@ -59,14 +58,12 @@ templ teamGrid(ts []teams.Team, playersByTeam map[string][]players.Player) {
 						@teamName(t.ID, t.Name)
 						<div>
 							@dialog.Trigger(dialog.TriggerProps{
-								For: "edit-modal",
+								For: "edit-modal-zzz",
 							}) {
 								@button.Button(button.Props{
 									Size:    button.SizeIcon,
 									Variant: button.VariantGhost,
-									Attributes: utils.Attrs(
-										utils.DataOnClick(dstar.SendGetf("/admin/teams/edit/%s", t.ID)),
-									),
+									Href:    fmt.Sprintf("/admin/teams/%s", t.ID),
 								}) {
 									@icon.Pencil()
 								}
@@ -96,121 +93,86 @@ templ teamGrid(ts []teams.Team, playersByTeam map[string][]players.Player) {
 	</div>
 }
 
-templ editNameInput(placeholder string) {
-	<div id="edit-input">
-		@input.Input(input.Props{
-			Placeholder: placeholder,
-			Attributes: utils.Attrs(
-				utils.DataBind("name"),
-			),
-		})
-	</div>
-}
-
-templ editSaveButton(id string) {
-	@button.Button(button.Props{
-		ID:    "edit-button",
-		Class: "mt-2",
-		Attributes: utils.Attrs(
-			utils.DataOnClick(dstar.SendPutf("/admin/teams/%s", id)),
-		),
-	}) {
-		Save Name
+templ editTeam(team teamsservice.Team, availablePlayers []players.Player) {
+	@admincomponents.Shell(admincomponents.Teams) {
+		<h1 class="text-3xl font-semibold text-foreground">Edit Team</h1>
+		@button.Button(button.Props{
+			Class:   "p-0 has-[>svg]:px-0",
+			Href:    "/admin/teams",
+			Variant: button.VariantGhost,
+		}) {
+			@icon.ChevronLeft()
+			Back to Teams
+		}
+		@editTeamDetails(team, availablePlayers)
 	}
 }
 
-templ editDialog() {
-	@dialog.Dialog(dialog.Props{
-		ID: "edit-modal",
+templ editTeamDetails(team teamsservice.Team, availablePlayers []players.Player) {
+	<div id="edit-team-details">
+		<h2 class="text-xl text-foreground my-4">
+			@teamName(team.ID, team.Name)
+		</h2>
+		@playersOnTeam(team, availablePlayers)
+		@availablePlayersTable(team, availablePlayers)
+	</div>
+}
+
+templ playersOnTeam(team teamsservice.Team, availablePlayers []players.Player) {
+	<div id="players-on-team" class="grid grid-cols-4 gap-x-4 w-fit place-items-center">
+		for i := range 2 {
+			<p class="w-full font-semibold text-lg text-left py-1">Player { fmt.Sprint(i+1) }:</p>
+			if i < len(team.Players) {
+				{{ p := team.Players[i] }}
+				<p class="w-full text-left col-span-2">{ p.FirstName } { p.LastName }</p>
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Class:   "text-destructive",
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", team.ID, p.ID)),
+					),
+				}) {
+					@icon.CircleMinus()
+				}
+			}
+		}
+	</div>
+}
+
+templ availablePlayersTable(team teamsservice.Team, availablePlayers []players.Player) {
+	@table.Table(table.Props{
+		ID:    "available-players-table",
+		Class: "mt-8",
 	}) {
-		@dialog.Content() {
-			@dialog.Title() {
-				Edit Team
+		@table.Header(table.HeaderProps{
+			Class: "sticky -top-px bg-background text-lg",
+		}) {
+			@table.Head() {
+				Available Players
 			}
-			@form.Item() {
-				@form.Label() {
-					Team Name
-				}
-				@editNameInput("")
-				@dialog.Close() {
-					@editSaveButton("")
+		}
+		@table.Body() {
+			for _, player := range availablePlayers {
+				@table.Row() {
+					@table.Cell(table.CellProps{
+						Class: "flex flex-row justify-between items-center",
+					}) {
+						<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
+						@button.Button(button.Props{
+							Class:    "hover:text-foreground hover:bg-background",
+							Variant:  button.VariantGhost,
+							Disabled: len(team.Players) >= 2,
+							Attributes: utils.Attrs(
+								utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?assign=%s", team.ID, player.ID)),
+							),
+						}) {
+							@icon.CirclePlus()
+						}
+					}
 				}
 			}
-			@emptyTeamListing()
 		}
 	}
-}
-
-templ emptyTeamListing() {
-	<div id="team-listing"></div>
-}
-
-templ teamListing(teamID string, available, onThisOne []players.Player) {
-	<div id="team-listing" class="max-h-[60svh] flex flex-col space-y-4">
-		<div class="h-1/3 grow overflow-y-auto">
-			@table.Table() {
-				@table.Header(table.HeaderProps{
-					Class: "sticky -top-px bg-background",
-				}) {
-					@table.Head() {
-						Players
-					}
-				}
-				@table.Body() {
-					for _, player := range onThisOne {
-						@table.Row() {
-							@table.Cell(table.CellProps{
-								Class: "flex flex-row justify-between items-center",
-							}) {
-								<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
-								@button.Button(button.Props{
-									Class:   "text-destructive hover:text-destructive hover:bg-background",
-									Variant: button.VariantGhost,
-									Attributes: utils.Attrs(
-										utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?unassign=%s", teamID, player.ID)),
-									),
-								}) {
-									@icon.CircleMinus()
-								}
-							}
-						}
-					}
-				}
-			}
-		</div>
-		<div class="h-2/3 grow overflow-y-auto">
-			@table.Table() {
-				@table.Header(table.HeaderProps{
-					Class: "sticky -top-px bg-background",
-				}) {
-					@table.Head() {
-						Available Players
-					}
-				}
-				@table.Body() {
-					for _, player := range available {
-						@table.Row() {
-							@table.Cell(table.CellProps{
-								Class: "flex flex-row justify-between items-center",
-							}) {
-								<div class="text-sm font-medium text-foreground">{ player.Name() }</div>
-								@button.Button(button.Props{
-									Class:    "hover:text-foreground hover:bg-background",
-									Variant:  button.VariantGhost,
-									Disabled: len(onThisOne) >= 2,
-									Attributes: utils.Attrs(
-										utils.DataOnClick(dstar.SendPutf("/admin/teams/%s?assign=%s", teamID, player.ID)),
-									),
-								}) {
-									@icon.CirclePlus()
-								}
-							}
-						}
-					}
-				}
-			}
-		</div>
-	</div>
 }
 
 templ confirmDeleteTitle(teamName string) {

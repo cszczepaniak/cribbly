@@ -87,7 +87,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	}
 	teamsRouter := adminRouter.Group("/teams")
 	teamsRouter.Handle("GET /", th.Index)
-	teamsRouter.Handle("GET /edit/{id}", th.Edit)
+	teamsRouter.Handle("GET /{id}", th.EditPage)
 	teamsRouter.Handle("GET /delete/{id}", th.ConfirmDelete)
 	teamsRouter.Handle("POST /", th.Create)
 	teamsRouter.Handle("POST /generate", th.Generate)

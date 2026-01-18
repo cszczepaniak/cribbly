@@ -42,6 +42,7 @@
     --text-7xl: 4.5rem;
     --text-7xl--line-height: 1;
     --font-weight-thin: 100;
+    --font-weight-light: 300;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
@@ -273,6 +274,9 @@
   }
   .z-\[9999\] {
     z-index: 9999;
+  }
+  .col-span-2 {
+    grid-column: span 2 / span 2;
   }
   .container {
     width: 100%;
@@ -522,6 +526,9 @@
   .w-auto {
     width: auto;
   }
+  .w-fit {
+    width: fit-content;
+  }
   .w-full {
     width: 100%;
   }
@@ -536,6 +543,18 @@
   }
   .min-w-0 {
     min-width: calc(var(--spacing) * 0);
+  }
+  .min-w-1 {
+    min-width: calc(var(--spacing) * 1);
+  }
+  .min-w-1\/2 {
+    min-width: calc(1/2 * 100%);
+  }
+  .min-w-32 {
+    min-width: calc(var(--spacing) * 32);
+  }
+  .min-w-64 {
+    min-width: calc(var(--spacing) * 64);
   }
   .flex-1 {
     flex: 1;
@@ -624,8 +643,14 @@
   .columns-4 {
     columns: 4;
   }
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .flex-col {
     flex-direction: column;
@@ -638,6 +663,9 @@
   }
   .flex-wrap {
     flex-wrap: wrap;
+  }
+  .place-items-center {
+    place-items: center;
   }
   .content-stretch {
     align-content: stretch;
@@ -709,6 +737,9 @@
   }
   .gap-x-2 {
     column-gap: calc(var(--spacing) * 2);
+  }
+  .gap-x-4 {
+    column-gap: calc(var(--spacing) * 4);
   }
   .gap-x-6 {
     column-gap: calc(var(--spacing) * 6);
@@ -854,6 +885,9 @@
   .object-top-right {
     object-position: right top;
   }
+  .p-0 {
+    padding: calc(var(--spacing) * 0);
+  }
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
@@ -901,6 +935,9 @@
   }
   .pb-4 {
     padding-bottom: calc(var(--spacing) * 4);
+  }
+  .pl-0 {
+    padding-left: calc(var(--spacing) * 0);
   }
   .text-center {
     text-align: center;
@@ -957,6 +994,10 @@
   .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
+  }
+  .font-light {
+    --tw-font-weight: var(--font-weight-light);
+    font-weight: var(--font-weight-light);
   }
   .font-medium {
     --tw-font-weight: var(--font-weight-medium);
@@ -1454,6 +1495,11 @@
   .disabled\:opacity-50 {
     &:disabled {
       opacity: 50%;
+    }
+  }
+  .has-\[\>svg\]\:px-0 {
+    &:has(>svg) {
+      padding-inline: calc(var(--spacing) * 0);
     }
   }
   .has-\[\>svg\]\:px-2\.5 {

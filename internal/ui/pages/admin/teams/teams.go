@@ -35,33 +35,19 @@ func (h TeamsHandler) Index(w http.ResponseWriter, r *http.Request) error {
 	return index(teams, playersByTeam).Render(r.Context(), w)
 }
 
-func (h TeamsHandler) Edit(w http.ResponseWriter, r *http.Request) error {
+func (h TeamsHandler) EditPage(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	team, err := h.TeamRepo.Get(r.Context(), id)
+	team, err := h.TeamService.GetTeam(r.Context(), id)
 	if err != nil {
 		return err
 	}
 
-	availablePlayers, err := h.PlayerRepo.GetFreeAgents(r.Context())
+	available, err := h.PlayerRepo.GetFreeAgents(r.Context())
 	if err != nil {
 		return err
 	}
 
-	onThisTeam, err := h.PlayerRepo.GetForTeam(r.Context(), id)
-	if err != nil {
-		return err
-	}
-
-	sse := datastar.NewSSE(w, r)
-	err = sse.PatchElementTempl(editNameInput(team.Name))
-	if err != nil {
-		return err
-	}
-	err = sse.PatchElementTempl(editSaveButton(id))
-	if err != nil {
-		return err
-	}
-	return sse.PatchElementTempl(teamListing(id, availablePlayers, onThisTeam))
+	return editTeam(team, available).Render(r.Context(), w)
 }
 
 func (h TeamsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) error {
@@ -180,26 +166,13 @@ func (h TeamsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 			return err
 		}
 
-		onThisTeam, err := h.PlayerRepo.GetForTeam(r.Context(), teamID)
-		if err != nil {
-			return err
-		}
-
 		available, err := h.PlayerRepo.GetFreeAgents(r.Context())
 		if err != nil {
 			return err
 		}
 
 		sse := datastar.NewSSE(w, r)
-		err = sse.PatchElementTempl(teamName(teamID, team.Name))
-		if err != nil {
-			return err
-		}
-		err = sse.PatchElementTempl(teamPlayersList(teamID, onThisTeam))
-		if err != nil {
-			return err
-		}
-		return sse.PatchElementTempl(teamListing(teamID, available, onThisTeam))
+		return sse.PatchElementTempl(editTeamDetails(team, available))
 	}
 
 	var sigs struct {
