@@ -14,6 +14,7 @@ import (
 type Division struct {
 	ID   string
 	Name string
+	Size int
 }
 
 type Repository struct {
@@ -37,6 +38,7 @@ func (s Repository) Init(ctx context.Context) error {
 		Columns(
 			column.VarChar("ID", 36).PrimaryKey(),
 			column.VarChar("Name", 255),
+			column.TinyInt("Size"), // 4 or 6
 		).
 		ExecContext(ctx, s.DB)
 	return err
@@ -49,8 +51,8 @@ func (s Repository) Create(ctx context.Context) (Division, error) {
 	}
 
 	_, err := s.Builder.InsertIntoTable("Divisions").
-		Fields("ID", "Name").
-		Values(division.ID, division.Name).
+		Fields("ID", "Name", "Size").
+		Values(division.ID, division.Name, 4).
 		ExecContext(ctx, s.DB)
 	if err != nil {
 		return Division{}, err
@@ -74,9 +76,17 @@ func (s Repository) Rename(ctx context.Context, id, newName string) error {
 	return err
 }
 
+func (s Repository) UpdateSize(ctx context.Context, id string, size int) error {
+	_, err := s.Builder.UpdateTable("Divisions").
+		SetFieldTo("Size", size).
+		Where(filter.Equals("ID", id)).
+		ExecContext(ctx, s.DB)
+	return err
+}
+
 func (s Repository) Get(ctx context.Context, id string) (Division, error) {
 	row, err := s.Builder.SelectFrom(table.Named("Divisions")).
-		Columns("ID", "Name").
+		Columns("ID", "Name", "Size").
 		Where(filter.Equals("ID", id)).
 		QueryRowContext(ctx, s.DB)
 	if err != nil {
@@ -84,7 +94,7 @@ func (s Repository) Get(ctx context.Context, id string) (Division, error) {
 	}
 
 	var division Division
-	err = row.Scan(&division.ID, &division.Name)
+	err = row.Scan(&division.ID, &division.Name, &division.Size)
 	if err != nil {
 		return Division{}, err
 	}
@@ -94,7 +104,7 @@ func (s Repository) Get(ctx context.Context, id string) (Division, error) {
 
 func (s Repository) GetAll(ctx context.Context) ([]Division, error) {
 	rows, err := s.Builder.SelectFrom(table.Named("Divisions")).
-		Columns("ID", "Name").
+		Columns("ID", "Name", "Size").
 		QueryContext(ctx, s.DB)
 	if err != nil {
 		return nil, err
@@ -103,13 +113,13 @@ func (s Repository) GetAll(ctx context.Context) ([]Division, error) {
 
 	var divisions []Division
 	for rows.Next() {
-		var t Division
-		err := rows.Scan(&t.ID, &t.Name)
+		var d Division
+		err := rows.Scan(&d.ID, &d.Name, &d.Size)
 		if err != nil {
 			return nil, err
 		}
 
-		divisions = append(divisions, t)
+		divisions = append(divisions, d)
 	}
 
 	if err := rows.Err(); err != nil {
