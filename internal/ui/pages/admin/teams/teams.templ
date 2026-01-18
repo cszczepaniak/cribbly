@@ -110,7 +110,7 @@ templ editTeam(team teamsservice.Team, availablePlayers []players.Player) {
 
 templ editTeamDetails(team teamsservice.Team, availablePlayers []players.Player) {
 	<div id="edit-team-details">
-		<h2 class="text-xl text-foreground my-4">
+		<h2 class="text-3xl text-foreground my-4">
 			@teamName(team.ID, team.Name)
 		</h2>
 		@playersOnTeam(team, availablePlayers)
