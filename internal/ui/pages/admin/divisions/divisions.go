@@ -132,27 +132,13 @@ func (h DivisionsHandler) SaveSize(w http.ResponseWriter, r *http.Request) error
 }
 
 func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
-	_, err := h.DivisionRepo.Create(r.Context())
+	division, err := h.DivisionRepo.Create(r.Context())
 	if err != nil {
 		return err
-	}
-
-	divisions, err := h.DivisionRepo.GetAll(r.Context())
-	if err != nil {
-		return err
-	}
-
-	teamsByDivision := make(map[string][]teams.Team, len(divisions))
-	for _, division := range divisions {
-		teams, err := h.TeamRepo.GetForDivision(r.Context(), division.ID)
-		if err != nil {
-			return err
-		}
-		teamsByDivision[division.ID] = teams
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(divisionGrid(divisions, teamsByDivision))
+	return sse.Redirectf("/admin/divisions/%s", division.ID)
 }
 
 func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
