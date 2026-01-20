@@ -16,6 +16,8 @@ import (
 	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 )
 
 templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
@@ -30,6 +32,7 @@ templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
 			Create New Division
 		}
 		@divisionGrid(ds, teamsByDivision)
+		@devTools()
 		@confirmDeleteDialog()
 	}
 }
@@ -315,6 +318,36 @@ templ confirmDeleteDialog() {
 			@confirmDeleteTitle("")
 			@dialog.Close() {
 				@confirmDeleteButton("")
+			}
+		}
+	}
+}
+
+templ devTools() {
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				Dev Tools
+			}
+			@accordion.Content() {
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendPostf("/admin/divisions/generate")),
+					),
+				}) {
+					Generate Divisions
+				}
+				@separator.Separator()
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendDeletef("/admin/divisions")),
+					),
+					Variant: button.VariantDestructive,
+				}) {
+					Delete All Divisions
+				}
 			}
 		}
 	}

@@ -4,11 +4,13 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/jaswdr/faker/v2"
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 type DivisionsHandler struct {
@@ -141,6 +143,48 @@ func (h DivisionsHandler) Create(w http.ResponseWriter, r *http.Request) error {
 	return sse.Redirectf("/admin/divisions/%s", division.ID)
 }
 
+func (h DivisionsHandler) Generate(w http.ResponseWriter, r *http.Request) error {
+	allTeams, err := h.TeamRepo.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	if len(allTeams)%2 != 0 {
+		return components.ShowErrorToast(w, r, "Cannot generate divisions with an odd number of teams.")
+	}
+
+	fake := faker.New()
+	for len(allTeams) > 0 {
+		division, err := h.DivisionRepo.Create(r.Context())
+		if err != nil {
+			return err
+		}
+
+		err = h.DivisionRepo.Rename(r.Context(), division.ID, fake.ProgrammingLanguage().Name())
+		if err != nil {
+			return err
+		}
+
+		nForThisDivision := 4
+		if len(allTeams) == 6 {
+			nForThisDivision = 6
+		}
+
+		forDivision := allTeams[:nForThisDivision]
+		allTeams = allTeams[nForThisDivision:]
+
+		for _, team := range forDivision {
+			err := h.TeamRepo.AssignToDivision(r.Context(), team.ID, division.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.Redirect("/admin/divisions")
+}
+
 func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 	division, err := h.DivisionRepo.Get(r.Context(), id)
@@ -161,6 +205,36 @@ func (h DivisionsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) 
 	err := h.DivisionRepo.Delete(r.Context(), id)
 	if err != nil {
 		return err
+	}
+
+	sse := datastar.NewSSE(w, r)
+	return sse.Redirect("/admin/divisions")
+}
+
+func (h DivisionsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
+	// TODO: do this in a transaction
+	divisions, err := h.DivisionRepo.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	for _, d := range divisions {
+		division, err := h.DivisionService.Get(r.Context(), d.ID)
+		if err != nil {
+			return err
+		}
+
+		for _, t := range division.Teams {
+			err := h.TeamRepo.UnassignFromDivision(r.Context(), t.ID)
+			if err != nil {
+				return err
+			}
+		}
+
+		err = h.DivisionRepo.Delete(r.Context(), d.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	sse := datastar.NewSSE(w, r)
