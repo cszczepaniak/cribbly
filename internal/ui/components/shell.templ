@@ -6,6 +6,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
 
 templ Shell() {
 	<!DOCTYPE html>
@@ -20,8 +21,9 @@ templ Shell() {
 			@dialog.Script()
 			@selectbox.Script()
 			@popover.Script()
+			@toast.Script()
 		</head>
-		<body>
+		<body id="body">
 			<header
 				class="bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex
 				flex-row justify-between"
@@ -42,4 +44,14 @@ templ Shell() {
 			{ children... }
 		</body>
 	</html>
+}
+
+templ errorToast(message string) {
+	@toast.Toast(toast.Props{
+		Title:       "Error",
+		Description: message,
+		Variant:     toast.VariantError,
+		Position:    toast.PositionTopCenter,
+		Icon:        true,
+	})
 }

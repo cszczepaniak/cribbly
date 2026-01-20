@@ -14,6 +14,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
 
 func Shell() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -56,7 +57,11 @@ func Shell() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><body><header class=\"bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex\n\t\t\t\tflex-row justify-between\"><a href=\"/\">Crib<span class=\"text-red-500\">b</span><span class=\"text-blue-600\">l</span><span class=\"text-green-500\">y</span></a>")
+		templ_7745c5c3_Err = toast.Script().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><body id=\"body\"><header class=\"bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex\n\t\t\t\tflex-row justify-between\"><a href=\"/\">Crib<span class=\"text-red-500\">b</span><span class=\"text-blue-600\">l</span><span class=\"text-green-500\">y</span></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -95,6 +100,41 @@ func Shell() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func errorToast(message string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = toast.Toast(toast.Props{
+			Title:       "Error",
+			Description: message,
+			Variant:     toast.VariantError,
+			Position:    toast.PositionTopCenter,
+			Icon:        true,
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
