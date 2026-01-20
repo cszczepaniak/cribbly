@@ -1,11 +1,13 @@
 package games
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
 	"iter"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/starfederation/datastar-go/datastar"
@@ -278,6 +280,14 @@ func (h Handler) getAllGames(ctx context.Context) ([]game, error) {
 		}
 		daGames = append(daGames, g)
 	}
+
+	slices.SortFunc(daGames, func(a, b game) int {
+		return cmp.Or(
+			cmp.Compare(a.division.Name, b.division.Name),
+			cmp.Compare(a.team1.Name, b.team1.Name),
+			cmp.Compare(a.team2.Name, b.team2.Name),
+		)
+	})
 
 	return daGames, nil
 }
