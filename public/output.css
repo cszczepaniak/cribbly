@@ -326,6 +326,9 @@
   .mx-auto {
     margin-inline: auto;
   }
+  .my-2 {
+    margin-block: calc(var(--spacing) * 2);
+  }
   .my-4 {
     margin-block: calc(var(--spacing) * 4);
   }
@@ -334,6 +337,9 @@
   }
   .-mt-1 {
     margin-top: calc(var(--spacing) * -1);
+  }
+  .-mt-2 {
+    margin-top: calc(var(--spacing) * -2);
   }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
@@ -358,6 +364,9 @@
   }
   .mr-4 {
     margin-right: calc(var(--spacing) * 4);
+  }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
   }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);

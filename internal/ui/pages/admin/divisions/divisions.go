@@ -58,7 +58,7 @@ func (h DivisionsHandler) EditName(w http.ResponseWriter, r *http.Request) error
 	}
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(editDivisionInput(division))
+	return sse.PatchElementTempl(editDivisionInput(division, ""))
 }
 
 func (h DivisionsHandler) SaveName(w http.ResponseWriter, r *http.Request) error {
@@ -70,21 +70,21 @@ func (h DivisionsHandler) SaveName(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	id := r.PathValue("id")
-	// TODO: better display for validation errors
+	division, err := h.DivisionService.Get(r.Context(), r.PathValue("id"))
+	if err != nil {
+		return err
+	}
+
 	if signals.Name == "" {
-		return errors.New("division name can't be empty")
+		sse := datastar.NewSSE(w, r)
+		return sse.PatchElementTempl(editDivisionInput(division, "Division name can't be empty."))
 	}
 
-	err = h.DivisionRepo.Rename(r.Context(), id, signals.Name)
+	err = h.DivisionRepo.Rename(r.Context(), division.ID, signals.Name)
 	if err != nil {
 		return err
 	}
-
-	division, err := h.DivisionService.Get(r.Context(), id)
-	if err != nil {
-		return err
-	}
+	division.Name = signals.Name
 
 	sse := datastar.NewSSE(w, r)
 	return sse.PatchElementTempl(editDivisionTitle(division))

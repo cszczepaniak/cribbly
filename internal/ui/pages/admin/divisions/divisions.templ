@@ -143,26 +143,38 @@ templ editDivisionTitle(division divisionservice.Division) {
 	</h2>
 }
 
-templ editDivisionInput(division divisionservice.Division) {
-	<div id="division-name" class="flex flex-row items-center">
-		<div class="w-fit mt-3 mb-4 -ml-3">
-			@input.Input(input.Props{
-				Value: division.Name,
-				Class: "h-fit md:text-3xl",
+templ editDivisionInput(division divisionservice.Division, errMsg string) {
+	<div id="division-name">
+		<div class="flex flex-row items-center">
+			<div class="w-fit mt-3 mb-4 -ml-3">
+				@input.Input(input.Props{
+					Value: division.Name,
+					Class: "h-fit md:text-3xl p-2",
+					Attributes: utils.Attrs(
+						utils.DataBind("name"),
+					),
+					HasError: errMsg != "",
+				})
+			</div>
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Size:    button.SizeLg,
 				Attributes: utils.Attrs(
-					utils.DataBind("name"),
+					utils.DataOnClick(dstar.SendPutf("/admin/divisions/%s/savename", division.ID)),
 				),
-			})
+			}) {
+				@icon.Check()
+			}
 		</div>
-		@button.Button(button.Props{
-			Variant: button.VariantGhost,
-			Size:    button.SizeLg,
-			Attributes: utils.Attrs(
-				utils.DataOnClick(dstar.SendPutf("/admin/divisions/%s/savename", division.ID)),
-			),
-		}) {
-			@icon.Check()
-		}
+		<div
+			id="login-error"
+			class="mb-4 -mt-2"
+			if errMsg == "" {
+				hidden
+			}
+		>
+			<p class="text-destructive italic">{ errMsg }</p>
+		</div>
 	</div>
 }
 
