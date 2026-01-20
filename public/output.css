@@ -603,6 +603,9 @@
   .w-full {
     width: 100%;
   }
+  .max-w-16 {
+    max-width: calc(var(--spacing) * 16);
+  }
   .max-w-\[calc\(100\%-2rem\)\] {
     max-width: calc(100% - 2rem);
   }

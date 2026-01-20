@@ -122,7 +122,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	gamesRouter.Handle("GET /", gh.Index)
 	gamesRouter.Handle("POST /generate", gh.Generate)
 	gamesRouter.Handle("DELETE /", gh.DeleteAll)
-	gamesRouter.Handle("PUT /scores/edit", gh.Edit)
+	gamesRouter.Handle("GET /scores/edit", gh.Edit)
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
 
 	uh := users.UsersHandler{

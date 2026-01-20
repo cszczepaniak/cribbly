@@ -9,6 +9,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 )
 
 templ index(games []game) {
@@ -49,30 +50,92 @@ templ index(games []game) {
 templ gameList(games []game) {
 	@table.Body(table.BodyProps{
 		ID: "game-list",
+		Attributes: utils.Attrs(
+			utils.DataMustMarshalSignals(gamesSignal{
+				Games: games,
+			}),
+		),
 	}) {
 		for _, game := range games {
-			@table.Row() {
-				@table.Cell() {
-					{ game.division.Name }
-				}
-				@table.Cell() {
-					{ game.team1.Name }
-				}
-				@table.Cell(table.CellProps{
-					Class: "flex flex-row items-center",
-					ID:    scoreCellID(game.gameID, game.team1.ID),
-				}) {
-					@displayScore(game.gameID, game.team1.ID, game.team1Score)
-				}
-				@table.Cell() {
-					{ game.team2.Name }
-				}
-				@table.Cell(table.CellProps{
-					Class: "flex flex-row items-center",
-					ID:    scoreCellID(game.gameID, game.team2.ID),
-				}) {
-					@displayScore(game.gameID, game.team2.ID, game.team2Score)
-				}
+			@gameRow(game)
+		}
+	}
+}
+
+templ gameRow(game game) {
+	@table.Row(table.RowProps{
+		ID: "game-" + game.GameID,
+	}) {
+		@table.Cell() {
+			{ game.DivisionName }
+		}
+		@table.Cell() {
+			{ game.Team1Name }
+		}
+		@table.Cell() {
+			{ fmt.Sprint(game.Team1Score) }
+		}
+		@table.Cell() {
+			{ game.Team2Name }
+		}
+		@table.Cell() {
+			{ fmt.Sprint(game.Team2Score) }
+		}
+		@table.Cell() {
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: utils.Attrs(
+					utils.DataOnClick(dstar.SendGetf("/admin/games/scores/edit?gameID=%s", game.GameID)),
+				),
+			}) {
+				@icon.Pencil()
+			}
+		}
+	}
+}
+
+templ gameRowEditing(game game) {
+	@table.Row(table.RowProps{
+		ID: "game-" + game.GameID,
+	}) {
+		@table.Cell() {
+			{ game.DivisionName }
+		}
+		@table.Cell() {
+			{ game.Team1Name }
+		}
+		@table.Cell() {
+			@input.Input(input.Props{
+				Value: fmt.Sprint(game.Team1Score),
+				Attributes: utils.Attrs(
+					utils.DataBind("team1Score"),
+				),
+				Class: "max-w-16",
+			})
+		}
+		@table.Cell() {
+			{ game.Team2Name }
+		}
+		@table.Cell() {
+			@input.Input(input.Props{
+				Value: fmt.Sprint(game.Team2Score),
+				Attributes: utils.Attrs(
+					utils.DataBind("team2Score"),
+				),
+				Class: "max-w-16",
+			})
+		}
+		@table.Cell() {
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: utils.Attrs(
+					utils.DataOnClick(
+						dstar.SendPutf("/admin/games/scores/save?gameID=%s",
+							game.GameID,
+						)),
+				),
+			}) {
+				@icon.Check()
 			}
 		}
 	}

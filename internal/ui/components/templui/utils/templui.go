@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"time"
@@ -69,6 +70,18 @@ func DataOn(event, action string) Attr {
 
 func DataOnClick(action string) Attr {
 	return DataOn("click", action)
+}
+
+func DataMustMarshalSignals(val any) Attr {
+	bs, err := json.Marshal(val)
+	if err != nil {
+		panic(err)
+	}
+
+	return Attr{
+		Key:   "data-signals",
+		Value: string(bs),
+	}
 }
 
 func Attrs(attrs ...Attr) templ.Attributes {

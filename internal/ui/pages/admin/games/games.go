@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"errors"
-	"fmt"
 	"iter"
 	"net/http"
 	"slices"
@@ -15,6 +14,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 type Handler struct {
@@ -38,7 +38,7 @@ func (h Handler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return index(nil).Render(r.Context(), w)
+	return datastar.NewSSE(w, r).Redirect("/admin/games")
 }
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
@@ -56,71 +56,101 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 	return sse.PatchElementTempl(gameList(gs))
 }
 
-type signals struct {
-	Score string `json:"score"`
+// gameRowInfo is used to add a signal to each row so that we don't have to re-query for all of this
+// information on subsequent requests.
+type gameRowInfo struct {
+	DivisionName string `json:"divisionName"`
+	Team1ID      string `json:"team1ID"`
+	Team1Name    string `json:"team1Name"`
+	Team2Name    string `json:"team2Name"`
+	Team2ID      string `json:"team2ID"`
+}
+
+type gamesSignal struct {
+	Games []game `json:"games"`
 }
 
 func (h Handler) Edit(w http.ResponseWriter, r *http.Request) error {
 	gameID := r.URL.Query().Get("gameID")
-	teamID := r.URL.Query().Get("teamID")
 
-	score, err := h.GameRepo.GetScore(r.Context(), gameID, teamID)
+	var sigs gamesSignal
+	err := datastar.ReadSignals(r, &sigs)
 	if err != nil {
 		return err
 	}
+
+	idx := slices.IndexFunc(sigs.Games, func(g game) bool { return g.GameID == gameID })
+	game := sigs.Games[idx]
 
 	sse := datastar.NewSSE(w, r)
-	err = sse.MarshalAndPatchSignals(signals{Score: fmt.Sprint(score)})
-	if err != nil {
-		return err
-	}
-
-	return sse.PatchElementTempl(
-		editScore(gameID, teamID, score),
-		datastar.WithSelectorID(scoreCellID(gameID, teamID)),
-		datastar.WithModeInner(),
-	)
+	return sse.PatchElementTempl(gameRowEditing(game))
 }
 
 func (h Handler) Save(w http.ResponseWriter, r *http.Request) error {
 	gameID := r.URL.Query().Get("gameID")
-	teamID := r.URL.Query().Get("teamID")
 
-	var signals signals
+	var signals struct {
+		gamesSignal
+		Team1Score string `json:"team1Score"`
+		Team2Score string `json:"team2Score"`
+	}
+
 	err := datastar.ReadSignals(r, &signals)
 	if err != nil {
 		return err
 	}
 
-	score, err := strconv.Atoi(signals.Score)
+	team1Score, err := strconv.Atoi(signals.Team1Score)
 	if err != nil {
 		return err
 	}
 
-	err = h.GameRepo.UpdateScore(r.Context(), gameID, teamID, score)
+	team2Score, err := strconv.Atoi(signals.Team2Score)
 	if err != nil {
 		return err
 	}
+
+	var isReset bool
+	var losingScore int
+	switch {
+	case team1Score == 0 && team2Score == 0:
+		isReset = true
+	case team1Score == 121 && team2Score != 121:
+		losingScore = team2Score
+	case team2Score == 121 && team1Score != 121:
+		losingScore = team1Score
+	default:
+		return components.ShowErrorToast(w, r, "Either both scores must be 0 or one score must be 121.")
+	}
+
+	if !isReset && (losingScore >= 121 || losingScore <= 0) {
+		return components.ShowErrorToast(w, r, "The losing score must be between 0 and 121.")
+	}
+
+	idx := slices.IndexFunc(signals.Games, func(g game) bool { return g.GameID == gameID })
+	game := signals.Games[idx]
+
+	err = h.GameRepo.UpdateScores(r.Context(), gameID, game.Team1ID, team1Score, game.Team2ID, team2Score)
+	if err != nil {
+		return err
+	}
+
+	game.Team1Score = team1Score
+	game.Team2Score = team2Score
 
 	sse := datastar.NewSSE(w, r)
-	return sse.PatchElementTempl(
-		displayScore(gameID, teamID, score),
-		datastar.WithSelectorID(scoreCellID(gameID, teamID)),
-		datastar.WithModeInner(),
-	)
-}
-
-func scoreCellID(gameID, teamID string) string {
-	return fmt.Sprintf("score-%s-%s", gameID, teamID)
+	return sse.PatchElementTempl(gameRow(game))
 }
 
 type game struct {
-	gameID     string
-	division   divisions.Division
-	team1      teams.Team
-	team1Score int
-	team2      teams.Team
-	team2Score int
+	GameID       string
+	DivisionName string
+	Team1ID      string
+	Team1Name    string
+	Team1Score   int
+	Team2ID      string
+	Team2Name    string
+	Team2Score   int
 }
 
 func (h Handler) generatePrelimGames(ctx context.Context) error {
@@ -271,21 +301,23 @@ func (h Handler) getAllGames(ctx context.Context) ([]game, error) {
 		}
 
 		g := game{
-			gameID:     gameID,
-			division:   division,
-			team1:      team1,
-			team1Score: scores[0].Score,
-			team2:      team2,
-			team2Score: scores[1].Score,
+			GameID:       gameID,
+			DivisionName: division.Name,
+			Team1ID:      team1.ID,
+			Team1Name:    team1.Name,
+			Team1Score:   scores[0].Score,
+			Team2ID:      team2.ID,
+			Team2Name:    team2.Name,
+			Team2Score:   scores[1].Score,
 		}
 		daGames = append(daGames, g)
 	}
 
 	slices.SortFunc(daGames, func(a, b game) int {
 		return cmp.Or(
-			cmp.Compare(a.division.Name, b.division.Name),
-			cmp.Compare(a.team1.Name, b.team1.Name),
-			cmp.Compare(a.team2.Name, b.team2.Name),
+			cmp.Compare(a.DivisionName, b.DivisionName),
+			cmp.Compare(a.Team1Name, b.Team1Name),
+			cmp.Compare(a.Team2Name, b.Team2Name),
 		)
 	})
 
