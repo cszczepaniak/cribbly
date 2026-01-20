@@ -124,6 +124,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	gamesRouter.Handle("DELETE /", gh.DeleteAll)
 	gamesRouter.Handle("GET /scores/edit", gh.Edit)
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
+	gamesRouter.Handle("PUT /scores/reset", gh.ResetScores)
 
 	uh := users.UsersHandler{
 		UserRepo: cfg.UserRepo,

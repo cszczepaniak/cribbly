@@ -142,6 +142,28 @@ func (h Handler) Save(w http.ResponseWriter, r *http.Request) error {
 	return sse.PatchElementTempl(gameRow(game))
 }
 
+func (h Handler) ResetScores(w http.ResponseWriter, r *http.Request) error {
+	gameID := r.URL.Query().Get("gameID")
+
+	var signals gamesSignal
+	err := datastar.ReadSignals(r, &signals)
+	if err != nil {
+		return err
+	}
+
+	idx := slices.IndexFunc(signals.Games, func(g game) bool { return g.GameID == gameID })
+	game := signals.Games[idx]
+
+	err = h.GameRepo.UpdateScores(r.Context(), gameID, game.Team1ID, 0, game.Team2ID, 0)
+	if err != nil {
+		return err
+	}
+	game.Team1Score = 0
+	game.Team2Score = 0
+
+	return datastar.NewSSE(w, r).PatchElementTempl(gameRow(game))
+}
+
 type game struct {
 	GameID       string
 	DivisionName string

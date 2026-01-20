@@ -90,6 +90,14 @@ templ gameRow(game game) {
 			}) {
 				@icon.Pencil()
 			}
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: utils.Attrs(
+					utils.DataOnClick(dstar.SendPutf("/admin/games/scores/reset?gameID=%s", game.GameID)),
+				),
+			}) {
+				@icon.RotateCcw()
+			}
 		}
 	}
 }
