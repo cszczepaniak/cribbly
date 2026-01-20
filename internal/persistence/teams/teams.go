@@ -91,7 +91,7 @@ func (s Repository) Rename(ctx context.Context, id, newName string) error {
 
 func (s Repository) Get(ctx context.Context, id string) (Team, error) {
 	row, err := s.Builder.SelectFrom(table.Named("Teams")).
-		Columns("ID", "Name").
+		Columns("ID", "Name", "DivisionID").
 		Where(filter.Equals("ID", id)).
 		QueryRowContext(ctx, s.DB)
 	if err != nil {
@@ -99,7 +99,7 @@ func (s Repository) Get(ctx context.Context, id string) (Team, error) {
 	}
 
 	var team Team
-	err = row.Scan(&team.ID, &team.Name)
+	err = row.Scan(&team.ID, &team.Name, &team.DivisionID)
 	if err != nil {
 		return Team{}, err
 	}
