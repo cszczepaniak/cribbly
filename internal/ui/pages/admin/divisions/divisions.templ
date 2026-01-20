@@ -223,6 +223,7 @@ templ editDivisionSize(division divisionservice.Division) {
 				Multiple: false,
 			}) {
 				@selectbox.Trigger(selectbox.TriggerProps{
+					Disabled: division.Size == 6 && len(division.Teams) > 4,
 					Attributes: utils.Attrs(
 						utils.DataBind("size"),
 						utils.DataOn("change", dstar.SendPutf("/admin/divisions/%s/savesize", division.ID)),

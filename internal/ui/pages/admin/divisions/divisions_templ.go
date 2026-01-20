@@ -985,6 +985,7 @@ func editDivisionSize(division divisionservice.Division) templ.Component {
 					return nil
 				})
 				templ_7745c5c3_Err = selectbox.Trigger(selectbox.TriggerProps{
+					Disabled: division.Size == 6 && len(division.Teams) > 4,
 					Attributes: utils.Attrs(
 						utils.DataBind("size"),
 						utils.DataOn("change", dstar.SendPutf("/admin/divisions/%s/savesize", division.ID)),
@@ -1218,7 +1219,7 @@ func availableTeamsTable(division divisionservice.Division, availableTeams []tea
 							var templ_7745c5c3_Var46 string
 							templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(team.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/divisions/divisions.templ`, Line: 272, Col: 66}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/divisions/divisions.templ`, Line: 273, Col: 66}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 							if templ_7745c5c3_Err != nil {
@@ -1330,7 +1331,7 @@ func confirmDeleteTitle(divisionName string) templ.Component {
 			var templ_7745c5c3_Var50 string
 			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(divisionName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/divisions/divisions.templ`, Line: 293, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/pages/admin/divisions/divisions.templ`, Line: 294, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 			if templ_7745c5c3_Err != nil {

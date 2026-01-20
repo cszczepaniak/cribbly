@@ -109,6 +109,9 @@ func (h DivisionsHandler) SaveSize(w http.ResponseWriter, r *http.Request) error
 		if division.Size == 4 {
 			return nil
 		}
+		if len(division.Teams) > 4 {
+			return errors.New("cannot decrease division size below the number of teams it has")
+		}
 		division.Size = 4
 	case "6":
 		if division.Size == 6 {
