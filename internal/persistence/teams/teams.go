@@ -99,10 +99,12 @@ func (s Repository) Get(ctx context.Context, id string) (Team, error) {
 	}
 
 	var team Team
-	err = row.Scan(&team.ID, &team.Name, &team.DivisionID)
+	var divisionID sql.Null[string]
+	err = row.Scan(&team.ID, &team.Name, &divisionID)
 	if err != nil {
 		return Team{}, err
 	}
+	team.DivisionID = divisionID.V
 
 	return team, nil
 }
