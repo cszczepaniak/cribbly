@@ -500,7 +500,7 @@ func standingsItems(ss []games.Standing) templ.Component {
 			templ_7745c5c3_Err = table.Row(table.RowProps{
 				Class: utils.TwMerge(
 					"text-lg text-foreground",
-					utils.IfElse(i < 8, "bg-green-100", "bg-red-100"),
+					utils.IfElse(i < 16, "bg-green-100", "bg-red-100"),
 				),
 				Attributes: map[string]any{
 					"style": fmt.Sprintf("view-transition-name:%s", s.TeamID),
