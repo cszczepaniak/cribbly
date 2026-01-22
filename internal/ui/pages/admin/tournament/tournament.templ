@@ -1,0 +1,11 @@
+package tournament
+
+import (
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+)
+
+templ index() {
+	@admincomponents.Shell(admincomponents.Tournament) {
+		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
+	}
+}

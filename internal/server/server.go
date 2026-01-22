@@ -11,6 +11,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/profile"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/tournament"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
 	pubdiv "github.com/cszczepaniak/cribbly/internal/ui/pages/divisions"
 	pubgame "github.com/cszczepaniak/cribbly/internal/ui/pages/games"
@@ -125,6 +126,15 @@ func setupAdminRoutes(cfg Config, r *router) {
 	gamesRouter.Handle("GET /scores/edit", gh.Edit)
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
 	gamesRouter.Handle("PUT /scores/reset", gh.ResetScores)
+
+	tourneyHandler := tournament.Handler{
+		// TODO: maybe don't need all of these
+		DivisionRepo: cfg.DivisionRepo,
+		TeamRepo:     cfg.TeamRepo,
+		GameRepo:     cfg.GameRepo,
+	}
+	tourneyRouter := adminRouter.Group("/tournament")
+	tourneyRouter.Handle("GET /", tourneyHandler.Index)
 
 	uh := users.UsersHandler{
 		UserRepo: cfg.UserRepo,
