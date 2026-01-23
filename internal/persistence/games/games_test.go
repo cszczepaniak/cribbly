@@ -1,6 +1,7 @@
 package games
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
@@ -124,4 +125,58 @@ func TestGames_UpdateScores_TeamsMustExistForGame(t *testing.T) {
 		"not a team",
 	).Scan(&exists)
 	assert.False(t, exists)
+}
+
+func TestTournamentGames(t *testing.T) {
+	n := &notifier.Notifier{}
+	db := sqlite.NewInMemoryForTest(t)
+	s := NewRepository(db, n)
+	require.NoError(t, s.Init(t.Context()))
+
+	err := s.InitializeTournament(t.Context(), 17)
+	assert.Error(t, err)
+
+	require.NoError(t, s.InitializeTournament(t.Context(), 32))
+
+	tourney, err := s.LoadTournament(t.Context())
+	require.NoError(t, err)
+
+	require.Len(t, tourney.Rounds, 5)
+	assert.Len(t, tourney.Rounds[0].Games, 16)
+	assert.Len(t, tourney.Rounds[1].Games, 8)
+	assert.Len(t, tourney.Rounds[2].Games, 4)
+	assert.Len(t, tourney.Rounds[3].Games, 2)
+	assert.Len(t, tourney.Rounds[4].Games, 1)
+
+	for i := range 32 {
+		require.NoError(t, s.PutTeamIntoTournamentGame(t.Context(), 0, i/2, fmt.Sprintf("team%d", i)))
+	}
+
+	tourney, err = s.LoadTournament(t.Context())
+	require.NoError(t, err)
+	require.Len(t, tourney.Rounds, 5)
+	for i, g := range tourney.Rounds[0].Games {
+		t1 := fmt.Sprintf("team%d", 2*i)
+		t2 := fmt.Sprintf("team%d", 2*i+1)
+		assert.Equal(t, t1, g.TeamIDs[0])
+		assert.Equal(t, t2, g.TeamIDs[1])
+
+		// Advance team1
+		require.NoError(t, s.SetTournamentGameWinner(t.Context(), g.Round, i, t1))
+		require.NoError(t, s.PutTeamIntoTournamentGame(t.Context(), g.Round+1, i/2, t1))
+	}
+
+	tourney, err = s.LoadTournament(t.Context())
+	require.NoError(t, err)
+	require.Len(t, tourney.Rounds, 5)
+	for i, g := range tourney.Rounds[0].Games {
+		t1 := fmt.Sprintf("team%d", 2*i)
+		assert.Equal(t, t1, g.Winner)
+	}
+	for i, g := range tourney.Rounds[1].Games {
+		t1 := fmt.Sprintf("team%d", 4*i)
+		t2 := fmt.Sprintf("team%d", 4*i+2)
+		assert.Equal(t, t1, g.TeamIDs[0])
+		assert.Equal(t, t2, g.TeamIDs[1])
+	}
 }

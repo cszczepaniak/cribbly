@@ -48,6 +48,20 @@ func (s Repository) Init(ctx context.Context) error {
 			
 			PRIMARY KEY (GameID, TeamID)
 		)`)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS TournamentGames (
+			Round   SMALLINT,
+			Idx     SMALLINT,
+			TeamID1 VARCHAR(36),
+			TeamID2 VARCHAR(36),
+			Winner  VARCHAR(36),
+			
+			PRIMARY KEY (Round, Idx)
+		)`)
+
 	return err
 }
 
@@ -64,6 +78,111 @@ func (s Repository) Create(ctx context.Context, teamID1, teamID2 string) (string
 	}
 
 	return id, nil
+}
+
+func (s Repository) InitializeTournament(ctx context.Context, numTeams int) error {
+	if (numTeams-1)&(numTeams) != 0 {
+		return errors.New("number of teams must be a power of two")
+	}
+
+	b := s.Builder.InsertIntoTable("TournamentGames").
+		Fields("Round", "Idx")
+
+	numGamesInRound := numTeams / 2
+	round := 0
+	for numGamesInRound > 0 {
+		for idx := range numGamesInRound {
+			b = b.Values(round, idx)
+		}
+		numGamesInRound /= 2
+		round++
+	}
+
+	_, err := b.ExecContext(ctx, s.DB)
+	return err
+}
+
+type TournamentGame struct {
+	Round   int
+	TeamIDs [2]string
+	Winner  string
+}
+
+type Round struct {
+	Games []TournamentGame
+}
+
+type Tournament struct {
+	Rounds []Round
+}
+
+func (s Repository) LoadTournament(ctx context.Context) (Tournament, error) {
+	rows, err := s.DB.QueryContext(
+		ctx,
+		// Ordering by DESC here allows us to allocate the exact size of the various arrays below.
+		`SELECT Round, Idx, TeamID1, TeamID2, Winner FROM TournamentGames
+		ORDER BY Round DESC, Idx DESC`,
+	)
+	if err != nil {
+		return Tournament{}, err
+	}
+
+	var tourney Tournament
+	for rows.Next() {
+		var round, idx int
+		var teamID1, teamID2, winner sql.Null[string]
+		err := rows.Scan(&round, &idx, &teamID1, &teamID2, &winner)
+		if err != nil {
+			return Tournament{}, err
+		}
+
+		if len(tourney.Rounds) == 0 {
+			tourney.Rounds = make([]Round, round+1)
+		}
+		thisRound := tourney.Rounds[round]
+		if len(thisRound.Games) == 0 {
+			thisRound.Games = make([]TournamentGame, idx+1)
+		}
+		thisGame := thisRound.Games[idx]
+		thisGame.TeamIDs = [2]string{teamID1.V, teamID2.V}
+		thisGame.Winner = winner.V
+		thisRound.Games[idx] = thisGame
+		tourney.Rounds[round] = thisRound
+	}
+
+	return tourney, nil
+}
+
+func (s Repository) PutTeamIntoTournamentGame(ctx context.Context, round, idx int, teamID string) error {
+	n, err := s.DB.ExecN(
+		ctx,
+		`UPDATE TournamentGames SET TeamID1 = ? 
+		WHERE Round = ? AND Idx = ? AND TeamID1 IS NULL`,
+		teamID, round, idx,
+	)
+	if err != nil {
+		return err
+	}
+	if n == 1 {
+		return nil
+	}
+
+	return s.DB.ExecOne(
+		ctx,
+		`UPDATE TournamentGames SET TeamID2 = ? 
+		WHERE Round = ? AND Idx = ? AND TeamID2 IS NULL`,
+		teamID, round, idx,
+	)
+}
+
+func (s Repository) SetTournamentGameWinner(ctx context.Context, round, idx int, winner string) error {
+	return s.DB.ExecVoid(
+		ctx,
+		`UPDATE TournamentGames SET Winner = ? WHERE Round = ? AND Idx = ?`,
+		winner,
+		round,
+		idx,
+	)
 }
 
 func (s Repository) UpdateScore(ctx context.Context, gameID, teamID string, score int) error {
