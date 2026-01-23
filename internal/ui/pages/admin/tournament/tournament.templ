@@ -2,10 +2,121 @@ package tournament
 
 import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/persistence/games"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 )
 
-templ index() {
+templ index(tourney games.Tournament) {
 	@admincomponents.Shell(admincomponents.Tournament) {
 		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
+		@tournamentControls()
+		@table.Table() {
+			@table.Header() {
+				@table.Head() {
+					Round
+				}
+				@table.Head() {
+					Team 1
+				}
+				@table.Head() {
+					Team 2
+				}
+				@table.Head() {
+					Winner
+				}
+			}
+			@table.Body() {
+				for i, round := range tourney.Rounds {
+					for _, game := range round.Games {
+						@table.Row() {
+							@table.Cell() {
+								{ fmt.Sprint(i+1) }
+							}
+							@table.Cell() {
+								{ game.TeamIDs[0] }
+							}
+							@table.Cell() {
+								{ game.TeamIDs[1] }
+							}
+							@table.Cell() {
+								{ game.Winner }
+							}
+						}
+					}
+				}
+			}
+		}
+		@devTools()
+	}
+}
+
+templ tournamentControls() {
+	@form.Item(form.ItemProps{
+		Class: "mb-4",
+	}) {
+		@form.Label() {
+			Number of Tournament Teams
+		}
+		@selectbox.SelectBox(selectbox.Props{
+			Multiple: false,
+		}) {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				Attributes: utils.Attrs(
+					utils.DataBind("size"),
+				),
+				Class: "w-fit",
+			}) {
+				@selectbox.Value()
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				@selectbox.Item(selectbox.ItemProps{
+					Value: "16",
+				}) {
+					16
+				}
+				@selectbox.Item(selectbox.ItemProps{
+					Value: "32",
+				}) {
+					32
+				}
+			}
+		}
+	}
+	@button.Button(button.Props{
+		Attributes: utils.Attrs(
+			utils.DataOnClick(dstar.SendPostf("/admin/tournament")),
+		),
+	}) {
+		Generate Tournament
+	}
+}
+
+templ devTools() {
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				Dev Tools
+			}
+			@accordion.Content() {
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendDeletef("/admin/tournament")),
+					),
+					Variant: button.VariantDestructive,
+				}) {
+					Delete Tournament
+				}
+			}
+		}
 	}
 }

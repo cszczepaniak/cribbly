@@ -102,6 +102,10 @@ func (s Repository) InitializeTournament(ctx context.Context, numTeams int) erro
 	return err
 }
 
+func (s Repository) DeleteTournament(ctx context.Context) error {
+	return s.DB.ExecVoid(ctx, `DELETE FROM TournamentGames`)
+}
+
 type TournamentGame struct {
 	Round   int
 	TeamIDs [2]string
