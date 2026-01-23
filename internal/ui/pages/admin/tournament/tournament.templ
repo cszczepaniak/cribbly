@@ -7,13 +7,13 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
-	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 )
 
-templ index(tourney games.Tournament) {
+templ index(rows []row) {
 	@admincomponents.Shell(admincomponents.Tournament) {
 		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
 		@tournamentControls()
@@ -33,21 +33,32 @@ templ index(tourney games.Tournament) {
 				}
 			}
 			@table.Body() {
-				for i, round := range tourney.Rounds {
-					for _, game := range round.Games {
-						@table.Row() {
-							@table.Cell() {
-								{ fmt.Sprint(i+1) }
-							}
-							@table.Cell() {
-								{ game.TeamIDs[0] }
-							}
-							@table.Cell() {
-								{ game.TeamIDs[1] }
-							}
-							@table.Cell() {
-								{ game.Winner }
-							}
+				for _, row := range rows {
+					@table.Row() {
+						@table.Cell() {
+							{ fmt.Sprint(row.round+1) }
+						}
+						@table.Cell() {
+							<div class="flex flex-row items-center">
+								{ row.team1Name }
+								if row.team1ID != "" {
+									@button.Button(button.Props{
+										Variant: button.VariantGhost,
+										Attributes: utils.Attrs(
+											utils.DataOnClick(dstar.SendPostf("/admin/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
+												row.team1ID, row.idx, row.round+1)),
+										),
+									}) {
+										@icon.Check()
+									}
+								}
+							</div>
+						}
+						@table.Cell() {
+							{ row.team2Name }
+						}
+						@table.Cell() {
+							{ row.winner }
 						}
 					}
 				}

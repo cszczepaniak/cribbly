@@ -137,6 +137,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	tourneyRouter.Handle("GET /", tourneyHandler.Index)
 	tourneyRouter.Handle("POST /", tourneyHandler.Generate)
 	tourneyRouter.Handle("DELETE /", tourneyHandler.Delete)
+	tourneyRouter.Handle("POST /team/{id}/advance", tourneyHandler.AdvanceTeam)
 
 	uh := users.UsersHandler{
 		UserRepo: cfg.UserRepo,
