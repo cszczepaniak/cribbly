@@ -35,13 +35,15 @@ templ Shell() {
 	class="text-blue-600"
 >l</span><span class="text-green-500">y</span>
 				</a>
-				@button.Button(button.Props{
-					Variant: button.VariantLink,
-					Href:    "/admin",
-					Class:   "text-background",
-				}) {
-					@icon.UserRound()
-				}
+				<div class="flex flex-row">
+					@button.Button(button.Props{
+						Variant: button.VariantLink,
+						Href:    "/admin",
+						Class:   "text-background",
+					}) {
+						@icon.UserRound()
+					}
+				</div>
 			</header>
 			{ children... }
 		</body>
