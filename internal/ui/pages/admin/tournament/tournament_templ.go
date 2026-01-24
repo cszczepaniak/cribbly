@@ -110,7 +110,7 @@ func roundDisplay(rounds []round, idx int) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"rounds\" class=\"flex flex-col items-start\" data-signals:round=\"0\"><div class=\"flex flex-row\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"rounds\" class=\"flex flex-col items-stretch max-w-full\" data-signals:round=\"0\"><div class=\"flex flex-row\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -168,12 +168,12 @@ func roundDisplay(rounds []round, idx int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><ul class=\"w-2xl flex flex-row overflow-x-hidden\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><ul class=\"flex flex-row overflow-x-hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for i, round := range rounds {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<li class=\"flex flex-col flex-[0_0_50%] ease-in-out transition-transform\n\t\t\t\t\tduration-500 pr-4\" data-style:translate=\"`-${$round*100}% 0`\"><p class=\"pl-2 pb-1 text-muted-foreground italic\">Round ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<li class=\"flex flex-col flex-[0_0_100%] lg:flex-[0_0_50%] xl:flex-[0_0_33.333%] ease-in-out transition-transform\n\t\t\t\t\tduration-500 pr-4\" data-style:translate=\"`-${$round*100}% 0`\"><p class=\"pl-2 pb-1 text-muted-foreground italic\">Round ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

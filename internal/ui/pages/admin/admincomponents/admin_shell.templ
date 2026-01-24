@@ -5,13 +5,13 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components"
 templ Shell(route Route) {
 	@components.Shell() {
 		<div class="flex flex-col">
-			<div class="flex min-h-svh">
+			<div class="flex flex-row min-h-svh">
 				<nav class="bg-primary">
 					<ul class="flex flex-col space-y-2 mt-8 whitespace-nowrap">
 						@adminNavs(route)
 					</ul>
 				</nav>
-				<main class="py-4 px-4 lg:px-16 mx-auto w-full">
+				<main class="py-4 px-4 lg:px-16 mx-auto min-w-0">
 					{ children... }
 				</main>
 			</div>

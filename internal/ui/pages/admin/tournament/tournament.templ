@@ -24,7 +24,7 @@ templ index(rows []row, rounds []round) {
 }
 
 templ roundDisplay(rounds []round, idx int) {
-	<div id="rounds" class="flex flex-col items-start" data-signals:round="0">
+	<div id="rounds" class="flex flex-col items-stretch max-w-full" data-signals:round="0">
 		<div class="flex flex-row">
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
@@ -43,10 +43,10 @@ templ roundDisplay(rounds []round, idx int) {
 				@icon.ChevronRight()
 			}
 		</div>
-		<ul class="w-2xl flex flex-row overflow-x-hidden">
+		<ul class="flex flex-row overflow-x-hidden">
 			for i, round := range rounds {
 				<li
-					class="flex flex-col flex-[0_0_50%] ease-in-out transition-transform
+					class="flex flex-col flex-[0_0_100%] lg:flex-[0_0_50%] xl:flex-[0_0_33.333%] ease-in-out transition-transform
 					duration-500 pr-4"
 					data-style:translate="`-${$round*100}% 0`"
 				>
