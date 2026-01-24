@@ -12,7 +12,6 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"cmp"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 )
 
 templ index(rows []row, rounds []round) {
@@ -21,40 +20,6 @@ templ index(rows []row, rounds []round) {
 		@tournamentControls()
 		@roundDisplay(rounds, 0)
 		@devTools()
-	}
-}
-
-templ roundCarousel(rounds []round) {
-	@carousel.Carousel(carousel.Props{
-		Class: "max-w-lg",
-	}) {
-		@carousel.Content() {
-			for i, round := range rounds {
-				@carousel.Item() {
-					<div class="flex flex-col items-center">
-						<p class="pb-1 text-muted-foreground italic">Round { fmt.Sprint(i+1) }</p>
-						<div class="min-w-2xs w-fit space-y-4 mr-2 flex flex-col grow justify-around">
-							for _, g := range round.games {
-								<div>
-									<div class="p-3 border-x border-t rounded-t-sm">
-										<p class={ utils.If(g.team1Name == "", "invisible") }>
-											{ cmp.Or(g.team1Name, "x") }
-										</p>
-									</div>
-									<div class="p-3 border rounded-b-sm">
-										<p class={ utils.If(g.team2Name == "", "invisible") }>
-											{ cmp.Or(g.team2Name, "x") }
-										</p>
-									</div>
-								</div>
-							}
-						</div>
-					</div>
-				}
-			}
-		}
-		@carousel.Previous()
-		@carousel.Next()
 	}
 }
 
