@@ -48,7 +48,7 @@ func standings(ss []games.Standing) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t::view-transition-group(*) {\n\t\t\tanimation-duration: 1000ms;\n\t\t}\n\t\t</style> <div class=\"p-4\"><h1 class=\"text-3xl font-semibold\">Prelim Standings</h1>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t::view-transition-group(*) {\n\t\t\tanimation-duration: 1000ms;\n\t\t}\n\t\t</style> <div class=\"px-0 md:px-4 py-4\"><h1 class=\"text-3xl font-semibold\">Prelim Standings</h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

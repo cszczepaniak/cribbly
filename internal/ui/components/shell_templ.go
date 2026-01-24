@@ -66,7 +66,7 @@ func Shell() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><body id=\"body\" class=\"max-w-screen\"><header class=\"bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex\n\t\t\t\tflex-row justify-between\"><a href=\"/\">Crib<span class=\"text-red-500\">b</span><span class=\"text-blue-600\">l</span><span class=\"text-green-500\">y</span></a><div class=\"flex flex-row\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><body id=\"body\" class=\"max-w-screen\"><header class=\"bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex\n\t\t\t\tflex-row justify-between sticky top-0\"><a href=\"/\">Crib<span class=\"text-red-500\">b</span><span class=\"text-blue-600\">l</span><span class=\"text-green-500\">y</span></a><div class=\"flex flex-row\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
