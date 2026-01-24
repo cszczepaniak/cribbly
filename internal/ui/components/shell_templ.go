@@ -15,6 +15,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 
 func Shell() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -58,6 +59,10 @@ func Shell() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = toast.Script().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = carousel.Script().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

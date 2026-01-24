@@ -11,60 +11,189 @@ import (
 	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+	"cmp"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 )
 
-templ index(rows []row) {
+templ index(rows []row, rounds []round) {
 	@admincomponents.Shell(admincomponents.Tournament) {
 		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
 		@tournamentControls()
-		@table.Table() {
-			@table.Header() {
-				@table.Head() {
-					Round
-				}
-				@table.Head() {
-					Team 1
-				}
-				@table.Head() {
-					Team 2
-				}
-				@table.Head() {
-					Winner
+		@roundDisplay(rounds, 0)
+		@devTools()
+	}
+}
+
+templ roundCarousel(rounds []round) {
+	@carousel.Carousel(carousel.Props{
+		Class: "max-w-lg",
+	}) {
+		@carousel.Content() {
+			for i, round := range rounds {
+				@carousel.Item() {
+					<div class="flex flex-col items-center">
+						<p class="pb-1 text-muted-foreground italic">Round { fmt.Sprint(i+1) }</p>
+						<div class="min-w-2xs w-fit space-y-4 mr-2 flex flex-col grow justify-around">
+							for _, g := range round.games {
+								<div>
+									<div class="p-3 border-x border-t rounded-t-sm">
+										<p class={ utils.If(g.team1Name == "", "invisible") }>
+											{ cmp.Or(g.team1Name, "x") }
+										</p>
+									</div>
+									<div class="p-3 border rounded-b-sm">
+										<p class={ utils.If(g.team2Name == "", "invisible") }>
+											{ cmp.Or(g.team2Name, "x") }
+										</p>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
 				}
 			}
-			@table.Body() {
-				for _, row := range rows {
-					@table.Row() {
-						@table.Cell() {
-							{ fmt.Sprint(row.round+1) }
+		}
+		@carousel.Previous()
+		@carousel.Next()
+	}
+}
+
+templ roundDisplay(rounds []round, idx int) {
+	<div id="rounds" class="flex flex-col items-start" data-signals:round="0">
+		<div class="flex flex-row">
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: utils.Attrs(
+					utils.DataOnClick("$round = $round === 0 ? 0 : $round - 1"),
+				),
+			}) {
+				@icon.ChevronLeft()
+			}
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: utils.Attrs(
+					utils.DataOnClick(fmt.Sprintf("$round = $round === %d ? %d : $round + 1", len(rounds)-1, len(rounds)-1)),
+				),
+			}) {
+				@icon.ChevronRight()
+			}
+		</div>
+		<ul class="w-2xl flex flex-row overflow-x-hidden">
+			for i, round := range rounds {
+				<li
+					class="flex flex-col flex-[0_0_50%] ease-in-out transition-transform
+					duration-500 pr-4"
+					data-style:translate="`-${$round*100}% 0`"
+				>
+					<p class="pl-2 pb-1 text-muted-foreground italic">Round { fmt.Sprint(i+1) }</p>
+					<div class="min-w-2xs space-y-4 flex flex-col grow justify-around">
+						for j, g := range round.games {
+							@game(g, i, j)
 						}
-						@table.Cell() {
-							<div class="flex flex-row items-center">
-								{ row.team1Name }
-								if row.team1ID != "" {
-									@button.Button(button.Props{
-										Variant: button.VariantGhost,
-										Attributes: utils.Attrs(
-											utils.DataOnClick(dstar.SendPostf("/admin/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
-												row.team1ID, row.idx, row.round+1)),
-										),
-									}) {
-										@icon.Check()
-									}
+					</div>
+				</li>
+			}
+		</ul>
+	</div>
+}
+
+templ game(g row, round, idx int) {
+	<div id={ fmt.Sprintf("game-%d-%d", round, idx) }>
+		@teamArea(teamAreaProps{
+			id:         g.team1ID,
+			round:      round,
+			idx:        idx,
+			name:       g.team1Name,
+			winnerName: g.winner,
+			top:        true,
+			gameReady:  g.team1ID != "" && g.team2ID != "",
+		})
+		@teamArea(teamAreaProps{
+			id:         g.team2ID,
+			round:      round,
+			idx:        idx,
+			name:       g.team2Name,
+			winnerName: g.winner,
+			top:        false,
+			gameReady:  g.team1ID != "" && g.team2ID != "",
+		})
+	</div>
+}
+
+templ teamArea(props teamAreaProps) {
+	<div
+		class={ utils.TwMerge(
+		"p-3 border-x flex flex-row justify-between items-center",
+		utils.IfElse(props.top, "border-t rounded-t-sm", "border rounded-b-sm"),
+		utils.If(props.isLoser(), "text-muted-foreground"),
+		utils.If(props.isWinner(), "font-semibold"),
+		) }
+	>
+		<p class={ utils.If(props.name == "", "invisible") }>
+			{ cmp.Or(props.name, "x") }
+		</p>
+		@button.Button(button.Props{
+			Class:   utils.If(props.winnerName != "" || !props.gameReady, "invisible"),
+			Variant: button.VariantGhost,
+			Attributes: utils.Attrs(
+				utils.DataOnClick(dstar.SendPostf(
+					"/admin/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
+					props.id, props.idx, props.round+1),
+				),
+			),
+		}) {
+			@icon.ChevronRight()
+		}
+	</div>
+}
+
+templ tournamentTable(rows []row) {
+	@table.Table() {
+		@table.Header() {
+			@table.Head() {
+				Round
+			}
+			@table.Head() {
+				Team 1
+			}
+			@table.Head() {
+				Team 2
+			}
+			@table.Head() {
+				Winner
+			}
+		}
+		@table.Body() {
+			for _, row := range rows {
+				@table.Row() {
+					@table.Cell() {
+						{ fmt.Sprint(row.round+1) }
+					}
+					@table.Cell() {
+						<div class="flex flex-row items-center">
+							{ row.team1Name }
+							if row.team1ID != "" {
+								@button.Button(button.Props{
+									Variant: button.VariantGhost,
+									Attributes: utils.Attrs(
+										utils.DataOnClick(dstar.SendPostf("/admin/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
+											row.team1ID, row.idx, row.round+1)),
+									),
+								}) {
+									@icon.Check()
 								}
-							</div>
-						}
-						@table.Cell() {
-							{ row.team2Name }
-						}
-						@table.Cell() {
-							{ row.winner }
-						}
+							}
+						</div>
+					}
+					@table.Cell() {
+						{ row.team2Name }
+					}
+					@table.Cell() {
+						{ row.winner }
 					}
 				}
 			}
 		}
-		@devTools()
 	}
 }
 
@@ -105,6 +234,7 @@ templ tournamentControls() {
 	@button.Button(button.Props{
 		Attributes: utils.Attrs(
 			utils.DataOnClick(dstar.SendPostf("/admin/tournament")),
+			utils.Attr("data-attr:disabled", "$size===''"),
 		),
 	}) {
 		Generate Tournament

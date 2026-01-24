@@ -113,6 +113,7 @@ type TournamentGame struct {
 }
 
 type Round struct {
+	N     int
 	Games []TournamentGame
 }
 
@@ -157,21 +158,17 @@ func (s Repository) LoadTournament(ctx context.Context) (Tournament, error) {
 	return tourney, nil
 }
 
-func (s Repository) PutTeamIntoTournamentGame(ctx context.Context, round, idx int, teamID string) error {
-	n, err := s.DB.ExecN(
+func (s Repository) PutTeam1IntoTournamentGame(ctx context.Context, round, idx int, teamID string) error {
+	return s.DB.ExecOne(
 		ctx,
 		`UPDATE TournamentGames SET TeamID1 = ? 
 		WHERE Round = ? AND Idx = ? AND TeamID1 IS NULL`,
 		teamID, round, idx,
 	)
-	if err != nil {
-		return err
-	}
-	if n == 1 {
-		return nil
-	}
+}
 
-	return s.DB.ExecOne(
+func (s Repository) PutTeam2IntoTournamentGame(ctx context.Context, round, idx int, teamID string) error {
+	return s.DB.ExecVoid(
 		ctx,
 		`UPDATE TournamentGames SET TeamID2 = ? 
 		WHERE Round = ? AND Idx = ? AND TeamID2 IS NULL`,
@@ -180,7 +177,7 @@ func (s Repository) PutTeamIntoTournamentGame(ctx context.Context, round, idx in
 }
 
 func (s Repository) SetTournamentGameWinner(ctx context.Context, round, idx int, winner string) error {
-	return s.DB.ExecVoid(
+	return s.DB.ExecOne(
 		ctx,
 		`UPDATE TournamentGames SET Winner = ? WHERE Round = ? AND Idx = ?`,
 		winner,

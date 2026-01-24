@@ -49,47 +49,51 @@ func MergeAttributes(attrs ...templ.Attributes) templ.Attributes {
 	return merged
 }
 
-type Attr struct {
+type Attribute struct {
 	Key   string
 	Value any
 }
 
-func DataBind(name string) Attr {
-	return Attr{
+func DataBind(name string) Attribute {
+	return Attribute{
 		Key:   "data-bind",
 		Value: name,
 	}
 }
 
-func DataOn(event, action string) Attr {
-	return Attr{
+func DataOn(event, action string) Attribute {
+	return Attribute{
 		Key:   "data-on:" + event,
 		Value: action,
 	}
 }
 
-func DataOnClick(action string) Attr {
+func DataOnClick(action string) Attribute {
 	return DataOn("click", action)
 }
 
-func DataMustMarshalSignals(val any) Attr {
+func DataMustMarshalSignals(val any) Attribute {
 	bs, err := json.Marshal(val)
 	if err != nil {
 		panic(err)
 	}
 
-	return Attr{
+	return Attribute{
 		Key:   "data-signals",
 		Value: string(bs),
 	}
 }
 
-func Attrs(attrs ...Attr) templ.Attributes {
+func Attrs(attrs ...Attribute) templ.Attributes {
 	res := make(templ.Attributes, len(attrs))
 	for _, attr := range attrs {
 		res[attr.Key] = attr.Value
 	}
 	return res
+}
+
+func Attr(k string, v any) Attribute {
+	return Attribute{Key: k, Value: v}
 }
 
 // RandomID generates a random ID string.

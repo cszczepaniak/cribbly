@@ -7,6 +7,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 
 templ Shell() {
 	<!DOCTYPE html>
@@ -22,6 +23,7 @@ templ Shell() {
 			@selectbox.Script()
 			@popover.Script()
 			@toast.Script()
+			@carousel.Script()
 		</head>
 		<body id="body">
 			<header

@@ -149,7 +149,11 @@ func TestTournamentGames(t *testing.T) {
 	assert.Len(t, tourney.Rounds[4].Games, 1)
 
 	for i := range 32 {
-		require.NoError(t, s.PutTeamIntoTournamentGame(t.Context(), 0, i/2, fmt.Sprintf("team%d", i)))
+		if i%2 == 0 {
+			require.NoError(t, s.PutTeam1IntoTournamentGame(t.Context(), 0, i/2, fmt.Sprintf("team%d", i)))
+		} else {
+			require.NoError(t, s.PutTeam2IntoTournamentGame(t.Context(), 0, i/2, fmt.Sprintf("team%d", i)))
+		}
 	}
 
 	tourney, err = s.LoadTournament(t.Context())
@@ -163,7 +167,12 @@ func TestTournamentGames(t *testing.T) {
 
 		// Advance team1
 		require.NoError(t, s.SetTournamentGameWinner(t.Context(), g.Round, i, t1))
-		require.NoError(t, s.PutTeamIntoTournamentGame(t.Context(), g.Round+1, i/2, t1))
+
+		if i%2 == 0 {
+			require.NoError(t, s.PutTeam1IntoTournamentGame(t.Context(), g.Round+1, i/2, t1))
+		} else {
+			require.NoError(t, s.PutTeam2IntoTournamentGame(t.Context(), g.Round+1, i/2, t1))
+		}
 	}
 
 	tourney, err = s.LoadTournament(t.Context())

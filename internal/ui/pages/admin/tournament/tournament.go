@@ -11,6 +11,24 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
+type teamAreaProps struct {
+	id         string
+	round      int
+	idx        int
+	name       string
+	winnerName string
+	top        bool
+	gameReady  bool
+}
+
+func (p teamAreaProps) isWinner() bool {
+	return p.winnerName != "" && p.winnerName == p.name
+}
+
+func (p teamAreaProps) isLoser() bool {
+	return p.winnerName != "" && p.winnerName != p.name
+}
+
 type Handler struct {
 	DivisionRepo divisions.Repository
 	TeamRepo     teams.Repository
@@ -42,6 +60,10 @@ type row struct {
 	winner    string
 }
 
+type round struct {
+	games []row
+}
+
 func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 	tourney, err := h.GameRepo.LoadTournament(r.Context())
 	if err != nil {
@@ -57,9 +79,20 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 		teamNamesByID[t.ID] = t.Name
 	}
 
+	var rounds []round
 	var rows []row
-	for i, round := range tourney.Rounds {
-		for j, game := range round.Games {
+	for i, rnd := range tourney.Rounds {
+		var games []row
+		for j, game := range rnd.Games {
+			games = append(games, row{
+				round:     i,
+				idx:       j,
+				team1ID:   game.TeamIDs[0],
+				team1Name: teamNamesByID[game.TeamIDs[0]],
+				team2ID:   game.TeamIDs[1],
+				team2Name: teamNamesByID[game.TeamIDs[1]],
+				winner:    teamNamesByID[game.Winner],
+			})
 			rows = append(rows, row{
 				round:     i,
 				idx:       j,
@@ -70,9 +103,13 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 				winner:    teamNamesByID[game.Winner],
 			})
 		}
+
+		rounds = append(rounds, round{
+			games: games,
+		})
 	}
 
-	return index(rows).Render(r.Context(), w)
+	return index(rows, rounds).Render(r.Context(), w)
 }
 
 func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
@@ -95,12 +132,50 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 
 	// 0,1->0; 2,3->1; etc.
 	newIdx := fromIdx / 2
-	err = h.GameRepo.PutTeamIntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+	if fromIdx%2 == 0 {
+		err = h.GameRepo.PutTeam1IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+	} else {
+		err = h.GameRepo.PutTeam2IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+	}
 	if err != nil {
 		return err
 	}
 
-	return datastar.NewSSE(w, r).Redirect("/admin/tournament")
+	tourney, err := h.GameRepo.LoadTournament(r.Context())
+	if err != nil {
+		return err
+	}
+
+	ts, err := h.TeamRepo.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+	teamNamesByID := make(map[string]string, len(ts))
+	for _, t := range ts {
+		teamNamesByID[t.ID] = t.Name
+	}
+
+	var rounds []round
+	for i, rnd := range tourney.Rounds {
+		var games []row
+		for j, game := range rnd.Games {
+			games = append(games, row{
+				round:     i,
+				idx:       j,
+				team1ID:   game.TeamIDs[0],
+				team1Name: teamNamesByID[game.TeamIDs[0]],
+				team2ID:   game.TeamIDs[1],
+				team2Name: teamNamesByID[game.TeamIDs[1]],
+				winner:    teamNamesByID[game.Winner],
+			})
+		}
+
+		rounds = append(rounds, round{
+			games: games,
+		})
+	}
+
+	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0))
 }
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
@@ -130,11 +205,11 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 		// compute 0,15 1,14 2,13 etc. for the tournament seeds
 		idx1 := i
 		idx2 := signals.Size.N() - (i + 1)
-		err := h.GameRepo.PutTeamIntoTournamentGame(r.Context(), 0, i, standings[idx1].TeamID)
+		err := h.GameRepo.PutTeam1IntoTournamentGame(r.Context(), 0, i, standings[idx1].TeamID)
 		if err != nil {
 			return err
 		}
-		err = h.GameRepo.PutTeamIntoTournamentGame(r.Context(), 0, i, standings[idx2].TeamID)
+		err = h.GameRepo.PutTeam2IntoTournamentGame(r.Context(), 0, i, standings[idx2].TeamID)
 		if err != nil {
 			return err
 		}
