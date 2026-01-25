@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -31,9 +32,10 @@ func (p teamAreaProps) isLoser() bool {
 }
 
 type Handler struct {
-	DivisionRepo divisions.Repository
-	TeamRepo     teams.Repository
-	GameRepo     games.Repository
+	DivisionRepo       divisions.Repository
+	TeamRepo           teams.Repository
+	GameRepo           games.Repository
+	TournamentNotifier *notifier.Notifier
 }
 
 type signalInt int
@@ -74,6 +76,28 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 	return index(rounds).Render(r.Context(), w)
 }
 
+func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
+	sub, done := h.TournamentNotifier.Subscribe()
+	defer done()
+
+	sse := datastar.NewSSE(w, r)
+	for {
+		select {
+		case <-r.Context().Done():
+			return nil
+		case <-sub:
+			rounds, err := h.loadRounds(r.Context())
+			if err != nil {
+				return err
+			}
+			err = sse.PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+
 func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 	teamID := r.PathValue("id")
 
@@ -108,6 +132,7 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	h.TournamentNotifier.Notify()
 	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
 }
 

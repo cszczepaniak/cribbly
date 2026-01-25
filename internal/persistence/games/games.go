@@ -25,13 +25,13 @@ type Game struct {
 
 type Repository struct {
 	repo.Base
-	n *notifier.Notifier
+	scoreNotifier *notifier.Notifier
 }
 
-func NewRepository(db *sql.DB, n *notifier.Notifier) Repository {
+func NewRepository(db *sql.DB, scoreNotifier *notifier.Notifier) Repository {
 	return Repository{
-		Base: repo.NewBase(db),
-		n:    n,
+		Base:          repo.NewBase(db),
+		scoreNotifier: scoreNotifier,
 	}
 }
 
@@ -195,7 +195,7 @@ func (s Repository) UpdateScore(ctx context.Context, gameID, teamID string, scor
 		return err
 	}
 
-	s.n.Notify()
+	s.scoreNotifier.Notify()
 	return nil
 }
 
@@ -251,7 +251,7 @@ func (s Repository) UpdateScores(
 		return err
 	}
 
-	s.n.Notify()
+	s.scoreNotifier.Notify()
 	return nil
 }
 

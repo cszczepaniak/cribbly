@@ -20,6 +20,7 @@ type Config struct {
 	GameRepo            games.Repository
 	UserRepo            users.Repository
 	ScoreUpdateNotifier *notifier.Notifier
+	TournamentNotifier  *notifier.Notifier
 }
 
 func (cfg Config) TeamService() teamservice.Service {

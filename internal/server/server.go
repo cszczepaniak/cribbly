@@ -57,10 +57,12 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("GET /standings/stream", gh.StreamStandings)
 
 	tourneyHandler := pubtournament.Handler{
-		GameRepo: cfg.GameRepo,
-		TeamRepo: cfg.TeamRepo,
+		GameRepo:           cfg.GameRepo,
+		TeamRepo:           cfg.TeamRepo,
+		TournamentNotifier: cfg.TournamentNotifier,
 	}
 	r.Handle("GET /tournament", tourneyHandler.Index)
+	r.Handle("GET /tournament/stream", tourneyHandler.Stream)
 	r.Handle("POST /tournament", tourneyHandler.Generate, adminmiddleware.ErrorIfNotAdmin())
 	r.Handle("DELETE /tournament", tourneyHandler.Delete, adminmiddleware.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, adminmiddleware.ErrorIfNotAdmin())

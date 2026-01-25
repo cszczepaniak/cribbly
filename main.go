@@ -44,6 +44,7 @@ func main() {
 	}
 
 	scoreUpdateNotifier := &notifier.Notifier{}
+	tournamentNotifier := &notifier.Notifier{}
 
 	playerRepo := players.NewRepository(db)
 	err = playerRepo.Init(ctx)
@@ -95,6 +96,7 @@ func main() {
 		GameRepo:            gameRepo,
 		UserRepo:            userRepo,
 		ScoreUpdateNotifier: scoreUpdateNotifier,
+		TournamentNotifier:  tournamentNotifier,
 	}
 
 	s := server.Setup(cfg)

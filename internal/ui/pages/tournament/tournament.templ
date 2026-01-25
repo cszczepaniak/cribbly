@@ -17,7 +17,9 @@ import (
 
 templ index(rounds []round) {
 	@components.Shell() {
-		@tournamentPage(rounds)
+		<div data-init={ dstar.SendGetf("/tournament/stream") }>
+			@tournamentPage(rounds)
+		</div>
 	}
 }
 
