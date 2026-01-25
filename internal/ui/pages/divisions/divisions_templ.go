@@ -47,7 +47,7 @@ func Index(divisions []divisions.Division) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full max-w-md my-4 mx-auto\"><h1 class=\"text-3xl font-semibold text-foreground\">Divisions</h1><p class=\"text-muted-foreground\">Click on your division to view prelim games.</p><div class=\"flex flex-col space-y-4 my-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full max-w-md my-4 mx-auto p-4\"><h1 class=\"text-3xl font-semibold text-foreground\">Divisions</h1><p class=\"text-muted-foreground\">Click on your division to view prelim games.</p><div class=\"flex flex-col space-y-4 my-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -190,7 +190,7 @@ func Division(d divisions.Division, teams []teams.Team) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"w-full max-w-md my-4 mx-auto\"><h1 class=\"text-3xl font-semibold text-foreground\">Division ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"w-full max-w-md my-4 mx-auto p-4\"><h1 class=\"text-3xl font-semibold text-foreground\">Division ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

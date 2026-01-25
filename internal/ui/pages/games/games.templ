@@ -11,7 +11,7 @@ import "fmt"
 
 templ Game(props getGameProps) {
 	@components.Shell() {
-		<div class="w-full max-w-md my-4 mx-auto flex flex-col space-y-2">
+		<div class="w-full max-w-md mx-auto flex flex-col space-y-2 p-4">
 			if props.complete {
 				<h1 class="text-xl font-semibold">Game Completed</h1>
 				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
@@ -49,7 +49,9 @@ templ Game(props getGameProps) {
 				@form.Item(form.ItemProps{
 					ID: "team-input",
 				}) {
-					@form.Label() {
+					@form.Label(form.LabelProps{
+						Class: "text-lg",
+					}) {
 						Who won?
 					}
 					@form.ItemFlex() {
@@ -62,7 +64,8 @@ templ Game(props getGameProps) {
 							},
 						})
 						@form.Label(form.LabelProps{
-							For: "r1",
+							For:   "r1",
+							Class: "text-md",
 						}) {
 							{ props.team1.Name }
 						}
@@ -77,7 +80,8 @@ templ Game(props getGameProps) {
 							},
 						})
 						@form.Label(form.LabelProps{
-							For: "r2",
+							For:   "r2",
+							Class: "text-md",
 						}) {
 							{ props.team2.Name }
 						}
@@ -109,7 +113,9 @@ templ scoreInput(errMsg string) {
 	@form.Item(form.ItemProps{
 		ID: "score-input",
 	}) {
-		@form.Label() {
+		@form.Label(form.LabelProps{
+			Class: "text-lg",
+		}) {
 			What was the loser's score?
 		}
 		@input.Input(input.Props{
