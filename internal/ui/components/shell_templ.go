@@ -163,7 +163,7 @@ func Shell() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><li>Divisions</li><li>Standings</li><li>Tournament</li></ul>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><li><a href=\"/divisions\">Divisions</a></li><li><a href=\"/standings\">Standings</a></li><li><a href=\"/tournament\">Tournament</a></li></ul>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
