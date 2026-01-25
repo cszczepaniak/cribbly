@@ -8,6 +8,9 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
+import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 
 templ Shell() {
 	<!DOCTYPE html>
@@ -35,18 +38,53 @@ templ Shell() {
 	class="text-blue-600"
 >l</span><span class="text-green-500">y</span>
 				</a>
-				<div class="flex flex-row">
-					@button.Button(button.Props{
-						Variant: button.VariantLink,
-						Href:    "/admin",
-						Class:   "text-background",
-					}) {
-						@icon.UserRound()
+				@sheet.Trigger(sheet.TriggerProps{
+					For: "menu",
+				}) {
+					@button.Button() {
+						@icon.Menu()
 					}
-				</div>
+				}
 			</header>
 			{ children... }
 		</body>
+		@sheet.Sheet(sheet.Props{
+			ID:   "menu",
+			Side: sheet.SideTop,
+		}) {
+			@sheet.Content(sheet.ContentProps{
+				Class: "bg-primary border-primary text-background",
+			}) {
+				@sheet.Header()
+				<div class="px-4 py-2 flex flex-col space-y-6 text-lg">
+					<ul>
+						<div class="space-y-2 mb-4 font-semibold">
+							<p>Player Pages</p>
+							@separator.Separator()
+						</div>
+						<li>Divisions</li>
+						<li>Standings</li>
+						<li>Tournament</li>
+					</ul>
+					if adminmiddleware.IsAdmin(ctx) {
+						<ul>
+							<div class="space-y-2 mb-4 font-semibold">
+								<p>Admin Pages</p>
+								@separator.Separator()
+							</div>
+							<li><a href="/admin/players">Players</a></li>
+							<li><a href="/admin/teams">Teams</a></li>
+							<li><a href="/admin/divisions">Divisions</a></li>
+							<li><a href="/admin/games">Games</a></li>
+							<li><a href="/admin/tournament">Tournament</a></li>
+							<li><a href="/admin/users">Users</a></li>
+							<li><a href="/admin/profile">My Profile</a></li>
+						</ul>
+					}
+				</div>
+				@sheet.Footer()
+			}
+		}
 	</html>
 }
 

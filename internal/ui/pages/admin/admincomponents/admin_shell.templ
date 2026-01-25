@@ -1,35 +1,10 @@
 package admincomponents
 
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 
 templ Shell(route Route) {
 	@components.Shell() {
 		<div class="flex flex-col">
-			<div class="bg-primary flex flex-col items-center md:hidden">
-				@sheet.Sheet(sheet.Props{
-					Side: sheet.SideTop,
-				}) {
-					@sheet.Trigger() {
-						@button.Button() {
-							@icon.Menu()
-						}
-					}
-					@sheet.Content(sheet.ContentProps{
-						Class: "bg-primary border-primary text-background",
-					}) {
-						@sheet.Header() {
-							@sheet.Title() {
-								Menu
-							}
-						}
-						@adminNavs("")
-						@sheet.Footer()
-					}
-				}
-			</div>
 			<div class="flex flex-row min-h-svh">
 				<nav class="bg-primary hidden md:block">
 					<ul class="flex flex-col space-y-2 mt-8 whitespace-nowrap">

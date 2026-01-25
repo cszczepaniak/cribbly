@@ -50,6 +50,7 @@
     --text-7xl--line-height: 1;
     --font-weight-thin: 100;
     --font-weight-light: 300;
+    --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
@@ -331,6 +332,9 @@
   }
   .left-\[50\%\] {
     left: 50%;
+  }
+  .z-0 {
+    z-index: 0;
   }
   .z-10 {
     z-index: 10;
@@ -1209,6 +1213,9 @@
     --tw-border-style: dotted;
     border-style: dotted;
   }
+  .border-accent {
+    border-color: var(--accent);
+  }
   .border-border {
     border-color: var(--border);
   }
@@ -1456,6 +1463,10 @@
   .font-medium {
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
+  }
+  .font-normal {
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
   }
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
