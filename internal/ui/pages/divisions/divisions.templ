@@ -9,26 +9,24 @@ import "github.com/cszczepaniak/cribbly/internal/persistence/teams"
 templ Index(divisions []divisions.Division) {
 	@components.Shell() {
 		<div class="w-full max-w-md my-4 mx-auto">
-			@card.Card() {
-				@card.Header() {
-					@card.Title() {
-						Divisions
-					}
-					@card.Description() {
-						Click on your division to view prelim games.
-					}
-				}
-				@card.Content() {
-					<div class="flex flex-col">
-						for _, d := range divisions {
-							<a
-								href={ templ.URL(fmt.Sprintf("/divisions/%s", d.ID)) }
-								class="hover:cursor-pointer"
-							>{ d.Name }</a>
+			<h1 class="text-3xl font-semibold text-foreground">Divisions</h1>
+			<p class="text-muted-foreground">Click on your division to view prelim games.</p>
+			<div class="flex flex-col space-y-4 my-4">
+				for _, d := range divisions {
+					<a href={ templ.URL(fmt.Sprintf("/divisions/%s", d.ID)) }>
+						@card.Card(card.Props{
+							Class: "hover:cursor-pointer hover:bg-accent",
+						}) {
+							@card.Header() {
+								@card.Title() {
+									{ d.Name }
+								}
+							}
+							@card.Footer()
 						}
-					</div>
+					</a>
 				}
-			}
+			</div>
 		</div>
 	}
 }
@@ -36,26 +34,24 @@ templ Index(divisions []divisions.Division) {
 templ Division(d divisions.Division, teams []teams.Team) {
 	@components.Shell() {
 		<div class="w-full max-w-md my-4 mx-auto">
-			@card.Card() {
-				@card.Header() {
-					@card.Title() {
-						Division { d.Name }
-					}
-					@card.Description() {
-						Click on your team to view prelim games.
-					}
-				}
-				@card.Content() {
-					<div class="flex flex-col">
-						for _, t := range teams {
-							<a
-								href={ templ.URL(fmt.Sprintf("/teams/%s/games", t.ID)) }
-								class="hover:cursor-pointer"
-							>{ t.Name }</a>
+			<h1 class="text-3xl font-semibold text-foreground">Division { d.Name }</h1>
+			<p class="text-muted-foreground">Click on your team to view prelim games.</p>
+			<div class="flex flex-col space-y-4 my-4">
+				for _, t := range teams {
+					<a href={ templ.URL(fmt.Sprintf("/teams/%s/games", t.ID)) }>
+						@card.Card(card.Props{
+							Class: "hover:cursor-pointer hover:bg-accent",
+						}) {
+							@card.Header() {
+								@card.Title() {
+									{ t.Name }
+								}
+							}
+							@card.Footer()
 						}
-					</div>
+					</a>
 				}
-			}
+			</div>
 		</div>
 	}
 }

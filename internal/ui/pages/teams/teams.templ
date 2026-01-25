@@ -17,8 +17,16 @@ templ Games(team teams.Team, games []game) {
 						Class: utils.IfElse(!g.complete(), "", utils.IfElse(g.won(team.Name), "bg-green-100", "bg-red-100")),
 					}) {
 						@card.Header() {
+							{{
+							var vs string
+							if team.Name == g.team1.name {
+								vs = g.team2.name
+							} else {
+								vs = g.team1.name
+							}
+							}}
 							@card.Title() {
-								{ g.team1.name } vs { g.team2.name }
+								vs { vs }
 							}
 						}
 						@card.Content() {
