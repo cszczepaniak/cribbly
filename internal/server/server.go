@@ -23,12 +23,13 @@ func Setup(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
-	mux.Handle("GET /", handleWithError(index.Index))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
 
-	r := NewRouter(mux)
+	r := NewRouter(mux, adminmiddleware.AuthenticationMiddleware(cfg.UserRepo))
+	r.Handle("GET /", index.Index)
+
 	setupAdminRoutes(cfg, r)
 
 	dh := pubdiv.Handler{
@@ -58,17 +59,18 @@ func Setup(cfg Config) http.Handler {
 }
 
 func setupAdminRoutes(cfg Config, r *router) {
-	// NOTE: these two admin routes must be registered without using the admin router because they
-	// must _not_ have the auth middleware attached to them.
 	ah := admin.AdminHandler{
 		UserRepo: cfg.UserRepo,
 	}
+
+	// NOTE: these admin routes must be registered without using the admin router because they
+	// must _not_ have the redirect middleware attached to them.
 	r.Handle("GET /admin/login", admin.LoginPage)
 	r.Handle("POST /admin/login", ah.DoLogin)
 	r.Handle("GET /admin/register", admin.RegisterPage)
 	r.Handle("POST /admin/register", ah.Register)
 
-	adminRouter := r.Group("/admin", adminmiddleware.AuthenticationMiddleware(cfg.UserRepo))
+	adminRouter := r.Group("/admin", adminmiddleware.RedirectToLoginIfNotAdmin())
 	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{

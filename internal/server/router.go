@@ -18,8 +18,8 @@ type router struct {
 	mw     []middleware
 }
 
-func NewRouter(m *http.ServeMux) *router {
-	return &router{m: m}
+func NewRouter(m *http.ServeMux, mw ...middleware) *router {
+	return &router{m: m, mw: mw}
 }
 
 func (r *router) Handle(route string, handler handler) {
