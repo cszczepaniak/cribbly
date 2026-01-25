@@ -1,7 +1,6 @@
 package tournament
 
 import (
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
@@ -12,15 +11,30 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"cmp"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 )
 
-templ index(rows []row, rounds []round) {
-	@admincomponents.Shell(admincomponents.Tournament) {
-		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
-		@tournamentControls()
-		@roundDisplay(rounds, 0)
-		@devTools()
+templ index(rounds []round) {
+	@components.Shell() {
+		@tournamentPage(rounds)
 	}
+}
+
+templ tournamentPage(rounds []round) {
+	<div id="tournament" class="p-4">
+		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
+		if len(rounds) == 0 {
+			if adminmiddleware.IsAdmin(ctx) {
+				@tournamentControls()
+			} else {
+				<p>The tournament hasn't started yet.</p>
+			}
+		} else {
+			@roundDisplay(rounds, 0)
+		}
+		@devTools()
+	</div>
 }
 
 templ roundDisplay(rounds []round, idx int) {
@@ -46,8 +60,10 @@ templ roundDisplay(rounds []round, idx int) {
 		<ul class="flex flex-row overflow-x-hidden">
 			for i, round := range rounds {
 				<li
-					class="flex flex-col flex-[0_0_100%] lg:flex-[0_0_50%] xl:flex-[0_0_33.333%] ease-in-out transition-transform
-					duration-500 pr-4"
+					class={ utils.TwMerge(
+					"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4",
+					utils.If(len(rounds) == 5, "2xl:flex-[0_0_20%]"),
+					) }
 					data-style:translate="`-${$round*100}% 0`"
 				>
 					<p class="pl-2 pb-1 text-muted-foreground italic">Round { fmt.Sprint(i+1) }</p>
@@ -93,16 +109,19 @@ templ teamArea(props teamAreaProps) {
 		utils.If(props.isLoser(), "text-muted-foreground"),
 		utils.If(props.isWinner(), "font-semibold"),
 		) }
+		if props.winnerName == "" {
+			style={ fmt.Sprintf("view-transition-name:%s", props.id) }
+		}
 	>
 		<p class={ utils.If(props.name == "", "invisible") }>
 			{ cmp.Or(props.name, "x") }
 		</p>
 		@button.Button(button.Props{
-			Class:   utils.If(props.winnerName != "" || !props.gameReady, "invisible"),
+			Class:   utils.If(props.winnerName != "" || !props.gameReady || !adminmiddleware.IsAdmin(ctx), "invisible"),
 			Variant: button.VariantGhost,
 			Attributes: utils.Attrs(
 				utils.DataOnClick(dstar.SendPostf(
-					"/admin/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
+					"/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
 					props.id, props.idx, props.round+1),
 				),
 			),
@@ -141,7 +160,7 @@ templ tournamentTable(rows []row) {
 								@button.Button(button.Props{
 									Variant: button.VariantGhost,
 									Attributes: utils.Attrs(
-										utils.DataOnClick(dstar.SendPostf("/admin/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
+										utils.DataOnClick(dstar.SendPostf("/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
 											row.team1ID, row.idx, row.round+1)),
 									),
 								}) {
@@ -163,64 +182,68 @@ templ tournamentTable(rows []row) {
 }
 
 templ tournamentControls() {
-	@form.Item(form.ItemProps{
-		Class: "mb-4",
-	}) {
-		@form.Label() {
-			Number of Tournament Teams
-		}
-		@selectbox.SelectBox(selectbox.Props{
-			Multiple: false,
+	if adminmiddleware.IsAdmin(ctx) {
+		@form.Item(form.ItemProps{
+			Class: "mb-4",
 		}) {
-			@selectbox.Trigger(selectbox.TriggerProps{
-				Attributes: utils.Attrs(
-					utils.DataBind("size"),
-				),
-				Class: "w-fit",
-			}) {
-				@selectbox.Value()
+			@form.Label() {
+				Number of Tournament Teams
 			}
-			@selectbox.Content(selectbox.ContentProps{
-				NoSearch: true,
+			@selectbox.SelectBox(selectbox.Props{
+				Multiple: false,
 			}) {
-				@selectbox.Item(selectbox.ItemProps{
-					Value: "16",
+				@selectbox.Trigger(selectbox.TriggerProps{
+					Attributes: utils.Attrs(
+						utils.DataBind("size"),
+					),
+					Class: "w-fit",
 				}) {
-					16
+					@selectbox.Value()
 				}
-				@selectbox.Item(selectbox.ItemProps{
-					Value: "32",
+				@selectbox.Content(selectbox.ContentProps{
+					NoSearch: true,
 				}) {
-					32
+					@selectbox.Item(selectbox.ItemProps{
+						Value: "16",
+					}) {
+						16
+					}
+					@selectbox.Item(selectbox.ItemProps{
+						Value: "32",
+					}) {
+						32
+					}
 				}
 			}
 		}
-	}
-	@button.Button(button.Props{
-		Attributes: utils.Attrs(
-			utils.DataOnClick(dstar.SendPostf("/admin/tournament")),
-			utils.Attr("data-attr:disabled", "$size===''"),
-		),
-	}) {
-		Generate Tournament
+		@button.Button(button.Props{
+			Attributes: utils.Attrs(
+				utils.DataOnClick(dstar.SendPostf("/tournament")),
+				utils.Attr("data-attr:disabled", "$size===''"),
+			),
+		}) {
+			Generate Tournament
+		}
 	}
 }
 
 templ devTools() {
-	@accordion.Accordion() {
-		@accordion.Item() {
-			@accordion.Trigger() {
-				Dev Tools
-			}
-			@accordion.Content() {
-				@button.Button(button.Props{
-					Class: "my-4",
-					Attributes: utils.Attrs(
-						utils.DataOnClick(dstar.SendDeletef("/admin/tournament")),
-					),
-					Variant: button.VariantDestructive,
-				}) {
-					Delete Tournament
+	if adminmiddleware.IsAdmin(ctx) {
+		@accordion.Accordion() {
+			@accordion.Item() {
+				@accordion.Trigger() {
+					Dev Tools
+				}
+				@accordion.Content() {
+					@button.Button(button.Props{
+						Class: "my-4",
+						Attributes: utils.Attrs(
+							utils.DataOnClick(dstar.SendDeletef("/tournament")),
+						),
+						Variant: button.VariantDestructive,
+					}) {
+						Delete Tournament
+					}
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package tournament
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -65,51 +66,12 @@ type round struct {
 }
 
 func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
-	tourney, err := h.GameRepo.LoadTournament(r.Context())
+	rounds, err := h.loadRounds(r.Context())
 	if err != nil {
 		return err
 	}
 
-	ts, err := h.TeamRepo.GetAll(r.Context())
-	if err != nil {
-		return err
-	}
-	teamNamesByID := make(map[string]string, len(ts))
-	for _, t := range ts {
-		teamNamesByID[t.ID] = t.Name
-	}
-
-	var rounds []round
-	var rows []row
-	for i, rnd := range tourney.Rounds {
-		var games []row
-		for j, game := range rnd.Games {
-			games = append(games, row{
-				round:     i,
-				idx:       j,
-				team1ID:   game.TeamIDs[0],
-				team1Name: teamNamesByID[game.TeamIDs[0]],
-				team2ID:   game.TeamIDs[1],
-				team2Name: teamNamesByID[game.TeamIDs[1]],
-				winner:    teamNamesByID[game.Winner],
-			})
-			rows = append(rows, row{
-				round:     i,
-				idx:       j,
-				team1ID:   game.TeamIDs[0],
-				team1Name: teamNamesByID[game.TeamIDs[0]],
-				team2ID:   game.TeamIDs[1],
-				team2Name: teamNamesByID[game.TeamIDs[1]],
-				winner:    teamNamesByID[game.Winner],
-			})
-		}
-
-		rounds = append(rounds, round{
-			games: games,
-		})
-	}
-
-	return index(rows, rounds).Render(r.Context(), w)
+	return index(rounds).Render(r.Context(), w)
 }
 
 func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
@@ -141,41 +103,12 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	tourney, err := h.GameRepo.LoadTournament(r.Context())
+	rounds, err := h.loadRounds(r.Context())
 	if err != nil {
 		return err
 	}
 
-	ts, err := h.TeamRepo.GetAll(r.Context())
-	if err != nil {
-		return err
-	}
-	teamNamesByID := make(map[string]string, len(ts))
-	for _, t := range ts {
-		teamNamesByID[t.ID] = t.Name
-	}
-
-	var rounds []round
-	for i, rnd := range tourney.Rounds {
-		var games []row
-		for j, game := range rnd.Games {
-			games = append(games, row{
-				round:     i,
-				idx:       j,
-				team1ID:   game.TeamIDs[0],
-				team1Name: teamNamesByID[game.TeamIDs[0]],
-				team2ID:   game.TeamIDs[1],
-				team2Name: teamNamesByID[game.TeamIDs[1]],
-				winner:    teamNamesByID[game.Winner],
-			})
-		}
-
-		rounds = append(rounds, round{
-			games: games,
-		})
-	}
-
-	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0))
+	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
 }
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
@@ -215,7 +148,12 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	return datastar.NewSSE(w, r).Redirect("/admin/tournament")
+	rounds, err := h.loadRounds(r.Context())
+	if err != nil {
+		return err
+	}
+
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds))
 }
 
 func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -224,5 +162,43 @@ func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return datastar.NewSSE(w, r).Redirect("/admin/tournament")
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil))
+}
+
+func (h Handler) loadRounds(ctx context.Context) ([]round, error) {
+	tourney, err := h.GameRepo.LoadTournament(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ts, err := h.TeamRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	teamNamesByID := make(map[string]string, len(ts))
+	for _, t := range ts {
+		teamNamesByID[t.ID] = t.Name
+	}
+
+	var rounds []round
+	for i, rnd := range tourney.Rounds {
+		var games []row
+		for j, game := range rnd.Games {
+			games = append(games, row{
+				round:     i,
+				idx:       j,
+				team1ID:   game.TeamIDs[0],
+				team1Name: teamNamesByID[game.TeamIDs[0]],
+				team2ID:   game.TeamIDs[1],
+				team2Name: teamNamesByID[game.TeamIDs[1]],
+				winner:    teamNamesByID[game.Winner],
+			})
+		}
+
+		rounds = append(rounds, round{
+			games: games,
+		})
+	}
+
+	return rounds, nil
 }

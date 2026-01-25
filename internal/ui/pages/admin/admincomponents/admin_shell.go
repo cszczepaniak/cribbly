@@ -9,14 +9,13 @@ import (
 type Route string
 
 const (
-	Home       Route = ""
-	Players    Route = "Players"
-	Teams      Route = "Teams"
-	Divisions  Route = "Divisions"
-	Games      Route = "Games"
-	Tournament Route = "Tournament"
-	Users      Route = "Users"
-	Profile    Route = "My Profile"
+	Home      Route = ""
+	Players   Route = "Players"
+	Teams     Route = "Teams"
+	Divisions Route = "Divisions"
+	Games     Route = "Games"
+	Users     Route = "Users"
+	Profile   Route = "My Profile"
 )
 
 func (r Route) ToSafeURL() templ.SafeURL {
@@ -29,8 +28,6 @@ func (r Route) ToSafeURL() templ.SafeURL {
 		return "/admin/players"
 	case Teams:
 		return "/admin/teams"
-	case Tournament:
-		return "/admin/tournament"
 	case Games:
 		return "/admin/games"
 	case Users:

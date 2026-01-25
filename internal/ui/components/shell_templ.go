@@ -69,7 +69,7 @@ func Shell() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><body id=\"body\" class=\"max-w-screen\"><header class=\"bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex\n\t\t\t\tflex-row justify-between sticky top-0\"><a href=\"/\">Crib<span class=\"text-red-500\">b</span><span class=\"text-blue-600\">l</span><span class=\"text-green-500\">y</span></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><body id=\"body\" class=\"max-w-screen\"><header class=\"bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex\n\t\t\t\tflex-row justify-between sticky top-0 z-50\"><a href=\"/\">Crib<span class=\"text-red-500\">b</span><span class=\"text-blue-600\">l</span><span class=\"text-green-500\">y</span></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -163,25 +163,30 @@ func Shell() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><li><a href=\"/divisions\">Divisions</a></li><li><a href=\"/standings\">Standings</a></li><li><a href=\"/tournament\">Tournament</a></li></ul>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><li><a href=\"/divisions\">Divisions</a></li><li><a href=\"/standings\">Standings</a></li><li><a href=\"/tournament\">Tournament</a></li></ul><ul><div class=\"space-y-2 mb-4 font-semibold\"><p>Admin Pages</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = separator.Separator().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if adminmiddleware.IsAdmin(ctx) {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<ul><div class=\"space-y-2 mb-4 font-semibold\"><p>Admin Pages</p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = separator.Separator().Render(ctx, templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/tournament\">Tournament</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li></ul>")
+				} else {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<li><a href=\"/admin/login\">Login</a></li>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</ul></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -206,7 +211,7 @@ func Shell() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -22,7 +22,7 @@ func NewRouter(m *http.ServeMux, mw ...middleware) *router {
 	return &router{m: m, mw: mw}
 }
 
-func (r *router) Handle(route string, handler handler) {
+func (r *router) Handle(route string, handler handler, mw ...middleware) {
 	method, route, ok := strings.Cut(route, " ")
 	if !ok {
 		panic("must have a method and a route")
@@ -31,7 +31,7 @@ func (r *router) Handle(route string, handler handler) {
 	route = path.Join(r.prefix, route)
 
 	finalHandler := handler
-	for _, mw := range slices.Backward(r.mw) {
+	for _, mw := range slices.Backward(slices.Concat(r.mw, mw)) {
 		finalHandler = mw(finalHandler)
 	}
 

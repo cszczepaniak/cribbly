@@ -31,7 +31,7 @@ templ Shell() {
 		<body id="body" class="max-w-screen">
 			<header
 				class="bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex
-				flex-row justify-between sticky top-0"
+				flex-row justify-between sticky top-0 z-50"
 			>
 				<a href="/">
 					Crib<span class="text-red-500">b</span><span
@@ -66,21 +66,22 @@ templ Shell() {
 						<li><a href="/standings">Standings</a></li>
 						<li><a href="/tournament">Tournament</a></li>
 					</ul>
-					if adminmiddleware.IsAdmin(ctx) {
-						<ul>
-							<div class="space-y-2 mb-4 font-semibold">
-								<p>Admin Pages</p>
-								@separator.Separator()
-							</div>
+					<ul>
+						<div class="space-y-2 mb-4 font-semibold">
+							<p>Admin Pages</p>
+							@separator.Separator()
+						</div>
+						if adminmiddleware.IsAdmin(ctx) {
 							<li><a href="/admin/players">Players</a></li>
 							<li><a href="/admin/teams">Teams</a></li>
 							<li><a href="/admin/divisions">Divisions</a></li>
 							<li><a href="/admin/games">Games</a></li>
-							<li><a href="/admin/tournament">Tournament</a></li>
 							<li><a href="/admin/users">Users</a></li>
 							<li><a href="/admin/profile">My Profile</a></li>
-						</ul>
-					}
+						} else {
+							<li><a href="/admin/login">Login</a></li>
+						}
+					</ul>
 				</div>
 				@sheet.Footer()
 			}

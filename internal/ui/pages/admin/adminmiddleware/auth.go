@@ -58,6 +58,17 @@ func AuthenticationMiddleware(userRepo users.Repository) func(next handler) hand
 	}
 }
 
+func ErrorIfNotAdmin() func(next handler) handler {
+	return func(next handler) handler {
+		return func(w http.ResponseWriter, r *http.Request) error {
+			if !IsAdmin(r.Context()) {
+				return errors.New("must be an admin")
+			}
+			return next(w, r)
+		}
+	}
+}
+
 func RedirectToLoginIfNotAdmin() func(next handler) handler {
 	return func(next handler) handler {
 		return func(w http.ResponseWriter, r *http.Request) error {

@@ -11,12 +11,12 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/profile"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/tournament"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
 	pubdiv "github.com/cszczepaniak/cribbly/internal/ui/pages/divisions"
 	pubgame "github.com/cszczepaniak/cribbly/internal/ui/pages/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
 	pubteam "github.com/cszczepaniak/cribbly/internal/ui/pages/teams"
+	pubtournament "github.com/cszczepaniak/cribbly/internal/ui/pages/tournament"
 )
 
 func Setup(cfg Config) http.Handler {
@@ -52,8 +52,18 @@ func Setup(cfg Config) http.Handler {
 	}
 	r.Handle("GET /games/{id}", gh.GetGame)
 	r.Handle("PUT /games/{id}", gh.UpdateGame)
+
 	r.Handle("GET /standings", gh.StandingsPage)
 	r.Handle("GET /standings/stream", gh.StreamStandings)
+
+	tourneyHandler := pubtournament.Handler{
+		GameRepo: cfg.GameRepo,
+		TeamRepo: cfg.TeamRepo,
+	}
+	r.Handle("GET /tournament", tourneyHandler.Index)
+	r.Handle("POST /tournament", tourneyHandler.Generate, adminmiddleware.ErrorIfNotAdmin())
+	r.Handle("DELETE /tournament", tourneyHandler.Delete, adminmiddleware.ErrorIfNotAdmin())
+	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, adminmiddleware.ErrorIfNotAdmin())
 
 	return mux
 }
@@ -128,18 +138,6 @@ func setupAdminRoutes(cfg Config, r *router) {
 	gamesRouter.Handle("GET /scores/edit", gh.Edit)
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
 	gamesRouter.Handle("PUT /scores/reset", gh.ResetScores)
-
-	tourneyHandler := tournament.Handler{
-		// TODO: maybe don't need all of these
-		DivisionRepo: cfg.DivisionRepo,
-		TeamRepo:     cfg.TeamRepo,
-		GameRepo:     cfg.GameRepo,
-	}
-	tourneyRouter := adminRouter.Group("/tournament")
-	tourneyRouter.Handle("GET /", tourneyHandler.Index)
-	tourneyRouter.Handle("POST /", tourneyHandler.Generate)
-	tourneyRouter.Handle("DELETE /", tourneyHandler.Delete)
-	tourneyRouter.Handle("POST /team/{id}/advance", tourneyHandler.AdvanceTeam)
 
 	uh := users.UsersHandler{
 		UserRepo: cfg.UserRepo,

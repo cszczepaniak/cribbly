@@ -2498,6 +2498,11 @@
       flex: 0 0 33.333%;
     }
   }
+  .lg\:flex-\[0_0_33\.333333\%\] {
+    @media (width >= 64rem) {
+      flex: 0 0 33.333333%;
+    }
+  }
   .lg\:flex-\[0_0_34\%\] {
     @media (width >= 64rem) {
       flex: 0 0 34%;
@@ -2513,9 +2518,19 @@
       padding-inline: calc(var(--spacing) * 16);
     }
   }
+  .xl\:flex-\[0_0_25\%\] {
+    @media (width >= 80rem) {
+      flex: 0 0 25%;
+    }
+  }
   .xl\:flex-\[0_0_33\.333\%\] {
     @media (width >= 80rem) {
       flex: 0 0 33.333%;
+    }
+  }
+  .\32 xl\:flex-\[0_0_20\%\] {
+    @media (width >= 96rem) {
+      flex: 0 0 20%;
     }
   }
   .dark\:border-input {
