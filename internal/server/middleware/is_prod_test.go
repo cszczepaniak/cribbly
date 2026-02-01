@@ -1,0 +1,40 @@
+package middleware
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestIsProdMiddleware(t *testing.T) {
+	var expIsProd bool
+	var isProd bool
+
+	assertIsProdHandler := func(_ http.ResponseWriter, r *http.Request) error {
+		assert.Equal(t, expIsProd, IsProd(r.Context()))
+		return nil
+	}
+
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		err := IsProdMiddleware(isProd)(assertIsProdHandler)(w, r)
+		require.NoError(t, err)
+	}
+
+	s := httptest.NewServer(http.HandlerFunc(handler))
+	t.Cleanup(s.Close)
+
+	isProd = true
+	expIsProd = true
+
+	_, err := s.Client().Get(s.URL)
+	require.NoError(t, err)
+
+	isProd = false
+	expIsProd = false
+
+	_, err = s.Client().Get(s.URL)
+	require.NoError(t, err)
+}
