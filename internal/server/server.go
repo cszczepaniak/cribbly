@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/games"
+	middleware1 "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/middleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/profile"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
@@ -27,7 +27,7 @@ func Setup(cfg Config) http.Handler {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
 
-	r := NewRouter(mux, adminmiddleware.AuthenticationMiddleware(cfg.UserRepo))
+	r := NewRouter(mux, middleware1.AuthenticationMiddleware(cfg.UserRepo))
 	r.Handle("GET /", index.Index)
 
 	setupAdminRoutes(cfg, r)
@@ -63,9 +63,9 @@ func Setup(cfg Config) http.Handler {
 	}
 	r.Handle("GET /tournament", tourneyHandler.Index)
 	r.Handle("GET /tournament/stream", tourneyHandler.Stream)
-	r.Handle("POST /tournament", tourneyHandler.Generate, adminmiddleware.ErrorIfNotAdmin())
-	r.Handle("DELETE /tournament", tourneyHandler.Delete, adminmiddleware.ErrorIfNotAdmin())
-	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, adminmiddleware.ErrorIfNotAdmin())
+	r.Handle("POST /tournament", tourneyHandler.Generate, middleware1.ErrorIfNotAdmin())
+	r.Handle("DELETE /tournament", tourneyHandler.Delete, middleware1.ErrorIfNotAdmin())
+	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, middleware1.ErrorIfNotAdmin())
 
 	return mux
 }
@@ -83,7 +83,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	r.Handle("GET /admin/register", admin.RegisterPage)
 	r.Handle("POST /admin/register", ah.Register)
 
-	adminRouter := r.Group("/admin", adminmiddleware.RedirectToLoginIfNotAdmin())
+	adminRouter := r.Group("/admin", middleware1.RedirectToLoginIfNotAdmin())
 	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{

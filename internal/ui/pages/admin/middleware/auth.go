@@ -1,4 +1,4 @@
-package adminmiddleware
+package middleware
 
 import (
 	"context"

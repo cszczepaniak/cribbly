@@ -5,12 +5,12 @@ package tournament
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"cmp"
 	"fmt"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
@@ -20,7 +20,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/middleware"
 )
 
 func index(rounds []round) templ.Component {
@@ -117,7 +117,7 @@ func tournamentPage(rounds []round) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(rounds) == 0 {
-			if adminmiddleware.IsAdmin(ctx) {
+			if middleware.IsAdmin(ctx) {
 				templ_7745c5c3_Err = tournamentControls().Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -495,7 +495,7 @@ func teamArea(props teamAreaProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = button.Button(button.Props{
-			Class:   utils.If(props.winnerName != "" || !props.gameReady || !adminmiddleware.IsAdmin(ctx), "invisible"),
+			Class:   utils.If(props.winnerName != "" || !props.gameReady || !middleware.IsAdmin(ctx), "invisible"),
 			Variant: button.VariantGhost,
 			Attributes: utils.Attrs(
 				utils.DataOnClick(dstar.SendPostf(
@@ -901,7 +901,7 @@ func tournamentControls() templ.Component {
 			templ_7745c5c3_Var40 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if adminmiddleware.IsAdmin(ctx) {
+		if middleware.IsAdmin(ctx) {
 			templ_7745c5c3_Var41 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -1128,7 +1128,7 @@ func devTools() templ.Component {
 			templ_7745c5c3_Var49 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if adminmiddleware.IsAdmin(ctx) {
+		if middleware.IsAdmin(ctx) {
 			templ_7745c5c3_Var50 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
