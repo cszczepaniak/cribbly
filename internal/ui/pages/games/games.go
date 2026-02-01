@@ -3,10 +3,11 @@ package games
 import (
 	"net/http"
 
+	"github.com/starfederation/datastar-go/datastar"
+
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
-	"github.com/starfederation/datastar-go/datastar"
 )
 
 type Handler struct {

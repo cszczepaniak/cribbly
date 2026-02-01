@@ -1,7 +1,6 @@
 .PHONY: tailwind
 tailwind:
 	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css
-	npx prettier public/output.css -w
 
 .PHONY: tailwind-watch
 tailwind-watch:

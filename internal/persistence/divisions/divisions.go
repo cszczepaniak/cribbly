@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/column"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 )
 
 type Division struct {
@@ -48,6 +49,7 @@ func (s Repository) Create(ctx context.Context) (Division, error) {
 	division := Division{
 		ID:   uuid.NewString(),
 		Name: "Unnamed Division",
+		Size: 4,
 	}
 
 	_, err := s.Builder.InsertIntoTable("Divisions").
