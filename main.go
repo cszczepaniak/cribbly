@@ -100,6 +100,7 @@ func runMain() error {
 		UserRepo:            userRepo,
 		ScoreUpdateNotifier: scoreUpdateNotifier,
 		TournamentNotifier:  tournamentNotifier,
+		IsProd:              cfg.Environment == "production",
 	}
 
 	s := server.Setup(scfg)

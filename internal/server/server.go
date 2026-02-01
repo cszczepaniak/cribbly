@@ -27,7 +27,7 @@ func Setup(cfg Config) http.Handler {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
 
-	r := NewRouter(mux, mw.AuthenticationMiddleware(cfg.UserRepo))
+	r := NewRouter(mux, mw.AuthenticationMiddleware(cfg.UserRepo), mw.IsProdMiddleware(cfg.IsProd))
 	r.Handle("GET /", index.Index)
 
 	setupAdminRoutes(cfg, r)

@@ -21,6 +21,7 @@ type Config struct {
 	UserRepo            users.Repository
 	ScoreUpdateNotifier *notifier.Notifier
 	TournamentNotifier  *notifier.Notifier
+	IsProd              bool
 }
 
 func (cfg Config) TeamService() teamservice.Service {
