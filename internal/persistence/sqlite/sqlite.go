@@ -13,7 +13,7 @@ import (
 
 func New(dsn string) (*sql.DB, error) {
 	filePath, ok := strings.CutPrefix(dsn, "file:")
-	if ok {
+	if ok && filePath != ":memory:" {
 		err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
 		if err != nil {
 			return nil, err
