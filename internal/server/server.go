@@ -128,6 +128,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	divisionsRouter.Handle("PUT /{id}/savesize", dh.SaveSize)
 	divisionsRouter.Handle("POST /generate", dh.Generate)
 	divisionsRouter.Handle("DELETE /", dh.DeleteAll)
+	divisionsRouter.Handle("GET /qrs", dh.GenerateQRCodes)
 
 	gh := games.Handler{
 		DivisionRepo: cfg.DivisionRepo,

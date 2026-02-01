@@ -352,6 +352,15 @@ templ devTools() {
 					Delete All Divisions
 				}
 			}
+			@accordion.Content() {
+				<a href="/admin/divisions/qrs">
+					@button.Button(button.Props{
+						Class: "my-4",
+					}) {
+						Generate QR Codes
+					}
+				</a>
+			}
 		}
 	}
 }

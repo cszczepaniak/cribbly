@@ -1,10 +1,14 @@
 package divisions
 
 import (
+	"bytes"
 	"errors"
 	"net/http"
+	"strconv"
 
+	"codeberg.org/go-pdf/fpdf"
 	"github.com/jaswdr/faker/v2"
+	qrcode "github.com/skip2/go-qrcode"
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
@@ -297,4 +301,30 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return nil
+}
+
+func (h DivisionsHandler) GenerateQRCodes(w http.ResponseWriter, r *http.Request) error {
+	png, err := qrcode.Encode("https://google.com", qrcode.Medium, 256)
+	if err != nil {
+		return err
+	}
+
+	buf := &bytes.Buffer{}
+	pdf := fpdf.New("P", "in", "Letter", "")
+	pdf.AddPage()
+	pdf.RegisterImageOptionsReader("qrcode.png", fpdf.ImageOptions{ImageType: "png"}, bytes.NewReader(png))
+	pdf.ImageOptions("qrcode.png", 0, 0, 0, 0, false, fpdf.ImageOptions{}, 0, "")
+	err = pdf.Output(buf)
+	if err != nil {
+		return err
+	}
+
+	pdf.Close()
+
+	w.Header().Add("Content-Type", "application/pdf")
+	w.Header().Add("Content-Disposition", "attachment; filename=\"qrs.pdf\"")
+	w.Header().Add("Content-Length", strconv.Itoa(len(buf.Bytes())))
+
+	_, err = w.Write(buf.Bytes())
+	return err
 }
