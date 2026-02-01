@@ -21,12 +21,15 @@ func GetSession(ctx context.Context) users.Session {
 }
 
 // TODO: share this type somewhere (can't be server pkg because that'd cause an import cycle)
-type handler = func(http.ResponseWriter, *http.Request) error
+type (
+	handler    = func(http.ResponseWriter, *http.Request) error
+	middleware = func(handler) handler
+)
 
 // AuthenticationMiddleware extracts the user's session (if any) and adds it to the request's Go
 // context. It always forwards the request to the next handler regardless of whether the user was
 // successfully authenticated.
-func AuthenticationMiddleware(userRepo users.Repository) func(next handler) handler {
+func AuthenticationMiddleware(userRepo users.Repository) middleware {
 	return func(next handler) handler {
 		return func(w http.ResponseWriter, r *http.Request) error {
 			cookie, err := r.Cookie("session")
