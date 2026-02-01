@@ -12,8 +12,8 @@ import (
 type Config struct {
 	DSN      string `env:"DSN"`
 	SeedUser struct {
-		SeedUsername string `env:"SEED_USERNAME"`
-		SeedPassword string `env:"SEED_PASSWORD"`
+		Username string `env:"SEED_USERNAME"`
+		Password string `env:"SEED_PASSWORD"`
 	}
 }
 
