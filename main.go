@@ -80,13 +80,12 @@ func runMain() error {
 		return err
 	}
 
-	seedUser, seedPass := os.Getenv("SEED_USER"), os.Getenv("SEED_PASSWORD")
-	if seedUser != "" && seedPass != "" {
-		passwordHash, err := argon2id.CreateHash(seedPass, argon2id.DefaultParams)
+	if cfg.SeedUser.Username != "" && cfg.SeedUser.Password != "" {
+		passwordHash, err := argon2id.CreateHash(cfg.SeedUser.Password, argon2id.DefaultParams)
 		if err != nil {
 			return err
 		}
-		err = userRepo.CreateUser(context.Background(), seedUser, passwordHash)
+		err = userRepo.CreateUser(context.Background(), cfg.SeedUser.Username, passwordHash)
 		if err != nil {
 			log.Println("could not seed user:", err)
 		}
