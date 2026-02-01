@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/alexedwards/argon2id"
+
 	"github.com/cszczepaniak/cribbly/internal/config"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence"

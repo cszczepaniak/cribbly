@@ -8,8 +8,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/google/uuid"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 )
 
 var (

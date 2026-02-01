@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
+
+	"github.com/cszczepaniak/cribbly/internal/notifier"
+	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
 )
 
 type Score struct {
