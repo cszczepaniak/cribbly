@@ -12,7 +12,7 @@ import (
 func NewInMemoryForTest(t testing.TB) *sql.DB {
 	t.Helper()
 
-	db, err := NewInMemory()
+	db, err := New(":memory:")
 	require.NoError(t, err)
 
 	return db

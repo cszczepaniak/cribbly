@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 
 	"github.com/alexedwards/argon2id"
+	"github.com/cszczepaniak/cribbly/internal/config"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
@@ -23,24 +21,29 @@ import (
 )
 
 func main() {
-	dbSource := flag.String("db", "file", "The source to use for the sqlite database. Valid options are 'memory' or 'file'.")
-	flag.Parse()
+	err := runMain()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runMain() error {
+	cfg := config.Config{}
+	err := config.Load(&cfg)
+	if err != nil {
+		return err
+	}
+
+	if cfg.DSN == "" {
+		cfg.DSN = "file:data/db.sqlite"
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt)
 	defer cancel()
 
-	var db *sql.DB
-	var err error
-	switch *dbSource {
-	case "file":
-		db, err = sqlite.NewFromFile("data/db.sqlite")
-	case "memory":
-		db, err = sqlite.NewInMemory()
-	default:
-		err = fmt.Errorf("unknown -db value: %q", *dbSource)
-	}
+	db, err := sqlite.New(cfg.DSN)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	scoreUpdateNotifier := &notifier.Notifier{}
@@ -49,38 +52,38 @@ func main() {
 	playerRepo := players.NewRepository(db)
 	err = playerRepo.Init(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	teamRepo := teams.NewRepository(db)
 	err = teamRepo.Init(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	divisionRepo := divisions.NewRepository(db)
 	err = divisionRepo.Init(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	gameRepo := games.NewRepository(db, scoreUpdateNotifier)
 	err = gameRepo.Init(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	userRepo := users.NewRepository(db)
 	err = userRepo.Init(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	seedUser, seedPass := os.Getenv("SEED_USER"), os.Getenv("SEED_PASSWORD")
 	if seedUser != "" && seedPass != "" {
 		passwordHash, err := argon2id.CreateHash(seedPass, argon2id.DefaultParams)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		err = userRepo.CreateUser(context.Background(), seedUser, passwordHash)
 		if err != nil {
@@ -88,7 +91,7 @@ func main() {
 		}
 	}
 
-	cfg := server.Config{
+	scfg := server.Config{
 		Transactor:          persistence.NewTransactor(db),
 		PlayerRepo:          playerRepo,
 		TeamRepo:            teamRepo,
@@ -99,7 +102,7 @@ func main() {
 		TournamentNotifier:  tournamentNotifier,
 	}
 
-	s := server.Setup(cfg)
+	s := server.Setup(scfg)
 
 	errCh := make(chan error)
 	go func() {
@@ -109,9 +112,8 @@ func main() {
 	select {
 	case <-ctx.Done():
 		log.Println("server shutting down...")
+		return nil
 	case err := <-errCh:
-		if err != nil {
-			log.Fatal(err)
-		}
+		return err
 	}
 }

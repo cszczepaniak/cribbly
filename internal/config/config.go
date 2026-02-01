@@ -18,8 +18,7 @@ type Config struct {
 }
 
 func Load(cfg *Config) error {
-	val := reflect.ValueOf(cfg).Elem()
-	return populate(val)
+	return populate(reflect.ValueOf(cfg))
 }
 
 func populate(val reflect.Value) error {
