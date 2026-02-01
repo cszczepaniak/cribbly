@@ -1,23 +1,23 @@
 package divisions
 
 import (
+	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
-	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
-	"fmt"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
 
 templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
