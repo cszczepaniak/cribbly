@@ -48,6 +48,7 @@ func (s Repository) Create(ctx context.Context) (Division, error) {
 	division := Division{
 		ID:   uuid.NewString(),
 		Name: "Unnamed Division",
+		Size: 4,
 	}
 
 	_, err := s.Builder.InsertIntoTable("Divisions").
