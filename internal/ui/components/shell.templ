@@ -11,6 +11,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
+import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
 
 templ Shell() {
 	<!DOCTYPE html>
@@ -78,6 +79,12 @@ templ Shell() {
 							<li><a href="/admin/games">Games</a></li>
 							<li><a href="/admin/users">Users</a></li>
 							<li><a href="/admin/profile">My Profile</a></li>
+							<li>
+								<a
+									data-on:click={ dstar.SendPostf("/admin/logout") }
+									class="hover:cursor-pointer"
+								>Logout</a>
+							</li>
 						} else {
 							<li><a href="/admin/login">Login</a></li>
 						}

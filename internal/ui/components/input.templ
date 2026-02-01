@@ -1,0 +1,29 @@
+package components
+
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+
+templ Input(props InputProps) {
+	{{
+		attrs := map[string]any{}
+		if props.DataBind != "" {
+			attrs["data-bind"] = props.DataBind
+		}
+	}}
+	@form.Item() {
+		if props.Label != "" {
+			@form.Label() {
+				{ props.Label }
+			}
+		}
+		@input.Input(props.getInputElemProps())
+		<div
+			class="mb-4 -mt-2 text-sm"
+			if props.ErrorMessage == "" {
+				hidden
+			}
+		>
+			<p class="text-destructive italic">{ props.ErrorMessage }</p>
+		</div>
+	}
+}

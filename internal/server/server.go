@@ -79,6 +79,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	// must _not_ have the redirect middleware attached to them.
 	r.Handle("GET /admin/login", admin.LoginPage)
 	r.Handle("POST /admin/login", ah.DoLogin)
+	r.Handle("POST /admin/logout", ah.DoLogout)
 	r.Handle("GET /admin/register", admin.RegisterPage)
 	r.Handle("POST /admin/register", ah.Register)
 

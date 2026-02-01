@@ -1,8 +1,8 @@
 package users
 
 import (
-	"errors"
 	"net/http"
+	"net/mail"
 
 	"github.com/starfederation/datastar-go/datastar"
 
@@ -32,8 +32,23 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if signals.Username == "" || signals.Password == "" {
-		return errors.New("missing username or password")
+	var userErr, pwErr string
+	if signals.Username == "" {
+		userErr = "Username is required."
+	}
+	if signals.Password == "" {
+		pwErr = "Password is required."
+	}
+
+	if signals.Username != "" {
+		_, err = mail.ParseAddress(signals.Username)
+		if err != nil {
+			userErr = "Username must be a valid email address."
+		}
+	}
+
+	if userErr != "" || pwErr != "" {
+		return datastar.NewSSE(w, r).PatchElementTempl(newUserForm(userErr, pwErr))
 	}
 
 	err = h.UserRepo.CreateUser(r.Context(), signals.Username, signals.Password)
@@ -47,6 +62,17 @@ func (h UsersHandler) Create(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	sse := datastar.NewSSE(w, r)
+	// Clear the form
+	signals.Username = ""
+	signals.Password = ""
+	err = sse.MarshalAndPatchSignals(signals)
+	if err != nil {
+		return err
+	}
+	err = sse.PatchElementTempl(newUserForm("", ""))
+	if err != nil {
+		return err
+	}
 	return sse.PatchElementTempl(userTable(users))
 }
 

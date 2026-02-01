@@ -19,6 +19,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
+import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
 
 func Shell() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -176,17 +177,30 @@ func Shell() templ.Component {
 					return templ_7745c5c3_Err
 				}
 				if adminmiddleware.IsAdmin(ctx) {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li><li><a data-on:click=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var6 string
+					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(dstar.SendPostf("/admin/logout"))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/components/shell.templ`, Line: 84, Col: 57}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"hover:cursor-pointer\">Logout</a></li>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<li><a href=\"/admin/login\">Login</a></li>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<li><a href=\"/admin/login\">Login</a></li>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</ul></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</ul></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -211,7 +225,7 @@ func Shell() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -235,9 +249,9 @@ func errorToast(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = toast.Toast(toast.Props{
