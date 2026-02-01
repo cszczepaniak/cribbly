@@ -2,6 +2,7 @@ package games
 
 import (
 	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
@@ -43,7 +44,9 @@ templ index(games []game) {
 			}
 			@gameList(games)
 		}
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 	}
 }
 

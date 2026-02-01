@@ -8,7 +8,7 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 )
 
 type ProfileHandler struct {
@@ -34,7 +34,7 @@ func (h ProfileHandler) ChangePassword(w http.ResponseWriter, r *http.Request) e
 		return errors.New("passwords must match")
 	}
 
-	sesh := adminmiddleware.GetSession(r.Context())
+	sesh := middleware.GetSession(r.Context())
 
 	hash, err := argon2id.CreateHash(signals.Password, argon2id.DefaultParams)
 	if err != nil {

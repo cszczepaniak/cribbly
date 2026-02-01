@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	mw "github.com/cszczepaniak/cribbly/internal/server/middleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
@@ -27,7 +27,7 @@ func Setup(cfg Config) http.Handler {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
 
-	r := NewRouter(mux, adminmiddleware.AuthenticationMiddleware(cfg.UserRepo))
+	r := NewRouter(mux, mw.AuthenticationMiddleware(cfg.UserRepo), mw.IsProdMiddleware(cfg.IsProd))
 	r.Handle("GET /", index.Index)
 
 	setupAdminRoutes(cfg, r)
@@ -63,9 +63,9 @@ func Setup(cfg Config) http.Handler {
 	}
 	r.Handle("GET /tournament", tourneyHandler.Index)
 	r.Handle("GET /tournament/stream", tourneyHandler.Stream)
-	r.Handle("POST /tournament", tourneyHandler.Generate, adminmiddleware.ErrorIfNotAdmin())
-	r.Handle("DELETE /tournament", tourneyHandler.Delete, adminmiddleware.ErrorIfNotAdmin())
-	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, adminmiddleware.ErrorIfNotAdmin())
+	r.Handle("POST /tournament", tourneyHandler.Generate, mw.ErrorIfNotAdmin())
+	r.Handle("DELETE /tournament", tourneyHandler.Delete, mw.ErrorIfNotAdmin())
+	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
 
 	return mux
 }
@@ -83,7 +83,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	r.Handle("GET /admin/register", admin.RegisterPage)
 	r.Handle("POST /admin/register", ah.Register)
 
-	adminRouter := r.Group("/admin", adminmiddleware.RedirectToLoginIfNotAdmin())
+	adminRouter := r.Group("/admin", mw.RedirectToLoginIfNotAdmin())
 	adminRouter.Handle("GET /", admin.Index)
 
 	ph := players.PlayersHandler{

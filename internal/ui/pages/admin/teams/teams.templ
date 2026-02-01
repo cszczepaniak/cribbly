@@ -5,6 +5,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	teamsservice "github.com/cszczepaniak/cribbly/internal/service/teams"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
@@ -29,7 +30,9 @@ templ index(ts []teams.Team, playersByTeam map[string][]players.Player) {
 			Create New Team
 		}
 		@teamGrid(ts, playersByTeam)
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 		@confirmDeleteDialog()
 	}
 }

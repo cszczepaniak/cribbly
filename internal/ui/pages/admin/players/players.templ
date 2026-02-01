@@ -2,6 +2,7 @@ package players
 
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
@@ -54,7 +55,9 @@ templ playerRegistrationPage(players []players.Player) {
 			}
 			@playerTable(players)
 		}
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 	}
 }
 

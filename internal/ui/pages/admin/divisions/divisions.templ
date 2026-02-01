@@ -5,6 +5,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
@@ -32,7 +33,9 @@ templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
 			Create New Division
 		}
 		@divisionGrid(ds, teamsByDivision)
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 		@confirmDeleteDialog()
 	}
 }

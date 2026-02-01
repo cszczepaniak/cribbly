@@ -10,6 +10,7 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 )
 
 type AdminHandler struct {
@@ -81,7 +82,7 @@ func (h AdminHandler) DoLogin(w http.ResponseWriter, r *http.Request) error {
 		Value:    sessionID,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // TODO: only in dev
+		Secure:   middleware.IsProd(r.Context()),
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -96,7 +97,7 @@ func (h AdminHandler) DoLogout(w http.ResponseWriter, r *http.Request) error {
 		Path:     "/",
 		Expires:  time.Now().Add(-time.Hour),
 		HttpOnly: true,
-		Secure:   false, // TODO: only in dev
+		Secure:   middleware.IsProd(r.Context()),
 		SameSite: http.SameSiteLaxMode,
 	})
 	http.Redirect(w, r, "/admin/login", http.StatusFound)

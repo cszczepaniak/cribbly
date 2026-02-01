@@ -15,6 +15,7 @@ type Config struct {
 		Username string `env:"SEED_USERNAME"`
 		Password string `env:"SEED_PASSWORD"`
 	}
+	Environment string `env:"RAILWAY_ENVIRONMENT_NAME"`
 }
 
 func Load(cfg *Config) error {

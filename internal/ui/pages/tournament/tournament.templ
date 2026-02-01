@@ -3,6 +3,7 @@ package tournament
 import (
 	"cmp"
 	"fmt"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
@@ -12,7 +13,6 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
 )
 
 templ index(rounds []round) {
@@ -27,7 +27,7 @@ templ tournamentPage(rounds []round) {
 	<div id="tournament" class="p-4">
 		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
 		if len(rounds) == 0 {
-			if adminmiddleware.IsAdmin(ctx) {
+			if middleware.IsAdmin(ctx) {
 				@tournamentControls()
 			} else {
 				<p>The tournament hasn't started yet.</p>
@@ -35,7 +35,9 @@ templ tournamentPage(rounds []round) {
 		} else {
 			@roundDisplay(rounds, 0)
 		}
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 	</div>
 }
 
@@ -122,7 +124,7 @@ templ teamArea(props teamAreaProps) {
 			{ cmp.Or(props.name, "x") }
 		</p>
 		@button.Button(button.Props{
-			Class:   utils.If(props.winnerName != "" || !props.gameReady || !adminmiddleware.IsAdmin(ctx), "invisible"),
+			Class:   utils.If(props.winnerName != "" || !props.gameReady || !middleware.IsAdmin(ctx), "invisible"),
 			Variant: button.VariantGhost,
 			Attributes: utils.Attrs(
 				utils.DataOnClick(dstar.SendPostf(
@@ -187,68 +189,64 @@ templ tournamentTable(rows []row) {
 }
 
 templ tournamentControls() {
-	if adminmiddleware.IsAdmin(ctx) {
-		@form.Item(form.ItemProps{
-			Class: "mb-4",
+	@form.Item(form.ItemProps{
+		Class: "mb-4",
+	}) {
+		@form.Label() {
+			Number of Tournament Teams
+		}
+		@selectbox.SelectBox(selectbox.Props{
+			Multiple: false,
 		}) {
-			@form.Label() {
-				Number of Tournament Teams
-			}
-			@selectbox.SelectBox(selectbox.Props{
-				Multiple: false,
+			@selectbox.Trigger(selectbox.TriggerProps{
+				Attributes: utils.Attrs(
+					utils.DataBind("size"),
+				),
+				Class: "w-fit",
 			}) {
-				@selectbox.Trigger(selectbox.TriggerProps{
-					Attributes: utils.Attrs(
-						utils.DataBind("size"),
-					),
-					Class: "w-fit",
+				@selectbox.Value()
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				@selectbox.Item(selectbox.ItemProps{
+					Value: "16",
 				}) {
-					@selectbox.Value()
+					16
 				}
-				@selectbox.Content(selectbox.ContentProps{
-					NoSearch: true,
+				@selectbox.Item(selectbox.ItemProps{
+					Value: "32",
 				}) {
-					@selectbox.Item(selectbox.ItemProps{
-						Value: "16",
-					}) {
-						16
-					}
-					@selectbox.Item(selectbox.ItemProps{
-						Value: "32",
-					}) {
-						32
-					}
+					32
 				}
 			}
 		}
-		@button.Button(button.Props{
-			Attributes: utils.Attrs(
-				utils.DataOnClick(dstar.SendPostf("/tournament")),
-				utils.Attr("data-attr:disabled", "$size===''"),
-			),
-		}) {
-			Generate Tournament
-		}
+	}
+	@button.Button(button.Props{
+		Attributes: utils.Attrs(
+			utils.DataOnClick(dstar.SendPostf("/tournament")),
+			utils.Attr("data-attr:disabled", "$size===''"),
+		),
+	}) {
+		Generate Tournament
 	}
 }
 
 templ devTools() {
-	if adminmiddleware.IsAdmin(ctx) {
-		@accordion.Accordion() {
-			@accordion.Item() {
-				@accordion.Trigger() {
-					Dev Tools
-				}
-				@accordion.Content() {
-					@button.Button(button.Props{
-						Class: "my-4",
-						Attributes: utils.Attrs(
-							utils.DataOnClick(dstar.SendDeletef("/tournament")),
-						),
-						Variant: button.VariantDestructive,
-					}) {
-						Delete Tournament
-					}
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				Dev Tools
+			}
+			@accordion.Content() {
+				@button.Button(button.Props{
+					Class: "my-4",
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendDeletef("/tournament")),
+					),
+					Variant: button.VariantDestructive,
+				}) {
+					Delete Tournament
 				}
 			}
 		}
