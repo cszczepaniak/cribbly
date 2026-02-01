@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"net/mail"
 	"slices"
 	"time"
 
@@ -86,12 +87,12 @@ func (s Repository) GetAll(ctx context.Context) ([]User, error) {
 
 // CreateUser creates the given user.
 func (s Repository) CreateUser(ctx context.Context, username, passwordHash string) error {
-	_, err := s.DB.ExecContext(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
+	_, err := mail.ParseAddress(username)
 	if err != nil {
-		return err
+		return errors.New("username must be a valid email address")
 	}
 
-	return nil
+	return s.DB.ExecVoid(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
 }
 
 // GetPassword returns the persisted hash of the password for the given user.
