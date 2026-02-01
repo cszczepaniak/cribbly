@@ -69,7 +69,10 @@ templ roundDisplay(rounds []round, idx int) {
 					data-style:translate="`-${$round*100}% 0`"
 				>
 					<p class="pl-2 pb-1 text-muted-foreground italic">Round { fmt.Sprint(i+1) }</p>
-					<div class="min-w-2xs space-y-4 flex flex-col grow justify-around">
+					<div
+						class="min-w-2xs space-y-4 flex flex-col grow justify-around"
+						data-style:display={ fmt.Sprintf("$round > %d ? 'none' : 'flex'", i) }
+					>
 						for j, g := range round.games {
 							@game(g, i, j)
 						}
