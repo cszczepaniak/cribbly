@@ -8,7 +8,7 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/middleware"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 )
 
 type ProfileHandler struct {

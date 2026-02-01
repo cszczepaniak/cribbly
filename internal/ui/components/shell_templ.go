@@ -18,7 +18,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
-import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/middleware"
+import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
 
 func Shell() templ.Component {
@@ -175,8 +175,8 @@ func Shell() templ.Component {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
-				}middleware
-				if adminmiddleware.IsAdmin(ctx) {
+				}
+				if middleware.IsAdmin(ctx) {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li><li><a data-on:click=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

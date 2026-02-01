@@ -10,7 +10,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/toast"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/carousel"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
-import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/adminmiddleware"
+import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
 
 templ Shell() {
@@ -72,7 +72,7 @@ templ Shell() {
 							<p>Admin Pages</p>
 							@separator.Separator()
 						</div>
-						if adminmiddleware.IsAdmin(ctx) {
+						if middleware.IsAdmin(ctx) {
 							<li><a href="/admin/players">Players</a></li>
 							<li><a href="/admin/teams">Teams</a></li>
 							<li><a href="/admin/divisions">Divisions</a></li>

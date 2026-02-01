@@ -11,6 +11,7 @@ import (
 
 	"github.com/a-h/templ"
 	templruntime "github.com/a-h/templ/runtime"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
@@ -20,7 +21,6 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
-	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/middleware"
 )
 
 func index(rounds []round) templ.Component {
