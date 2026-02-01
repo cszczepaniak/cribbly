@@ -2,6 +2,7 @@ package components
 
 import (
 	"github.com/a-h/templ"
+
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 )
 
