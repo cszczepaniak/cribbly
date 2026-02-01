@@ -18,6 +18,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
@@ -32,7 +33,9 @@ templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
 			Create New Division
 		}
 		@divisionGrid(ds, teamsByDivision)
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 		@confirmDeleteDialog()
 	}
 }

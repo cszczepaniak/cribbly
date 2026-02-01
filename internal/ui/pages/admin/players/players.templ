@@ -11,6 +11,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 templ playerRegistrationPage(players []players.Player) {
@@ -54,7 +55,9 @@ templ playerRegistrationPage(players []players.Player) {
 			}
 			@playerTable(players)
 		}
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 	}
 }
 

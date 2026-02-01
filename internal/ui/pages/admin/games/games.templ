@@ -10,6 +10,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 templ index(games []game) {
@@ -43,7 +44,9 @@ templ index(games []game) {
 			}
 			@gameList(games)
 		}
-		@devTools()
+		@components.DevTools() {
+			@devTools()
+		}
 	}
 }
 
