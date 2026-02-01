@@ -89,6 +89,20 @@ func (h AdminHandler) DoLogin(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func (h AdminHandler) DoLogout(w http.ResponseWriter, r *http.Request) error {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: true,
+		Secure:   false, // TODO: only in dev
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, "/admin/login", http.StatusFound)
+	return nil
+}
+
 func (h AdminHandler) Register(w http.ResponseWriter, r *http.Request) error {
 	var signals struct {
 		Username       string `json:"username"`
