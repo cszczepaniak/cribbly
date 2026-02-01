@@ -3,12 +3,11 @@ package users
 import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
-	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 templ index(users []users.User) {
@@ -19,34 +18,7 @@ templ index(users []users.User) {
 				New admin users can be created here. Once an admin logs in, they'll be free to change
 				their password.
 			</p>
-			@form.Item() {
-				@form.Label() {
-					Username
-				}
-				@input.Input(input.Props{
-					Attributes: map[string]any{
-						"data-bind": "username",
-					},
-				})
-			}
-			@form.Item() {
-				@form.Label() {
-					Password
-				}
-				@input.Input(input.Props{
-					Type: input.TypePassword,
-					Attributes: map[string]any{
-						"data-bind": "password",
-					},
-				})
-			}
-			@button.Button(button.Props{
-				Attributes: map[string]any{
-					"data-on:click": dstar.SendPostf("/admin/users"),
-				},
-			}) {
-				Add User
-			}
+			@newUserForm("", "")
 		</div>
 		@table.Table(table.Props{
 			Class: "mt-4",
@@ -59,6 +31,27 @@ templ index(users []users.User) {
 			@userTable(users)
 		}
 	}
+}
+
+templ newUserForm(usernameErr, passwordErr string) {
+	<form id="new-user" data-on:submit={ dstar.SendPostf("/admin/users") } class="space-y-4">
+		@components.Input(components.InputProps{
+			Label:        "Username",
+			DataBind:     "username",
+			ErrorMessage: usernameErr,
+		})
+		@components.Input(components.InputProps{
+			Label:        "Password",
+			DataBind:     "password",
+			ErrorMessage: passwordErr,
+			Password:     true,
+		})
+		@button.Button(button.Props{
+			Type: button.TypeSubmit,
+		}) {
+			Add User
+		}
+	</form>
 }
 
 templ userTable(users []users.User) {
