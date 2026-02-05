@@ -1,7 +1,6 @@
 package divisions
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -305,7 +304,7 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 }
 
 type divisionQR struct {
-	img          string
+	img          []byte
 	divisionName string
 }
 
@@ -331,8 +330,7 @@ func (h DivisionsHandler) GenerateQRCodes(w http.ResponseWriter, r *http.Request
 			return err
 		}
 
-		img := fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(png))
-		qrs = append(qrs, divisionQR{img: img, divisionName: div.Name})
+		qrs = append(qrs, divisionQR{img: png, divisionName: div.Name})
 	}
 
 	return qrPage(qrs).Render(r.Context(), w)

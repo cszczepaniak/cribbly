@@ -19,6 +19,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+	"encoding/base64"
 )
 
 templ index(ds []divisions.Division, teamsByDivision map[string][]teams.Team) {
@@ -332,7 +333,7 @@ templ qrPage(qrs []divisionQR) {
 			for _, qr := range qrs {
 				<div>
 					<p class="break-after-avoid-page">{ qr.divisionName }</p>
-					<img src={ qr.img }/>
+					<img src={ fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(qr.img)) }/>
 				</div>
 			}
 		</div>
