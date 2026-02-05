@@ -6,8 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/cszczepaniak/cribbly/internal/assert"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )
@@ -23,7 +22,7 @@ func TestGeneratePairs_4(t *testing.T) {
 		ID: "4",
 	}}
 	pairs, err := generateMatchups(allTeams)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, []string{
 		"1,2",
@@ -48,7 +47,7 @@ func TestGeneratePairs_5(t *testing.T) {
 		ID: "5",
 	}}
 	_, err := generateMatchups(allTeams)
-	require.Error(t, err)
+	assert.Error(t, err)
 }
 
 func TestGeneratePairs_6(t *testing.T) {
@@ -66,7 +65,7 @@ func TestGeneratePairs_6(t *testing.T) {
 		ID: "6",
 	}}
 	pairs, err := generateMatchups(allTeams)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, []string{
 		"1,2",

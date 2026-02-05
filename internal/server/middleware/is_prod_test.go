@@ -5,8 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/cszczepaniak/cribbly/internal/assert"
 )
 
 func TestIsProdMiddleware(t *testing.T) {
@@ -20,7 +19,7 @@ func TestIsProdMiddleware(t *testing.T) {
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		err := IsProdMiddleware(isProd)(assertIsProdHandler)(w, r)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	}
 
 	s := httptest.NewServer(http.HandlerFunc(handler))
@@ -30,11 +29,11 @@ func TestIsProdMiddleware(t *testing.T) {
 	expIsProd = true
 
 	_, err := s.Client().Get(s.URL)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	isProd = false
 	expIsProd = false
 
 	_, err = s.Client().Get(s.URL)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 }

@@ -1,12 +1,12 @@
 package players
 
 import (
+	"cmp"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
+	"github.com/cszczepaniak/cribbly/internal/assert"
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
@@ -15,17 +15,17 @@ func TestPlayerRepo(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
 	s := NewRepository(db)
 
-	require.NoError(t, s.Init(t.Context()))
+	assert.NoError(t, s.Init(t.Context()))
 
 	id1, err := s.Create(t.Context(), "Mario", "Mario")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	id2, err := s.Create(t.Context(), "Luigi", "Mario")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	id3, err := s.Create(t.Context(), "Waluigi", "Wario")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	players, err := s.GetAll(t.Context())
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -43,6 +43,7 @@ func TestPlayerRepo(t *testing.T) {
 			LastName:  "Wario",
 		}},
 		players,
+		func(x, y Player) int { return cmp.Compare(x.ID, y.ID) },
 	)
 }
 
@@ -50,15 +51,15 @@ func TestAssigningPlayers(t *testing.T) {
 	db := sqlite.NewInMemoryForTest(t)
 	s := NewRepository(db)
 
-	require.NoError(t, s.Init(t.Context()))
+	assert.NoError(t, s.Init(t.Context()))
 
 	id1, err := s.Create(t.Context(), "Mario", "Mario")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	id2, err := s.Create(t.Context(), "Luigi", "Mario")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	players, err := s.GetFreeAgents(t.Context())
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -72,18 +73,19 @@ func TestAssigningPlayers(t *testing.T) {
 			LastName:  "Mario",
 		}},
 		players,
+		func(x, y Player) int { return cmp.Compare(x.ID, y.ID) },
 	)
 
 	mario := players[0]
 	teamID := uuid.NewString()
 
 	err = s.AssignToTeam(t.Context(), mario.ID, teamID)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	// Now mario is on a team, so we should only see luigi as a free agent.
 	players, err = s.GetFreeAgents(t.Context())
-	require.NoError(t, err)
-	require.Len(t, players, 1)
+	assert.NoError(t, err)
+	assert.SliceLen(t, players, 1)
 	assert.Equal(t,
 		Player{
 			ID:        id2,
@@ -95,8 +97,8 @@ func TestAssigningPlayers(t *testing.T) {
 
 	// We should also see mario on the team
 	players, err = s.GetForTeam(t.Context(), teamID)
-	require.NoError(t, err)
-	require.Len(t, players, 1)
+	assert.NoError(t, err)
+	assert.SliceLen(t, players, 1)
 	assert.Equal(t,
 		Player{
 			ID:        id1,
@@ -112,16 +114,16 @@ func TestAssigningPlayers(t *testing.T) {
 	assert.ErrorIs(t, err, ErrPlayerAlreadyOnATeam)
 
 	// Unassigning mario from a different team is an error.
-	require.Error(t, s.UnassignFromTeam(t.Context(), "not the team", moreiter.Of(mario.ID)))
+	assert.Error(t, s.UnassignFromTeam(t.Context(), "not the team", moreiter.Of(mario.ID)))
 
 	// Unassigning mario should make him a free agent again.
-	require.NoError(t, s.UnassignFromTeam(t.Context(), teamID, moreiter.Of(mario.ID)))
+	assert.NoError(t, s.UnassignFromTeam(t.Context(), teamID, moreiter.Of(mario.ID)))
 
 	// Unassigning mario again is an error.
-	require.Error(t, s.UnassignFromTeam(t.Context(), teamID, moreiter.Of(mario.ID)))
+	assert.Error(t, s.UnassignFromTeam(t.Context(), teamID, moreiter.Of(mario.ID)))
 
 	players, err = s.GetFreeAgents(t.Context())
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -135,5 +137,6 @@ func TestAssigningPlayers(t *testing.T) {
 			LastName:  "Mario",
 		}},
 		players,
+		func(x, y Player) int { return cmp.Compare(x.ID, y.ID) },
 	)
 }
