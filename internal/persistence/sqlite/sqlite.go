@@ -8,7 +8,6 @@ import (
 
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 func New(dsn string) (*sql.DB, error) {
@@ -20,5 +19,5 @@ func New(dsn string) (*sql.DB, error) {
 		}
 	}
 
-	return sql.Open("libsql", dsn)
+	return sql.Open("sqlite3", dsn)
 }
