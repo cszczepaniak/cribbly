@@ -1,8 +1,11 @@
 package divisions
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"image/png"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -325,12 +328,24 @@ func (h DivisionsHandler) GenerateQRCodes(w http.ResponseWriter, r *http.Request
 
 	qrs := make([]divisionQR, 0, len(divs))
 	for _, div := range divs {
-		png, err := qrcode.Encode(fmt.Sprintf("%s/divisions/%s", host, div.ID), qrcode.Medium, 256)
+		q, err := qrcode.New(fmt.Sprintf("%s/divisions/%s", host, div.ID), qrcode.Medium)
+		if err != nil {
+			return err
+		}
+		q.DisableBorder = true
+
+		img := q.Image(256)
+		encoder := png.Encoder{CompressionLevel: png.BestCompression}
+
+		buf := bytes.NewBuffer(nil)
+		w := base64.NewEncoder(base64.StdEncoding, buf)
+
+		err = encoder.Encode(w, img)
 		if err != nil {
 			return err
 		}
 
-		qrs = append(qrs, divisionQR{img: png, divisionName: div.Name})
+		qrs = append(qrs, divisionQR{img: buf.Bytes(), divisionName: div.Name})
 	}
 
 	return qrPage(qrs).Render(r.Context(), w)
