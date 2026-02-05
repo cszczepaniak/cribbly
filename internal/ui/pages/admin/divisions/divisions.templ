@@ -1,6 +1,7 @@
 package divisions
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -326,6 +327,19 @@ templ confirmDeleteDialog() {
 	}
 }
 
+templ qrPage(qrs []divisionQR) {
+	@components.Document() {
+		<div class="p-2 grid grid-cols-2 max-w-[8.5in]">
+			for _, qr := range qrs {
+				<div>
+					<p class="break-after-avoid-page">{ qr.divisionName }</p>
+					<img src={ fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(qr.img)) }/>
+				</div>
+			}
+		</div>
+	}
+}
+
 templ devTools() {
 	@accordion.Accordion() {
 		@accordion.Item() {
@@ -351,6 +365,15 @@ templ devTools() {
 				}) {
 					Delete All Divisions
 				}
+			}
+			@accordion.Content() {
+				<a href="/admin/divisions/qrs" target="_blank">
+					@button.Button(button.Props{
+						Class: "my-4",
+					}) {
+						Generate QR Codes
+					}
+				</a>
 			}
 		}
 	}

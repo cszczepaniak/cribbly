@@ -549,6 +549,9 @@
   .max-w-16 {
     max-width: calc(var(--spacing) * 16);
   }
+  .max-w-\[8\.5in\] {
+    max-width: 8.5in;
+  }
   .max-w-\[calc\(100\%-2rem\)\] {
     max-width: calc(100% - 2rem);
   }
@@ -666,6 +669,12 @@
   }
   .columns-4 {
     columns: 4;
+  }
+  .break-after-avoid-page {
+    break-after: avoid-page;
+  }
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -2,9 +2,13 @@ package divisions
 
 import (
 	"errors"
+	"fmt"
+	"log/slog"
 	"net/http"
+	"net/url"
 
 	"github.com/jaswdr/faker/v2"
+	qrcode "github.com/skip2/go-qrcode"
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
@@ -297,4 +301,37 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return nil
+}
+
+type divisionQR struct {
+	img          []byte
+	divisionName string
+}
+
+func (h DivisionsHandler) GenerateQRCodes(w http.ResponseWriter, r *http.Request) error {
+	divs, err := h.DivisionRepo.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	var host string
+	ref, err := url.Parse(r.Header.Get("Referer"))
+	if err != nil {
+		slog.Error("could not parse Referer header", "err", err)
+		host = r.Host
+	} else {
+		host = ref.Scheme + "://" + ref.Host
+	}
+
+	qrs := make([]divisionQR, 0, len(divs))
+	for _, div := range divs {
+		png, err := qrcode.Encode(fmt.Sprintf("%s/divisions/%s", host, div.ID), qrcode.Medium, 256)
+		if err != nil {
+			return err
+		}
+
+		qrs = append(qrs, divisionQR{img: png, divisionName: div.Name})
+	}
+
+	return qrPage(qrs).Render(r.Context(), w)
 }
