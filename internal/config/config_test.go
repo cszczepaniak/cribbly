@@ -4,8 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/cszczepaniak/cribbly/internal/assert"
 )
 
 type testConfig struct {
@@ -28,7 +27,7 @@ func TestPopulate(t *testing.T) {
 	t.Setenv("NESTED_2", "nested2")
 	cfg := &testConfig{}
 
-	require.NoError(t, populate(reflect.ValueOf(cfg)))
+	assert.NoError(t, populate(reflect.ValueOf(cfg)))
 
 	assert.Equal(t, "str1", cfg.MyStr)
 	assert.Equal(t, 123, cfg.MyInt)
@@ -42,7 +41,7 @@ func TestPopulate(t *testing.T) {
 
 	cfg = &testConfig{}
 
-	require.NoError(t, populate(reflect.ValueOf(cfg)))
+	assert.NoError(t, populate(reflect.ValueOf(cfg)))
 
 	assert.Equal(t, "str1", cfg.MyStr)
 	assert.Equal(t, 123, cfg.MyInt)

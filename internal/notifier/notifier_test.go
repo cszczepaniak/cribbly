@@ -5,7 +5,7 @@ import (
 	"testing"
 	"testing/synctest"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/cszczepaniak/cribbly/internal/assert"
 )
 
 func TestNotifier(t *testing.T) {
