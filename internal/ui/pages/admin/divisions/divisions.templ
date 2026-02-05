@@ -326,13 +326,13 @@ templ confirmDeleteDialog() {
 	}
 }
 
-templ qrPage(imgs []string) {
+templ qrPage(qrs []divisionQR) {
 	@components.Document() {
-		<div data-init="window.print()" class="grid grid-cols-2 max-w-[8.5in]">
-			for i, img := range imgs {
+		<div class="p-2 grid grid-cols-2 max-w-[8.5in]">
+			for _, qr := range qrs {
 				<div>
-					<p class="break-after-avoid-page">Image { fmt.Sprint(i) }</p>
-					<img src={ img }/>
+					<p class="break-after-avoid-page">{ qr.divisionName }</p>
+					<img src={ qr.img }/>
 				</div>
 			}
 		</div>

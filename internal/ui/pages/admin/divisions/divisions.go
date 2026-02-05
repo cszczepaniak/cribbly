@@ -4,7 +4,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"net/url"
 
 	"github.com/jaswdr/faker/v2"
 	qrcode "github.com/skip2/go-qrcode"
@@ -302,17 +304,36 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type divisionQR struct {
+	img          string
+	divisionName string
+}
+
 func (h DivisionsHandler) GenerateQRCodes(w http.ResponseWriter, r *http.Request) error {
-	n := 10
-	imgs := make([]string, 0, n)
-	for range n {
-		png, err := qrcode.Encode("https://google.com", qrcode.Medium, 256)
+	divs, err := h.DivisionRepo.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+
+	var host string
+	ref, err := url.Parse(r.Header.Get("Referer"))
+	if err != nil {
+		slog.Error("could not parse Referer header", "err", err)
+		host = r.Host
+	} else {
+		host = ref.Scheme + "://" + ref.Host
+	}
+
+	qrs := make([]divisionQR, 0, len(divs))
+	for _, div := range divs {
+		png, err := qrcode.Encode(fmt.Sprintf("%s/divisions/%s", host, div.ID), qrcode.Medium, 256)
 		if err != nil {
 			return err
 		}
 
-		imgs = append(imgs, fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(png)))
+		img := fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(png))
+		qrs = append(qrs, divisionQR{img: img, divisionName: div.Name})
 	}
 
-	return qrPage(imgs).Render(r.Context(), w)
+	return qrPage(qrs).Render(r.Context(), w)
 }
