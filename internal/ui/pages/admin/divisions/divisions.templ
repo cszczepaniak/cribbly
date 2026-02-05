@@ -1,7 +1,6 @@
 package divisions
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -336,11 +335,11 @@ templ confirmDeleteDialog() {
 
 templ qrPage(qrs []divisionQR) {
 	@components.Document() {
-		<div class="p-2 grid grid-cols-2 max-w-[8.5in]">
+		<div class="p-4 grid grid-cols-2 gap-y-6 max-w-[8.5in]">
 			for _, qr := range qrs {
-				<div>
-					<p class="break-after-avoid-page">{ qr.divisionName }</p>
-					<img src={ fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(qr.img)) }/>
+				<div class="mx-auto">
+					<p class="break-after-avoid-page text-center text-2xl mb-2">{ qr.divisionName }</p>
+					<img src={ fmt.Sprintf("data:image/png;base64,%s", string(qr.img)) }/>
 				</div>
 			}
 		</div>
