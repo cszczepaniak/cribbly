@@ -4,9 +4,9 @@ import (
 	"cmp"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
 	"github.com/google/uuid"
 
+	"github.com/cszczepaniak/cribbly/internal/assert"
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
