@@ -326,6 +326,19 @@ templ confirmDeleteDialog() {
 	}
 }
 
+templ qrPage(imgs []string) {
+	@components.Document() {
+		<div data-init="window.print()" class="grid grid-cols-2 max-w-[8.5in]">
+			for i, img := range imgs {
+				<div>
+					<p class="break-after-avoid-page">Image { fmt.Sprint(i) }</p>
+					<img src={ img }/>
+				</div>
+			}
+		</div>
+	}
+}
+
 templ devTools() {
 	@accordion.Accordion() {
 		@accordion.Item() {
@@ -353,7 +366,7 @@ templ devTools() {
 				}
 			}
 			@accordion.Content() {
-				<a href="/admin/divisions/qrs">
+				<a href="/admin/divisions/qrs" target="_blank">
 					@button.Button(button.Props{
 						Class: "my-4",
 					}) {
