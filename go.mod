@@ -6,7 +6,7 @@ require (
 	github.com/Oudwins/tailwind-merge-go v0.2.1
 	github.com/a-h/templ v0.3.857
 	github.com/alexedwards/argon2id v1.0.0
-	github.com/cszczepaniak/go-sqlbuilder v0.0.7
+	github.com/cszczepaniak/go-sqlbuilder v0.0.9
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/jaswdr/faker/v2 v2.9.1
