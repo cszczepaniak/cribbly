@@ -39,5 +39,9 @@ func (h Handler) GetDivisions(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	slices.SortFunc(ts, func(a, b teams.Team) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+
 	return Division(d, ts).Render(r.Context(), w)
 }
