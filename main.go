@@ -11,7 +11,7 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/config"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -47,36 +47,34 @@ func runMain() error {
 		return err
 	}
 
-	pDB := persistence.NewDatabase(db)
-
 	scoreUpdateNotifier := &notifier.Notifier{}
 	tournamentNotifier := &notifier.Notifier{}
 
-	playerRepo := players.NewRepository(pDB)
+	playerRepo := players.NewRepository(db)
 	err = playerRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	teamRepo := teams.NewRepository(pDB)
+	teamRepo := teams.NewRepository(db)
 	err = teamRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	divisionRepo := divisions.NewRepository(pDB)
+	divisionRepo := divisions.NewRepository(db)
 	err = divisionRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	gameRepo := games.NewRepository(pDB, scoreUpdateNotifier)
+	gameRepo := games.NewRepository(db, scoreUpdateNotifier)
 	err = gameRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	userRepo := users.NewRepository(pDB)
+	userRepo := users.NewRepository(db)
 	err = userRepo.Init(ctx)
 	if err != nil {
 		return err
@@ -94,7 +92,7 @@ func runMain() error {
 	}
 
 	scfg := server.Config{
-		Transactor:          persistence.NewTransactor(db),
+		Transactor:          database.NewTransactor(db),
 		PlayerRepo:          playerRepo,
 		TeamRepo:            teamRepo,
 		DivisionRepo:        divisionRepo,

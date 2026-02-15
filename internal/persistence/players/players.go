@@ -16,7 +16,7 @@ import (
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 var (
@@ -35,11 +35,11 @@ func (p Player) Name() string {
 }
 
 type Repository struct {
-	db persistence.DB
+	db database.Database
 	b  *sqlbuilder.Builder
 }
 
-func NewRepository(db persistence.Database) Repository {
+func NewRepository(db database.Database) Repository {
 	return Repository{
 		db: db,
 		b:  sqlbuilder.New(formatter.Sqlite{}),

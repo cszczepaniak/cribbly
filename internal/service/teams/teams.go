@@ -7,18 +7,18 @@ import (
 	"slices"
 
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )
 
 type Service struct {
-	txer       persistence.Transactor
+	txer       database.Transactor
 	playerRepo players.Repository
 	teamRepo   teams.Repository
 }
 
-func New(txer persistence.Transactor, playerRepo players.Repository, teamRepo teams.Repository) Service {
+func New(txer database.Transactor, playerRepo players.Repository, teamRepo teams.Repository) Service {
 	return Service{
 		txer:       txer,
 		playerRepo: playerRepo,

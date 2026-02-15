@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/cszczepaniak/cribbly/internal/assert"
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
-func NewInMemoryForTest(t testing.TB) persistence.Database {
+func NewInMemoryForTest(t testing.TB) database.Database {
 	t.Helper()
 
 	db, err := New("file::memory:")
 	assert.NoError(t, err)
 
-	return persistence.NewDatabase(db)
+	return db
 }

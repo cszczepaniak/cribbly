@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 type Score struct {
@@ -27,12 +27,12 @@ type Game struct {
 }
 
 type Repository struct {
-	db            persistence.Database
+	db            database.Database
 	b             *sqlbuilder.Builder
 	scoreNotifier *notifier.Notifier
 }
 
-func NewRepository(db persistence.Database, scoreNotifier *notifier.Notifier) Repository {
+func NewRepository(db database.Database, scoreNotifier *notifier.Notifier) Repository {
 	return Repository{
 		db:            db,
 		b:             sqlbuilder.New(formatter.Sqlite{}),
