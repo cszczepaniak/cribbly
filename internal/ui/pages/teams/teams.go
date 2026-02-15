@@ -1,7 +1,9 @@
 package teams
 
 import (
+	"cmp"
 	"net/http"
+	"slices"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -78,6 +80,18 @@ func (h Handler) GetGames(w http.ResponseWriter, r *http.Request) error {
 			},
 		})
 	}
+
+	slices.SortFunc(games, func(a, b game) int {
+		// Put completed games at the end
+		if a.complete() && !b.complete() {
+			return 1
+		}
+		if !a.complete() && b.complete() {
+			return -1
+		}
+
+		return cmp.Compare(a.id, b.id)
+	})
 
 	return Games(t, games).Render(r.Context(), w)
 }
