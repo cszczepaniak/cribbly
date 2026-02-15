@@ -8,11 +8,12 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 import "fmt"
+import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 
 templ Game(props getGameProps) {
 	@components.Shell() {
 		<div class="w-full max-w-md mx-auto flex flex-col space-y-2 p-4">
-			if props.complete {
+			if props.complete && !middleware.IsAdmin(ctx) {
 				<h1 class="text-xl font-semibold">Game Completed</h1>
 				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
 				@table.Table() {
@@ -44,7 +45,13 @@ templ Game(props getGameProps) {
 					}
 				}
 			} else {
-				<h1 class="text-xl font-semibold">Record Game Score</h1>
+				<h1 class="text-xl font-semibold">
+					if props.complete && middleware.IsAdmin(ctx) {
+						Record Game Score (Admin Editing Completed Game)
+					} else {
+						Record Game Score
+					}
+				</h1>
 				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
 				@form.Item(form.ItemProps{
 					ID: "team-input",
