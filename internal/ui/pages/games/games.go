@@ -1,6 +1,7 @@
 package games
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/starfederation/datastar-go/datastar"
@@ -8,6 +9,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 )
 
 type Handler struct {
@@ -122,6 +124,10 @@ func (h Handler) UpdateGame(w http.ResponseWriter, r *http.Request) error {
 	scores, err := h.GameRepo.Get(r.Context(), gameID)
 	if err != nil {
 		return err
+	}
+
+	if (scores[0].Score != 0 || scores[1].Score != 0) && !middleware.IsAdmin(r.Context()) {
+		return errors.New("completed games can only be edited by an admin")
 	}
 
 	var losingID string

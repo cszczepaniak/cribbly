@@ -56,16 +56,6 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 	return sse.PatchElementTempl(gameList(gs))
 }
 
-// gameRowInfo is used to add a signal to each row so that we don't have to re-query for all of this
-// information on subsequent requests.
-type gameRowInfo struct {
-	DivisionName string `json:"divisionName"`
-	Team1ID      string `json:"team1ID"`
-	Team1Name    string `json:"team1Name"`
-	Team2Name    string `json:"team2Name"`
-	Team2ID      string `json:"team2ID"`
-}
-
 type gamesSignal struct {
 	Games []game `json:"games"`
 }

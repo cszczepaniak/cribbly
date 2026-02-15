@@ -6,6 +6,8 @@ import "fmt"
 import "github.com/cszczepaniak/cribbly/internal/persistence/teams"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+import "github.com/cszczepaniak/cribbly/internal/server/middleware"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 
 templ Games(team teams.Team, games []game) {
 	@components.Shell() {
@@ -26,7 +28,21 @@ templ Games(team teams.Team, games []game) {
 							}
 							}}
 							@card.Title() {
-								vs { vs }
+								<div class="flex flex-row justify-between items-center">
+									vs { vs }
+									if g.complete() && middleware.IsAdmin(ctx) {
+										<a
+											href={ templ.URL(fmt.Sprintf("/games/%s?fromID=%s", g.id, team.ID)) }
+											class="hover:cursor-pointer"
+										>
+											@button.Button(button.Props{
+												Variant: button.VariantGhost,
+											}) {
+												@icon.Pencil()
+											}
+										</a>
+									}
+								</div>
 							}
 						}
 						@card.Content() {
