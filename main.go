@@ -47,34 +47,36 @@ func runMain() error {
 		return err
 	}
 
+	pDB := persistence.NewDatabase(db)
+
 	scoreUpdateNotifier := &notifier.Notifier{}
 	tournamentNotifier := &notifier.Notifier{}
 
-	playerRepo := players.NewRepository(db)
+	playerRepo := players.NewRepository(pDB)
 	err = playerRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	teamRepo := teams.NewRepository(db)
+	teamRepo := teams.NewRepository(pDB)
 	err = teamRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	divisionRepo := divisions.NewRepository(db)
+	divisionRepo := divisions.NewRepository(pDB)
 	err = divisionRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	gameRepo := games.NewRepository(db, scoreUpdateNotifier)
+	gameRepo := games.NewRepository(pDB, scoreUpdateNotifier)
 	err = gameRepo.Init(ctx)
 	if err != nil {
 		return err
 	}
 
-	userRepo := users.NewRepository(db)
+	userRepo := users.NewRepository(pDB)
 	err = userRepo.Init(ctx)
 	if err != nil {
 		return err

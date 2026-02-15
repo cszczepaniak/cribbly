@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
+	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
+	"github.com/cszczepaniak/cribbly/internal/persistence"
 )
 
 type Score struct {
@@ -25,24 +27,21 @@ type Game struct {
 }
 
 type Repository struct {
-	repo.Base
+	db            persistence.Database
+	b             *sqlbuilder.Builder
 	scoreNotifier *notifier.Notifier
 }
 
-func NewRepository(db *sql.DB, scoreNotifier *notifier.Notifier) Repository {
+func NewRepository(db persistence.Database, scoreNotifier *notifier.Notifier) Repository {
 	return Repository{
-		Base:          repo.NewBase(db),
+		db:            db,
+		b:             sqlbuilder.New(formatter.Sqlite{}),
 		scoreNotifier: scoreNotifier,
 	}
 }
 
-func (s Repository) WithTx(tx *sql.Tx) Repository {
-	s.Base = s.Base.WithTx(tx)
-	return s
-}
-
 func (s Repository) Init(ctx context.Context) error {
-	_, err := s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Scores (
+	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Scores (
 			GameID VARCHAR(36),
 			TeamID VARCHAR(36),
 			Score SMALLINT,
@@ -53,7 +52,7 @@ func (s Repository) Init(ctx context.Context) error {
 		return err
 	}
 
-	_, err = s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS TournamentGames (
+	_, err = s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS TournamentGames (
 			Round   SMALLINT,
 			Idx     SMALLINT,
 			TeamID1 VARCHAR(36),
@@ -69,11 +68,11 @@ func (s Repository) Init(ctx context.Context) error {
 func (s Repository) Create(ctx context.Context, teamID1, teamID2 string) (string, error) {
 	id := uuid.NewString()
 
-	_, err := s.Builder.InsertIntoTable("Scores").
+	_, err := s.b.InsertIntoTable("Scores").
 		Fields("GameID", "TeamID", "Score").
 		Values(id, teamID1, 0).
 		Values(id, teamID2, 0).
-		ExecContext(ctx, s.DB)
+		ExecContext(ctx, s.db)
 	if err != nil {
 		return "", err
 	}
@@ -86,7 +85,7 @@ func (s Repository) InitializeTournament(ctx context.Context, numTeams int) erro
 		return errors.New("number of teams must be a power of two")
 	}
 
-	b := s.Builder.InsertIntoTable("TournamentGames").
+	b := s.b.InsertIntoTable("TournamentGames").
 		Fields("Round", "Idx")
 
 	numGamesInRound := numTeams / 2
@@ -99,12 +98,12 @@ func (s Repository) InitializeTournament(ctx context.Context, numTeams int) erro
 		round++
 	}
 
-	_, err := b.ExecContext(ctx, s.DB)
+	_, err := b.ExecContext(ctx, s.db)
 	return err
 }
 
 func (s Repository) DeleteTournament(ctx context.Context) error {
-	return s.DB.ExecVoid(ctx, `DELETE FROM TournamentGames`)
+	return s.db.ExecVoid(ctx, `DELETE FROM TournamentGames`)
 }
 
 type TournamentGame struct {
@@ -123,7 +122,7 @@ type Tournament struct {
 }
 
 func (s Repository) LoadTournament(ctx context.Context) (Tournament, error) {
-	rows, err := s.DB.QueryContext(
+	rows, err := s.db.QueryContext(
 		ctx,
 		// Ordering by DESC here allows us to allocate the exact size of the various arrays below.
 		`SELECT Round, Idx, TeamID1, TeamID2, Winner FROM TournamentGames
@@ -160,7 +159,7 @@ func (s Repository) LoadTournament(ctx context.Context) (Tournament, error) {
 }
 
 func (s Repository) PutTeam1IntoTournamentGame(ctx context.Context, round, idx int, teamID string) error {
-	return s.DB.ExecOne(
+	return s.db.ExecOne(
 		ctx,
 		`UPDATE TournamentGames SET TeamID1 = ? 
 		WHERE Round = ? AND Idx = ? AND TeamID1 IS NULL`,
@@ -169,7 +168,7 @@ func (s Repository) PutTeam1IntoTournamentGame(ctx context.Context, round, idx i
 }
 
 func (s Repository) PutTeam2IntoTournamentGame(ctx context.Context, round, idx int, teamID string) error {
-	return s.DB.ExecVoid(
+	return s.db.ExecVoid(
 		ctx,
 		`UPDATE TournamentGames SET TeamID2 = ? 
 		WHERE Round = ? AND Idx = ? AND TeamID2 IS NULL`,
@@ -178,7 +177,7 @@ func (s Repository) PutTeam2IntoTournamentGame(ctx context.Context, round, idx i
 }
 
 func (s Repository) SetTournamentGameWinner(ctx context.Context, round, idx int, winner string) error {
-	return s.DB.ExecOne(
+	return s.db.ExecOne(
 		ctx,
 		`UPDATE TournamentGames SET Winner = ? WHERE Round = ? AND Idx = ?`,
 		winner,
@@ -188,10 +187,10 @@ func (s Repository) SetTournamentGameWinner(ctx context.Context, round, idx int,
 }
 
 func (s Repository) UpdateScore(ctx context.Context, gameID, teamID string, score int) error {
-	_, err := s.Builder.UpdateTable("Scores").SetFieldTo("Score", score).WhereAll(
+	_, err := s.b.UpdateTable("Scores").SetFieldTo("Score", score).WhereAll(
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
-	).ExecContext(ctx, s.DB)
+	).ExecContext(ctx, s.db)
 	if err != nil {
 		return err
 	}
@@ -208,59 +207,40 @@ func (s Repository) UpdateScores(
 	team2ID string,
 	team2Score int,
 ) error {
-	tx, cancel, err := s.Base.EnsureTx(ctx)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-
-	mustUpdateOneRow := func(res sql.Result, err error) error {
-		n, err := res.RowsAffected()
+	return s.db.WithTx(ctx, func(ctx context.Context) error {
+		err := s.db.ExecOne(
+			ctx,
+			"UPDATE Scores SET Score = ? WHERE GameID = ? AND TeamID = ?",
+			team1Score,
+			gameID,
+			team1ID,
+		)
 		if err != nil {
 			return err
 		}
-		if n != 1 {
-			return errors.New("unknown team ID")
+
+		err = s.db.ExecOne(
+			ctx,
+			"UPDATE Scores SET Score = ? WHERE GameID = ? AND TeamID = ?",
+			team2Score,
+			gameID,
+			team2ID,
+		)
+
+		if err != nil {
+			return err
 		}
+
+		s.scoreNotifier.Notify()
 		return nil
-	}
-
-	err = mustUpdateOneRow(tx.ExecContext(
-		ctx,
-		"UPDATE Scores SET Score = ? WHERE GameID = ? AND TeamID = ?",
-		team1Score,
-		gameID,
-		team1ID,
-	))
-	if err != nil {
-		return err
-	}
-
-	err = mustUpdateOneRow(tx.ExecContext(
-		ctx,
-		"UPDATE Scores SET Score = ? WHERE GameID = ? AND TeamID = ?",
-		team2Score,
-		gameID,
-		team2ID,
-	))
-	if err != nil {
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-
-	s.scoreNotifier.Notify()
-	return nil
+	})
 }
 
 func (s Repository) GetScore(ctx context.Context, gameID, teamID string) (int, error) {
-	row, err := s.Builder.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
+	row, err := s.b.SelectFrom(table.Named("Scores")).Columns("Score").WhereAll(
 		filter.Equals("GameID", gameID),
 		filter.Equals("TeamID", teamID),
-	).QueryRowContext(ctx, s.DB)
+	).QueryRowContext(ctx, s.db)
 	if err != nil {
 		return 0, err
 	}
@@ -275,7 +255,7 @@ func (s Repository) GetScore(ctx context.Context, gameID, teamID string) (int, e
 }
 
 func (s Repository) GetAll(ctx context.Context) ([]Score, error) {
-	rows, err := s.Builder.SelectFrom(table.Named("Scores")).Columns("GameID", "TeamID", "Score").QueryContext(ctx, s.DB)
+	rows, err := s.b.SelectFrom(table.Named("Scores")).Columns("GameID", "TeamID", "Score").QueryContext(ctx, s.db)
 	if err != nil {
 		return nil, err
 	}
@@ -296,12 +276,12 @@ func (s Repository) GetAll(ctx context.Context) ([]Score, error) {
 }
 
 func (s Repository) DeleteAll(ctx context.Context) error {
-	_, err := s.Builder.DeleteFromTable("Scores").ExecContext(ctx, s.DB)
+	_, err := s.b.DeleteFromTable("Scores").ExecContext(ctx, s.db)
 	return err
 }
 
 func (s Repository) Get(ctx context.Context, id string) ([2]Score, error) {
-	rows, err := s.DB.QueryContext(ctx, `
+	rows, err := s.db.QueryContext(ctx, `
 		SELECT GameID, TeamID, Score FROM Scores WHERE GameID = ? ORDER BY TeamID`,
 		id,
 	)
@@ -336,7 +316,7 @@ func (s Repository) Get(ctx context.Context, id string) ([2]Score, error) {
 }
 
 func (s Repository) GetForTeam(ctx context.Context, teamID string) (map[string][2]Score, error) {
-	rows, err := s.DB.QueryContext(ctx, `
+	rows, err := s.db.QueryContext(ctx, `
 		SELECT GameID, TeamID, Score FROM Scores WHERE GameID IN (
 			SELECT GameID FROM Scores WHERE TeamID = ?
 		) ORDER BY GameID, TeamID
@@ -391,7 +371,7 @@ type Standing struct {
 }
 
 func (s Repository) GetStandings(ctx context.Context) ([]Standing, error) {
-	rows, err := s.DB.QueryContext(ctx, `
+	rows, err := s.db.QueryContext(ctx, `
 		SELECT
 			TeamID,
 			t.Name,
