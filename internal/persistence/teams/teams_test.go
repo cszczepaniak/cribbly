@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/cszczepaniak/cribbly/internal/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
-	"github.com/google/uuid"
 )
 
 func TestTeamsRepo(t *testing.T) {

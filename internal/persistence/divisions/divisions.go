@@ -3,13 +3,14 @@ package divisions
 import (
 	"context"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/column"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/table"
 	"github.com/google/uuid"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 type Division struct {

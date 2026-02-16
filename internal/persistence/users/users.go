@@ -11,9 +11,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 var (
