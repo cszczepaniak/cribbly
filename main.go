@@ -11,11 +11,10 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/config"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 	"github.com/cszczepaniak/cribbly/internal/server"
@@ -42,7 +41,7 @@ func runMain() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt)
 	defer cancel()
 
-	db, err := sqlite.New(cfg.DSN)
+	db, err := database.NewSQLiteDB(cfg.DSN)
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,7 @@ func runMain() error {
 	}
 
 	scfg := server.Config{
-		Transactor:          persistence.NewTransactor(db),
+		Transactor:          database.NewTransactor(db),
 		PlayerRepo:          playerRepo,
 		TeamRepo:            teamRepo,
 		DivisionRepo:        divisionRepo,

@@ -3,7 +3,7 @@ package divisions
 import (
 	"context"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )
@@ -16,12 +16,12 @@ type Division struct {
 }
 
 type Service struct {
-	txer         persistence.Transactor
+	txer         database.Transactor
 	teamRepo     teams.Repository
 	divisionRepo divisions.Repository
 }
 
-func New(txer persistence.Transactor, teamRepo teams.Repository, divisionRepo divisions.Repository) Service {
+func New(txer database.Transactor, teamRepo teams.Repository, divisionRepo divisions.Repository) Service {
 	return Service{
 		txer:         txer,
 		teamRepo:     teamRepo,

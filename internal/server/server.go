@@ -112,6 +112,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	teamsRouter.Handle("DELETE /", th.DeleteAll)
 
 	dh := divisions.DivisionsHandler{
+		Transactor:      cfg.Transactor,
 		TeamRepo:        cfg.TeamRepo,
 		DivisionRepo:    cfg.DivisionRepo,
 		DivisionService: cfg.DivisionService(),
@@ -131,6 +132,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	divisionsRouter.Handle("GET /qrs", dh.GenerateQRCodes)
 
 	gh := games.Handler{
+		Transactor:   cfg.Transactor,
 		DivisionRepo: cfg.DivisionRepo,
 		TeamRepo:     cfg.TeamRepo,
 		GameRepo:     cfg.GameRepo,

@@ -8,11 +8,11 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/assert"
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 func TestPlayerRepo(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 
 	assert.NoError(t, s.Init(t.Context()))
@@ -48,7 +48,7 @@ func TestPlayerRepo(t *testing.T) {
 }
 
 func TestAssigningPlayers(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 
 	assert.NoError(t, s.Init(t.Context()))

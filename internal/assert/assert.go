@@ -48,12 +48,14 @@ func MapLen[M ~map[K]V, K comparable, V any](t testing.TB, m M, l int) {
 }
 
 func Error(t testing.TB, err error) {
+	t.Helper()
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func NoError(t testing.TB, err error) {
+	t.Helper()
 	if err != nil {
 		t.Fatalf("expected no error but got: %q", err)
 	}

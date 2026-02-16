@@ -11,7 +11,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/internal/repo"
+	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
+	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/formatter"
+
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 var (
@@ -20,22 +23,19 @@ var (
 )
 
 type Repository struct {
-	repo.Base
+	db database.Database
+	b  *sqlbuilder.Builder
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db database.Database) Repository {
 	return Repository{
-		Base: repo.NewBase(db),
+		db: db,
+		b:  sqlbuilder.New(formatter.Sqlite{}),
 	}
 }
 
-func (s Repository) WithTx(tx *sql.Tx) Repository {
-	s.Base = s.Base.WithTx(tx)
-	return s
-}
-
 func (s Repository) Init(ctx context.Context) error {
-	_, err := s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Users (
+	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Users (
 			Username TEXT,
 			PasswordHash BLOB,
 			
@@ -45,7 +45,7 @@ func (s Repository) Init(ctx context.Context) error {
 		return err
 	}
 
-	_, err = s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Sessions (
+	_, err = s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS Sessions (
 			ID TEXT,
 			Username TEXT,
 			Expires DATETIME,
@@ -60,7 +60,7 @@ type User struct {
 }
 
 func (s Repository) GetAll(ctx context.Context) ([]User, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT Username FROM Users`)
+	rows, err := s.db.QueryContext(ctx, `SELECT Username FROM Users`)
 	if err != nil {
 		return nil, err
 	}
@@ -92,13 +92,13 @@ func (s Repository) CreateUser(ctx context.Context, username, passwordHash strin
 		return errors.New("username must be a valid email address")
 	}
 
-	return s.DB.ExecVoid(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
+	return s.db.ExecVoid(ctx, `INSERT INTO Users (Username, PasswordHash) VALUES (?, ?)`, username, passwordHash)
 }
 
 // GetPassword returns the persisted hash of the password for the given user.
 func (s Repository) GetPassword(ctx context.Context, username string) (string, error) {
 	var pw string
-	err := s.DB.QueryRowContext(
+	err := s.db.QueryRowContext(
 		ctx,
 		`SELECT PasswordHash FROM Users WHERE Username = ?`,
 		username,
@@ -115,18 +115,18 @@ func (s Repository) GetPassword(ctx context.Context, username string) (string, e
 }
 
 func (s Repository) ChangePassword(ctx context.Context, username, newPassHash string) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, newPassHash, username)
+	_, err := s.db.ExecContext(ctx, `UPDATE Users SET PasswordHash = ? WHERE Username = ?`, newPassHash, username)
 	return err
 }
 
 func (s Repository) DeleteUser(ctx context.Context, username string) error {
-	_, err := s.DB.ExecContext(ctx, `DELETE FROM Users WHERE Username = ?`, username)
+	_, err := s.db.ExecContext(ctx, `DELETE FROM Users WHERE Username = ?`, username)
 	return err
 }
 
 func (s Repository) CreateSession(ctx context.Context, username string, expiresIn time.Duration) (string, error) {
 	var exists bool
-	err := s.DB.QueryRowContext(
+	err := s.db.QueryRowContext(
 		ctx,
 		`SELECT EXISTS(SELECT 1 FROM Users WHERE Username = ?)`,
 		username,
@@ -141,7 +141,7 @@ func (s Repository) CreateSession(ctx context.Context, username string, expiresI
 
 	id := uuid.NewString()
 	deadline := time.Now().Add(expiresIn)
-	_, err = s.DB.ExecContext(
+	_, err = s.db.ExecContext(
 		ctx,
 		`INSERT INTO Sessions (ID, Username, Expires) VALUES (?, ?, ?)`,
 		id, username, deadline,
@@ -168,7 +168,7 @@ func (s Repository) GetSession(ctx context.Context, sessionID string) (Session, 
 		ID: sessionID,
 	}
 
-	err := s.DB.QueryRowContext(
+	err := s.db.QueryRowContext(
 		ctx,
 		`SELECT Username, Expires FROM Sessions WHERE ID = ?`,
 		sessionID,
@@ -182,7 +182,7 @@ func (s Repository) GetSession(ctx context.Context, sessionID string) (Session, 
 	}
 
 	if sesh.Expired() {
-		_, deleteErr := s.DB.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
+		_, deleteErr := s.db.ExecContext(ctx, `DELETE FROM Sessions WHERE ID = ?`, sessionID)
 		return Session{}, errors.Join(ErrSessionExpired, deleteErr)
 	}
 

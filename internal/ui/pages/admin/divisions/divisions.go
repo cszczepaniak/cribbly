@@ -2,6 +2,7 @@ package divisions
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 	"github.com/starfederation/datastar-go/datastar"
 
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
@@ -21,6 +23,7 @@ import (
 )
 
 type DivisionsHandler struct {
+	Transactor      database.Transactor
 	TeamRepo        teams.Repository
 	DivisionRepo    divisions.Repository
 	DivisionService divisionservice.Service
@@ -209,7 +212,20 @@ func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 
 func (h DivisionsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	err := h.DivisionRepo.Delete(r.Context(), id)
+
+	err := h.Transactor.WithTx(r.Context(), func(ctx context.Context) error {
+		ts, err := h.TeamRepo.GetForDivision(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		err = h.TeamRepo.UnassignFromDivision(ctx, ts...)
+		if err != nil {
+			return err
+		}
+
+		return h.DivisionRepo.Delete(ctx, id)
+	})
 	if err != nil {
 		return err
 	}
@@ -219,29 +235,33 @@ func (h DivisionsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h DivisionsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) error {
-	// TODO: do this in a transaction
-	divisions, err := h.DivisionRepo.GetAll(r.Context())
-	if err != nil {
-		return err
-	}
-
-	for _, d := range divisions {
-		division, err := h.DivisionService.Get(r.Context(), d.ID)
+	err := h.Transactor.WithTx(r.Context(), func(ctx context.Context) error {
+		divisions, err := h.DivisionRepo.GetAll(ctx)
 		if err != nil {
 			return err
 		}
 
-		for _, t := range division.Teams {
-			err := h.TeamRepo.UnassignFromDivision(r.Context(), t.ID)
+		for _, d := range divisions {
+			teams, err := h.TeamRepo.GetForDivision(ctx, d.ID)
+			if err != nil {
+				return err
+			}
+
+			err = h.TeamRepo.UnassignFromDivision(ctx, teams...)
+			if err != nil {
+				return err
+			}
+
+			err = h.DivisionRepo.Delete(ctx, d.ID)
 			if err != nil {
 				return err
 			}
 		}
 
-		err = h.DivisionRepo.Delete(r.Context(), d.ID)
-		if err != nil {
-			return err
-		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	sse := datastar.NewSSE(w, r)
@@ -262,7 +282,12 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		if assign != "" {
 			err = h.TeamRepo.AssignToDivision(r.Context(), assign, divisionID)
 		} else {
-			err = h.TeamRepo.UnassignFromDivision(r.Context(), unassign)
+			team, err := h.TeamRepo.Get(r.Context(), unassign)
+			if err != nil {
+				return err
+			}
+
+			err = h.TeamRepo.UnassignFromDivision(r.Context(), team)
 		}
 		if err != nil {
 			return err

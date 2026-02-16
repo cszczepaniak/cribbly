@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/google/uuid"
 
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
+	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 func TestTeamsRepo(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -57,7 +58,7 @@ func TestTeamsRepo(t *testing.T) {
 }
 
 func TestTeamsRepo_Rename(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -70,4 +71,54 @@ func TestTeamsRepo_Rename(t *testing.T) {
 	gotTeam, err := s.Get(t.Context(), team.ID)
 	assert.Equal(t, team.ID, gotTeam.ID)
 	assert.Equal(t, "New Name", gotTeam.Name)
+}
+
+func TestTeamsRepo_AssignAndUnassign(t *testing.T) {
+	db := database.NewInMemory(t)
+	s := NewRepository(db)
+	assert.NoError(t, s.Init(t.Context()))
+
+	team1, err := s.Create(t.Context(), "team1")
+	assert.NoError(t, err)
+	assert.Equal(t, team1.Name, "team1")
+
+	team2, err := s.Create(t.Context(), "team2")
+	assert.NoError(t, err)
+	assert.Equal(t, team2.Name, "team2")
+
+	divID := uuid.NewString()
+	assert.NoError(t, s.AssignToDivision(t.Context(), team1.ID, divID))
+
+	team1WithDiv := team1
+	team1WithDiv.DivisionID = divID
+	ts, err := s.GetForDivision(t.Context(), divID)
+	assert.NoError(t, err)
+	assert.Equal(t, ts, []Team{team1WithDiv})
+
+	ts, err = s.GetWithoutDivision(t.Context())
+	assert.NoError(t, err)
+	assert.Equal(t, ts, []Team{team2})
+
+	assert.NoError(t, s.AssignToDivision(t.Context(), team2.ID, divID))
+
+	team2WithDiv := team2
+	team2WithDiv.DivisionID = divID
+
+	ts, err = s.GetForDivision(t.Context(), divID)
+	assert.NoError(t, err)
+	assert.Equal(t, ts, []Team{team1WithDiv, team2WithDiv})
+
+	ts, err = s.GetWithoutDivision(t.Context())
+	assert.NoError(t, err)
+	assert.SliceLen(t, ts, 0)
+
+	assert.NoError(t, s.UnassignFromDivision(t.Context(), team1))
+
+	ts, err = s.GetForDivision(t.Context(), divID)
+	assert.NoError(t, err)
+	assert.Equal(t, ts, []Team{team2WithDiv})
+
+	ts, err = s.GetWithoutDivision(t.Context())
+	assert.NoError(t, err)
+	assert.Equal(t, ts, []Team{team1})
 }
