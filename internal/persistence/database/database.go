@@ -72,3 +72,66 @@ func (db Database) QueryRowContext(ctx context.Context, stmt string, args ...any
 func (db Database) WithTx(ctx context.Context, fn func(context.Context) error) error {
 	return withTx(ctx, db.db, fn)
 }
+
+type txKey struct{}
+
+func ctxWithTx(ctx context.Context, tx *sql.Tx) context.Context {
+	return context.WithValue(ctx, txKey{}, tx)
+}
+
+func getTx(ctx context.Context) (*sql.Tx, bool) {
+	tx, ok := ctx.Value(txKey{}).(*sql.Tx)
+	return tx, ok
+}
+
+func withTx(
+	ctx context.Context,
+	db *sql.DB,
+	fn func(context.Context) error,
+) error {
+	var tx *sql.Tx
+	shouldCommit := false
+
+	if t, ok := getTx(ctx); ok {
+		// Context already has a transaction
+		tx = t
+	} else {
+		shouldCommit = true
+		ctxWithCancel, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		var err error
+		tx, err = db.BeginTx(ctxWithCancel, nil)
+		if err != nil {
+			return err
+		}
+
+		ctx = ctxWithTx(ctxWithCancel, tx)
+	}
+
+	err := fn(ctx)
+	if err != nil {
+		return err
+	}
+
+	if shouldCommit {
+		return tx.Commit()
+	}
+
+	return nil
+}
+
+// Transactor knows how to start a transaction but can't do anything else.
+type Transactor struct {
+	db Database
+}
+
+func NewTransactor(db Database) Transactor {
+	return Transactor{
+		db: db,
+	}
+}
+
+func (t Transactor) WithTx(ctx context.Context, fn func(context.Context) error) error {
+	return t.db.WithTx(ctx, fn)
+}
