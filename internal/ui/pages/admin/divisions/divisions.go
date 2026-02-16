@@ -212,7 +212,20 @@ func (h DivisionsHandler) Delete(w http.ResponseWriter, r *http.Request) error {
 
 func (h DivisionsHandler) ConfirmDelete(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
-	err := h.DivisionRepo.Delete(r.Context(), id)
+
+	err := h.Transactor.WithTx(r.Context(), func(ctx context.Context) error {
+		ts, err := h.TeamRepo.GetForDivision(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		err = h.TeamRepo.UnassignFromDivision(ctx, ts...)
+		if err != nil {
+			return err
+		}
+
+		return h.DivisionRepo.Delete(ctx, id)
+	})
 	if err != nil {
 		return err
 	}
@@ -229,16 +242,14 @@ func (h DivisionsHandler) DeleteAll(w http.ResponseWriter, r *http.Request) erro
 		}
 
 		for _, d := range divisions {
-			division, err := h.DivisionService.Get(ctx, d.ID)
+			teams, err := h.TeamRepo.GetForDivision(ctx, d.ID)
 			if err != nil {
 				return err
 			}
 
-			for _, t := range division.Teams {
-				err := h.TeamRepo.UnassignFromDivision(ctx, t.ID)
-				if err != nil {
-					return err
-				}
+			err = h.TeamRepo.UnassignFromDivision(ctx, teams...)
+			if err != nil {
+				return err
 			}
 
 			err = h.DivisionRepo.Delete(ctx, d.ID)
@@ -271,7 +282,12 @@ func (h DivisionsHandler) Save(w http.ResponseWriter, r *http.Request) error {
 		if assign != "" {
 			err = h.TeamRepo.AssignToDivision(r.Context(), assign, divisionID)
 		} else {
-			err = h.TeamRepo.UnassignFromDivision(r.Context(), unassign)
+			team, err := h.TeamRepo.Get(r.Context(), unassign)
+			if err != nil {
+				return err
+			}
+
+			err = h.TeamRepo.UnassignFromDivision(r.Context(), team)
 		}
 		if err != nil {
 			return err

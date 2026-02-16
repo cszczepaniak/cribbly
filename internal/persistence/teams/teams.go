@@ -169,10 +169,15 @@ func (s Repository) selectTeams() *sel.Builder {
 		Columns("ID", "Name", "DivisionID")
 }
 
-func (s Repository) UnassignFromDivision(ctx context.Context, id string) error {
+func (s Repository) UnassignFromDivision(ctx context.Context, teams ...Team) error {
+	ids := make([]string, 0, len(teams))
+	for _, team := range teams {
+		ids = append(ids, team.ID)
+	}
+
 	_, err := s.b.UpdateTable("Teams").
 		SetFieldToNull("DivisionID").
-		Where(filter.Equals("ID", id)).
+		Where(filter.In("ID", ids...)).
 		ExecContext(ctx, s.db)
 	return err
 }
