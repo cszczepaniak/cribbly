@@ -11,6 +11,7 @@ import (
 
 	"github.com/starfederation/datastar-go/datastar"
 
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -18,6 +19,7 @@ import (
 )
 
 type Handler struct {
+	Transactor   database.Transactor
 	DivisionRepo divisions.Repository
 	TeamRepo     teams.Repository
 	GameRepo     games.Repository
@@ -166,35 +168,37 @@ type game struct {
 }
 
 func (h Handler) generatePrelimGames(ctx context.Context) error {
-	allTeams, err := h.TeamRepo.GetAll(ctx)
-	if err != nil {
-		return err
-	}
-
-	teamsByDivision := make(map[string][]teams.Team)
-	for _, team := range allTeams {
-		if team.DivisionID == "" {
-			return errors.New("all teams must be in divisions to generate games")
-		}
-		teamsByDivision[team.DivisionID] = append(teamsByDivision[team.DivisionID], team)
-	}
-
-	// TODO: don't insert one-by-one!
-	for _, teams := range teamsByDivision {
-		pairs, err := generateMatchups(teams)
+	return h.Transactor.WithTx(ctx, func(ctx context.Context) error {
+		allTeams, err := h.TeamRepo.GetAll(ctx)
 		if err != nil {
 			return err
 		}
 
-		for _, pair := range pairs {
-			_, err := h.GameRepo.Create(ctx, pair[0].ID, pair[1].ID)
+		teamsByDivision := make(map[string][]teams.Team)
+		for _, team := range allTeams {
+			if team.DivisionID == "" {
+				return errors.New("all teams must be in divisions to generate games")
+			}
+			teamsByDivision[team.DivisionID] = append(teamsByDivision[team.DivisionID], team)
+		}
+
+		// TODO: don't insert one-by-one (but at least we're in a transaction now!)
+		for _, teams := range teamsByDivision {
+			pairs, err := generateMatchups(teams)
 			if err != nil {
 				return err
 			}
-		}
-	}
 
-	return nil
+			for _, pair := range pairs {
+				_, err := h.GameRepo.Create(ctx, pair[0].ID, pair[1].ID)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
 }
 
 func cycle[T any](in []T) iter.Seq[T] {

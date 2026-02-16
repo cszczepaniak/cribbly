@@ -132,6 +132,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	divisionsRouter.Handle("GET /qrs", dh.GenerateQRCodes)
 
 	gh := games.Handler{
+		Transactor:   cfg.Transactor,
 		DivisionRepo: cfg.DivisionRepo,
 		TeamRepo:     cfg.TeamRepo,
 		GameRepo:     cfg.GameRepo,
