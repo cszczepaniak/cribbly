@@ -70,4 +70,19 @@ func TestWithTransaction(t *testing.T) {
 	err = db.QueryRowContext(t.Context(), `SELECT SUM(A) FROM Test`).Scan(&val)
 	assert.NoError(t, err)
 	assert.Equal(t, 10, val)
+
+	// It should work when a transaction already exists
+	tx, err := db.db.BeginTx(t.Context(), nil)
+	assert.NoError(t, err)
+
+	err = db.WithTx(ctxWithTx(t.Context(), tx), func(ctx context.Context) error {
+		assert.NoError(t, db.ExecVoid(ctx, `INSERT INTO Test (A) VALUES (?), (?)`, 5, 6))
+		return nil
+	})
+	assert.NoError(t, err)
+	assert.NoError(t, tx.Commit())
+
+	err = db.QueryRowContext(t.Context(), `SELECT SUM(A) FROM Test`).Scan(&val)
+	assert.NoError(t, err)
+	assert.Equal(t, 21, val)
 }
