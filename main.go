@@ -12,7 +12,6 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/config"
 	"github.com/cszczepaniak/cribbly/internal/notifier"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
-	"github.com/cszczepaniak/cribbly/internal/persistence/database/sqlite"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -42,7 +41,7 @@ func runMain() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt)
 	defer cancel()
 
-	db, err := database.New(sqlite.Factory(cfg.DSN))
+	db, err := database.NewSQLiteDB(cfg.DSN)
 	if err != nil {
 		return err
 	}

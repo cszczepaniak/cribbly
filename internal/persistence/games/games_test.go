@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
 )
 
 func TestGames(t *testing.T) {
 	n := &notifier.Notifier{}
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db, n)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -77,7 +77,7 @@ func TestGames(t *testing.T) {
 
 func TestGames_Notifications(t *testing.T) {
 	n := &notifier.Notifier{}
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db, n)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -105,7 +105,7 @@ func TestGames_Notifications(t *testing.T) {
 
 func TestGames_UpdateScores_TeamsMustExistForGame(t *testing.T) {
 	n := &notifier.Notifier{}
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db, n)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -129,7 +129,7 @@ func TestGames_UpdateScores_TeamsMustExistForGame(t *testing.T) {
 
 func TestTournamentGames(t *testing.T) {
 	n := &notifier.Notifier{}
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db, n)
 	assert.NoError(t, s.Init(t.Context()))
 

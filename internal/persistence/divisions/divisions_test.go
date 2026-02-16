@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/cszczepaniak/cribbly/internal/assert"
-
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 func TestDivisionsRepo(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -57,7 +56,7 @@ func TestDivisionsRepo(t *testing.T) {
 }
 
 func TestDivisionsRepo_Rename(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 	assert.NoError(t, s.Init(t.Context()))
 

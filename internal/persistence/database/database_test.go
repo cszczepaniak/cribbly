@@ -7,11 +7,10 @@ import (
 	"testing"
 
 	"github.com/cszczepaniak/cribbly/internal/assert"
-	"github.com/cszczepaniak/cribbly/internal/persistence/database/sqlite"
 )
 
 func TestWithTransaction(t *testing.T) {
-	db, err := New(sqlite.Factory("file:db.sqlite"))
+	db, err := NewSQLiteDB("file:db.sqlite")
 	assert.NoError(t, err)
 
 	t.Cleanup(func() {

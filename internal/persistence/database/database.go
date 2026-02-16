@@ -12,12 +12,8 @@ type Database struct {
 
 type DatabaseFactory func() (*sql.DB, error)
 
-func New(factory DatabaseFactory) (Database, error) {
-	db, err := factory()
-	if err != nil {
-		return Database{}, err
-	}
-	return Database{db: db}, nil
+func New(db *sql.DB) Database {
+	return Database{db: db}
 }
 
 type stmtHandler interface {

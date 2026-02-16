@@ -5,12 +5,11 @@ import (
 	"time"
 
 	"github.com/cszczepaniak/cribbly/internal/assert"
-
-	"github.com/cszczepaniak/cribbly/internal/persistence/sqlite"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
 func TestUsers(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 	assert.NoError(t, s.Init(t.Context()))
 
@@ -44,7 +43,7 @@ func TestUsers(t *testing.T) {
 }
 
 func TestSessions(t *testing.T) {
-	db := sqlite.NewInMemoryForTest(t)
+	db := database.NewInMemory(t)
 	s := NewRepository(db)
 	assert.NoError(t, s.Init(t.Context()))
 
