@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 )
 
 type Database struct {
@@ -30,10 +29,8 @@ type stmtHandler interface {
 func getDB(ctx context.Context, db *sql.DB) stmtHandler {
 	tx, ok := getTx(ctx)
 	if ok {
-		fmt.Println("got a tx")
 		return tx
 	}
-	fmt.Println("did not got a tx")
 	return db
 }
 
