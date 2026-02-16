@@ -4,14 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 type Database struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) Database {
-	return Database{db: db}
+type DatabaseFactory func() (*sql.DB, error)
+
+func New(factory DatabaseFactory) (Database, error) {
+	db, err := factory()
+	if err != nil {
+		return Database{}, err
+	}
+	return Database{db: db}, nil
 }
 
 type stmtHandler interface {
@@ -23,8 +30,10 @@ type stmtHandler interface {
 func getDB(ctx context.Context, db *sql.DB) stmtHandler {
 	tx, ok := getTx(ctx)
 	if ok {
+		fmt.Println("got a tx")
 		return tx
 	}
+	fmt.Println("did not got a tx")
 	return db
 }
 
