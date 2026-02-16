@@ -43,16 +43,16 @@ func withTx(
 		tx = t
 	} else {
 		shouldCommit = true
-		ctx, cancel := context.WithCancel(ctx)
+		ctxWithCancel, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		var err error
-		tx, err = db.BeginTx(ctx, nil)
+		tx, err = db.BeginTx(ctxWithCancel, nil)
 		if err != nil {
 			return err
 		}
 
-		ctx = ctxWithTx(ctx, tx)
+		ctx = ctxWithTx(ctxWithCancel, tx)
 	}
 
 	err := fn(ctx)
