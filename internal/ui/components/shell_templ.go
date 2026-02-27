@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/inputotp"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
@@ -47,6 +48,10 @@ func Document() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = input.Script().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = inputotp.Script().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -226,14 +231,14 @@ func Shell() templ.Component {
 						return templ_7745c5c3_Err
 					}
 					if middleware.IsAdmin(ctx) {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li><li><a data-on:click=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<li><a href=\"/admin/players\">Players</a></li><li><a href=\"/admin/teams\">Teams</a></li><li><a href=\"/admin/divisions\">Divisions</a></li><li><a href=\"/admin/games\">Games</a></li><li><a href=\"/admin/users\">Users</a></li><li><a href=\"/admin/profile\">My Profile</a></li><li><a href=\"/admin/room-codes\">Room Codes</a></li><li><a data-on:click=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var8 string
 						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(dstar.SendPostf("/admin/logout"))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/components/shell.templ`, Line: 90, Col: 57}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/ui/components/shell.templ`, Line: 93, Col: 57}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {

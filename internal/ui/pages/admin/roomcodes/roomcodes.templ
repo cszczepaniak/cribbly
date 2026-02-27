@@ -1,0 +1,31 @@
+package roomcodes
+
+import "github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+
+templ index(latest *latestView) {
+	@admincomponents.Shell(admincomponents.RoomCodes) {
+		<h1 class="text-3xl font-semibold text-foreground">Room Codes</h1>
+		if latest != nil {
+			<p class="mt-4 text-lg">
+				Current room code:
+				<span class="font-mono font-semibold">{ latest.Code }</span>
+			</p>
+			<p class="mt-1 text-muted-foreground">
+				Expires at { latest.Expires.Format("Jan 2, 2006 3:04 PM") }
+			</p>
+		} else {
+			<p class="mt-4 text-muted-foreground">
+				There is currently no active room code.
+			</p>
+		}
+		<form method="POST" action="/admin/room-codes" class="mt-8">
+			@button.Button(button.Props{
+				Type:  button.TypeSubmit,
+				Class: "w-full sm:w-auto",
+			}) {
+				Generate New Room Code
+			}
+		</form>
+	}
+}
