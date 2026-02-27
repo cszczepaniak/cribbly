@@ -14,6 +14,7 @@ const (
 	Teams     Route = "Teams"
 	Divisions Route = "Divisions"
 	Games     Route = "Games"
+	RoomCodes Route = "Room Codes"
 	Users     Route = "Users"
 	Profile   Route = "My Profile"
 )
@@ -30,6 +31,8 @@ func (r Route) ToSafeURL() templ.SafeURL {
 		return "/admin/teams"
 	case Games:
 		return "/admin/games"
+	case RoomCodes:
+		return "/admin/room-codes"
 	case Users:
 		return "/admin/users"
 	case Profile:

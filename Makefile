@@ -1,13 +1,9 @@
+.PHONY: generate
+generate: tailwind generate-templ
+
 .PHONY: tailwind
 tailwind:
 	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css
-
-.PHONY: tailwind-watch
-tailwind-watch:
-	npx @tailwindcss/cli -i internal/ui/components/css/input.css -o public/output.css --watch
-
-.PHONY: generate
-generate: tailwind generate-templ
 
 .PHONY: generate-templ
 generate-templ:
@@ -23,3 +19,7 @@ format-go:
 .PHONY: format-templ
 format-templ:
 	go tool templ fmt .
+
+.PHONY: dev
+dev:
+	./scripts/run_local.sh

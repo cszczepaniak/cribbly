@@ -2,25 +2,58 @@ package index
 
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/server/middleware"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/inputotp"
 
 templ index() {
 	@components.Shell() {
 		<div class="text-center mt-8">
-			<h1 class="text-7xl font-semibold text-foreground">
-				Welcome to Cribbly
-			</h1>
-			<div class="mt-10 flex items-center justify-center gap-x-6">
-				@button.Button(button.Props{
-					Href: "/divisions",
-				}) {
-					View Divisions
-				}
-				@button.Button(button.Props{
-					Href: "/standings",
-				}) {
-					View Standings
-				}
-			</div>
+			if !middleware.HasRoomAccess(ctx) {
+				<h1 class="text-4xl font-semibold text-foreground">
+					Enter Room Code
+				</h1>
+				<p class="mt-4 text-muted-foreground">
+					Ask your organizer for the room code to view divisions, standings, and more.
+				</p>
+				<form
+					method="POST"
+					action="/room-code"
+					class="mt-8 flex flex-col items-center gap-y-4 max-w-xs mx-auto"
+				>
+					@inputotp.InputOTP(inputotp.Props{
+						Name: "room_code",
+					}) {
+						@inputotp.Group() {
+							for i := range 6 {
+								@inputotp.Slot(inputotp.SlotProps{
+									Index: i,
+								})
+							}
+						}
+					}
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Continue
+					}
+				</form>
+			} else {
+				<h1 class="text-7xl font-semibold text-foreground">
+					Welcome to Cribbly
+				</h1>
+				<div class="mt-10 flex items-center justify-center gap-x-6">
+					@button.Button(button.Props{
+						Href: "/divisions",
+					}) {
+						View Divisions
+					}
+					@button.Button(button.Props{
+						Href: "/standings",
+					}) {
+						View Standings
+					}
+				</div>
+			}
 		</div>
 	}
 }

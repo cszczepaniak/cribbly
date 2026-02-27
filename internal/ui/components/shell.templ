@@ -3,6 +3,7 @@ package components
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/inputotp"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/dialog"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/popover"
@@ -23,6 +24,7 @@ templ Document() {
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"></script>
 			<link href="/public/output.css" rel="stylesheet"/>
 			@input.Script()
+			@inputotp.Script()
 			@dialog.Script()
 			@selectbox.Script()
 			@popover.Script()
@@ -85,6 +87,7 @@ templ Shell() {
 							<li><a href="/admin/games">Games</a></li>
 							<li><a href="/admin/users">Users</a></li>
 							<li><a href="/admin/profile">My Profile</a></li>
+							<li><a href="/admin/room-codes">Room Codes</a></li>
 							<li>
 								<a
 									data-on:click={ dstar.SendPostf("/admin/logout") }

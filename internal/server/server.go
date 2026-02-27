@@ -10,6 +10,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/games"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/profile"
+	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/roomcodes"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/teams"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/users"
 	pubdiv "github.com/cszczepaniak/cribbly/internal/ui/pages/divisions"
@@ -27,8 +28,18 @@ func Setup(cfg Config) http.Handler {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
 
-	r := NewRouter(mux, mw.AuthenticationMiddleware(cfg.UserRepo), mw.IsProdMiddleware(cfg.IsProd))
-	r.Handle("GET /", index.Index)
+	r := NewRouter(
+		mux,
+		mw.AuthenticationMiddleware(cfg.UserRepo),
+		mw.IsProdMiddleware(cfg.IsProd),
+		mw.RoomCodeMiddleware(cfg.RoomCodeRepo),
+	)
+
+	home := index.Handler{
+		RoomCodeRepo: cfg.RoomCodeRepo,
+	}
+	r.Handle("GET /", home.Index)
+	r.Handle("POST /room-code", home.SubmitRoomCode)
 
 	setupAdminRoutes(cfg, r)
 
@@ -144,6 +155,13 @@ func setupAdminRoutes(cfg Config, r *router) {
 	gamesRouter.Handle("GET /scores/edit", gh.Edit)
 	gamesRouter.Handle("PUT /scores/save", gh.Save)
 	gamesRouter.Handle("PUT /scores/reset", gh.ResetScores)
+
+	rcHandler := roomcodes.Handler{
+		RoomCodeRepo: cfg.RoomCodeRepo,
+	}
+	roomCodesRouter := adminRouter.Group("/room-codes")
+	roomCodesRouter.Handle("GET /", rcHandler.Index)
+	roomCodesRouter.Handle("POST /", rcHandler.Generate)
 
 	uh := users.UsersHandler{
 		UserRepo: cfg.UserRepo,

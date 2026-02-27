@@ -15,6 +15,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
+	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 	"github.com/cszczepaniak/cribbly/internal/server"
@@ -73,6 +74,12 @@ func runMain() error {
 		return err
 	}
 
+	roomCodeRepo := roomcodes.NewRepository(db)
+	err = roomCodeRepo.Init(ctx)
+	if err != nil {
+		return err
+	}
+
 	userRepo := users.NewRepository(db)
 	err = userRepo.Init(ctx)
 	if err != nil {
@@ -97,6 +104,7 @@ func runMain() error {
 		DivisionRepo:        divisionRepo,
 		GameRepo:            gameRepo,
 		UserRepo:            userRepo,
+		RoomCodeRepo:        roomCodeRepo,
 		ScoreUpdateNotifier: scoreUpdateNotifier,
 		TournamentNotifier:  tournamentNotifier,
 		IsProd:              cfg.Environment == "production",
