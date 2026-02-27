@@ -1,4 +1,4 @@
-package rodtests
+package integration
 
 import (
 	"context"
