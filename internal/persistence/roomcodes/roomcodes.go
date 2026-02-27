@@ -101,4 +101,3 @@ func (r Repository) Latest(ctx context.Context) (RoomCode, error) {
 	}
 	return rc, nil
 }
-

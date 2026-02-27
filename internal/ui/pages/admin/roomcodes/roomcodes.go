@@ -38,7 +38,7 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 	const (
-		codeLength = 6
+		codeLength  = 6
 		maxAttempts = 5
 	)
 
@@ -82,4 +82,3 @@ func generateCode(n int) (string, error) {
 
 	return string(buf), nil
 }
-
