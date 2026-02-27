@@ -2,8 +2,8 @@ package index
 
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 import "github.com/cszczepaniak/cribbly/internal/server/middleware"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/inputotp"
 
 templ index() {
 	@components.Shell() {
@@ -20,13 +20,17 @@ templ index() {
 					action="/room-code"
 					class="mt-8 flex flex-col items-center gap-y-4 max-w-xs mx-auto"
 				>
-					@input.Input(input.Props{
-						Placeholder: "Room code",
-						Attributes: map[string]any{
-							"name":         "room_code",
-							"autocomplete": "one-time-code",
-						},
-					})
+					@inputotp.InputOTP(inputotp.Props{
+						Name: "room_code",
+					}) {
+						@inputotp.Group() {
+							for i := range 6 {
+								@inputotp.Slot(inputotp.SlotProps{
+									Index: i,
+								})
+							}
+						}
+					}
 					@button.Button(button.Props{
 						Type: button.TypeSubmit,
 					}) {
