@@ -5,6 +5,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
+	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
@@ -19,6 +20,7 @@ type Config struct {
 	DivisionRepo        divisions.Repository
 	GameRepo            games.Repository
 	UserRepo            users.Repository
+	RoomCodeRepo        roomcodes.Repository
 	ScoreUpdateNotifier *notifier.Notifier
 	TournamentNotifier  *notifier.Notifier
 	IsProd              bool
