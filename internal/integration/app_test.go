@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
@@ -51,7 +52,8 @@ func newTestApp(t *testing.T) *testApp {
 		_ = httpServer.Shutdown(ctx)
 	})
 
-	browser := rod.New().MustConnect()
+	u := launcher.New().NoSandbox(true).MustLaunch()
+	browser := rod.New().ControlURL(u).MustConnect()
 	t.Cleanup(func() {
 		_ = browser.Close()
 	})
