@@ -80,4 +80,3 @@ func TestLatestReturnsMostRecentNonExpired(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "NEW", rc.Code)
 }
-

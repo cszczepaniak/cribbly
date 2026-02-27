@@ -109,4 +109,3 @@ func TestRouterHandlerErrorResultsIn500(t *testing.T) {
 type assertError string
 
 func (e assertError) Error() string { return string(e) }
-
