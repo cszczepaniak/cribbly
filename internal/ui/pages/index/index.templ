@@ -3,7 +3,7 @@ package index
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/server/middleware"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/inputotp"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 
 templ index() {
 	@components.Shell() {
@@ -20,17 +20,9 @@ templ index() {
 					action="/room-code"
 					class="mt-8 flex flex-col items-center gap-y-4 max-w-xs mx-auto"
 				>
-					@inputotp.InputOTP(inputotp.Props{
+					@input.Input(input.Props{
 						Name: "room_code",
-					}) {
-						@inputotp.Group() {
-							for i := range 6 {
-								@inputotp.Slot(inputotp.SlotProps{
-									Index: i,
-								})
-							}
-						}
-					}
+					})
 					@button.Button(button.Props{
 						Type: button.TypeSubmit,
 					}) {
