@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
@@ -24,7 +24,7 @@ func TestTeamsRepo(t *testing.T) {
 	assert.NoError(t, err)
 
 	teams, err := s.GetAll(t.Context())
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Team{team1, team2, team3},
 		teams,
@@ -46,7 +46,7 @@ func TestTeamsRepo(t *testing.T) {
 	assert.NoError(t, s.Delete(t.Context(), team2.ID))
 
 	teams, err = s.GetAll(t.Context())
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Team{team1, team3},
 		teams,

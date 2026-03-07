@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
@@ -47,7 +47,9 @@ func TestExpiredRoomCodeReturnsExpiredErrorAndDeletes(t *testing.T) {
 
 	ok, err := repo.Validate(t.Context(), "OLD123")
 	assert.NoError(t, err)
-	assert.False(t, ok)
+	if ok {
+		t.Fatal("expected false")
+	}
 }
 
 func TestValidateRoomCode(t *testing.T) {
@@ -64,7 +66,9 @@ func TestValidateRoomCode(t *testing.T) {
 
 	ok, err = repo.Validate(t.Context(), "BAD1")
 	assert.NoError(t, err)
-	assert.False(t, ok)
+	if ok {
+		t.Fatal("expected false")
+	}
 }
 
 func TestLatestReturnsMostRecentNonExpired(t *testing.T) {

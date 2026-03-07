@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 )
@@ -34,7 +34,9 @@ func TestAuthenticationMiddleware_NoCookieLeavesContextUnauthenticated(t *testin
 
 	resp := runHandler(t, h, nil)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.False(t, isAdmin)
+	if isAdmin {
+		t.Fatal("expected false")
+	}
 }
 
 func TestAuthenticationMiddleware_ExpiredSessionLeavesContextUnauthenticated(t *testing.T) {
@@ -60,7 +62,9 @@ func TestAuthenticationMiddleware_ExpiredSessionLeavesContextUnauthenticated(t *
 		req.AddCookie(&http.Cookie{Name: "session", Value: sessionID})
 	})
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.False(t, isAdmin)
+	if isAdmin {
+		t.Fatal("expected false")
+	}
 }
 
 func TestAuthenticationMiddleware_ValidSessionMarksContextAsAdmin(t *testing.T) {

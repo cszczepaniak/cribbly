@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 )
 
 func TestWithTransaction(t *testing.T) {

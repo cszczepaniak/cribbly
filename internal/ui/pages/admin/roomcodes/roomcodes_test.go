@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
 )

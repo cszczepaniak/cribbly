@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )

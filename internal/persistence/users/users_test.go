@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
@@ -59,7 +59,9 @@ func TestSessions(t *testing.T) {
 
 	sesh, err := s.GetSession(t.Context(), sessionID)
 	assert.NoError(t, err)
-	assert.False(t, sesh.Expired())
+	if sesh.Expired() {
+		t.Fatal("expected false")
+	}
 
 	// Create an already-expired session now
 	expiredSessionID, err := s.CreateSession(t.Context(), "mario@mario.com", -time.Hour)

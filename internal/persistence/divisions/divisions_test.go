@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
@@ -22,7 +22,7 @@ func TestDivisionsRepo(t *testing.T) {
 	assert.NoError(t, err)
 
 	divisions, err := s.GetAll(t.Context())
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Division{division1, division2, division3},
 		divisions,
@@ -44,7 +44,7 @@ func TestDivisionsRepo(t *testing.T) {
 	assert.NoError(t, s.Delete(t.Context(), division2.ID))
 
 	divisions, err = s.GetAll(t.Context())
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Division{division1, division3},
 		divisions,

@@ -3,7 +3,7 @@ package divisions
 import (
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
