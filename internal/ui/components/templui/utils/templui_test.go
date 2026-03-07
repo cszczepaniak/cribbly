@@ -6,7 +6,7 @@ import (
 
 	"github.com/a-h/templ"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 )
 
 func TestIfAndIfElse(t *testing.T) {

@@ -7,7 +7,8 @@ require (
 	github.com/a-h/templ v0.3.857
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/cszczepaniak/go-sqlbuilder v0.0.7
-	github.com/google/go-cmp v0.7.0
+	github.com/cszczepaniak/gotest v0.0.2
+	github.com/go-rod/rod v0.116.2
 	github.com/google/uuid v1.6.0
 	github.com/jaswdr/faker/v2 v2.9.1
 	github.com/ncruces/go-sqlite3 v0.30.5
@@ -24,7 +25,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-rod/rod v0.116.2 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

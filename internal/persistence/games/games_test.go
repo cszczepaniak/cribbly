@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
+
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
@@ -124,7 +125,9 @@ func TestGames_UpdateScores_TeamsMustExistForGame(t *testing.T) {
 		"SELECT EXISTS(SELECT 1 FROM Scores WHERE TeamID = ?)",
 		"not a team",
 	).Scan(&exists)
-	assert.False(t, exists)
+	if exists {
+		t.Fatal("expected false")
+	}
 }
 
 func TestTournamentGames(t *testing.T) {

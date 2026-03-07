@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
+
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
 )
@@ -97,7 +98,9 @@ func TestRoomCodeMiddleware_InvalidCodeRedirects(t *testing.T) {
 
 	// Should redirect to "/" with temporary redirect.
 	assert.Equal(t, http.StatusTemporaryRedirect, resp.StatusCode)
-	assert.False(t, called)
+	if called {
+		t.Fatal("expected false")
+	}
 }
 
 func TestShouldBypassRoomCode(t *testing.T) {

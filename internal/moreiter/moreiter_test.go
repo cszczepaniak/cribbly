@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 )
 
 func TestOfCollectsValues(t *testing.T) {

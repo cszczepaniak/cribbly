@@ -87,12 +87,13 @@ func (r Repository) Validate(ctx context.Context, code string) (bool, error) {
 // Latest returns the most recently expiring, non-expired room code, if any.
 func (r Repository) Latest(ctx context.Context) (RoomCode, error) {
 	var rc RoomCode
+	now := time.Now()
 	err := r.db.QueryRowContext(ctx, `
 		SELECT Code, Expires FROM RoomCodes
-		WHERE Expires > CURRENT_TIMESTAMP
+		WHERE Expires > ?
 		ORDER BY Expires DESC
 		LIMIT 1
-	`).Scan(&rc.Code, &rc.Expires)
+	`, now).Scan(&rc.Code, &rc.Expires)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return RoomCode{}, ErrCodeNotFound

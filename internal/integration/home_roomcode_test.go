@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
 )
 
 func TestValidRoomCodeUnlocksHome(t *testing.T) {

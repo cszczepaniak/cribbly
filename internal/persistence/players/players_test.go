@@ -6,7 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/cszczepaniak/cribbly/internal/assert"
+	"github.com/cszczepaniak/gotest/assert"
+
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
@@ -27,7 +28,7 @@ func TestPlayerRepo(t *testing.T) {
 	players, err := s.GetAll(t.Context())
 	assert.NoError(t, err)
 
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Player{{
 			ID:        id1,
@@ -61,7 +62,7 @@ func TestAssigningPlayers(t *testing.T) {
 	players, err := s.GetFreeAgents(t.Context())
 	assert.NoError(t, err)
 
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Player{{
 			ID:        id1,
@@ -125,7 +126,7 @@ func TestAssigningPlayers(t *testing.T) {
 	players, err = s.GetFreeAgents(t.Context())
 	assert.NoError(t, err)
 
-	assert.ElementsMatch(
+	assert.SliceElemsMatchFunc(
 		t,
 		[]Player{{
 			ID:        id1,
