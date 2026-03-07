@@ -29,6 +29,21 @@ jobs:
 
             - run: go build
 
+    verify-go-mod:
+        runs-on: ubuntu-latest
+        name: Verify go mod tidy
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-go@v4
+              with:
+                  go-version: stable
+
+            - name: Verify go mod tidy
+              uses: ./.github/actions/verify_code_consistency
+              with:
+                  cmd: go mod tidy
+
     verify-go:
         runs-on: ubuntu-latest
         name: Verify Go Code Consistency
