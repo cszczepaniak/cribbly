@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/cszczepaniak/gotest/assert"
+
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 

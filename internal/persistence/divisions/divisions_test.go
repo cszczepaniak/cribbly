@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/cszczepaniak/gotest/assert"
+
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 )
 
