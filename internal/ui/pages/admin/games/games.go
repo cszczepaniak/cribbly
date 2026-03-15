@@ -212,7 +212,7 @@ func generateMatchups(allTeams []teams.Team) ([][2]teams.Team, error) {
 	case 3, 4, 5:
 		// Full round robin: all pairs once. 2, 3, or 4 games per team.
 		var pairs [][2]teams.Team
-		for i := 0; i < n; i++ {
+		for i := range n {
 			for j := i + 1; j < n; j++ {
 				pairs = append(pairs, [2]teams.Team{allTeams[i], allTeams[j]})
 			}
@@ -222,10 +222,10 @@ func generateMatchups(allTeams []teams.Team) ([][2]teams.Team, error) {
 		// 3 games per team = 9 games. Use 3 rounds of circle method (no duplicate pairings).
 		others := []int{1, 2, 3, 4, 5}
 		var pairs [][2]teams.Team
-		for r := 0; r < 3; r++ {
+		for r := range 3 {
 			order := make([]int, 6)
 			order[0] = 0
-			for i := 0; i < 5; i++ {
+			for i := range 5 {
 				order[i+1] = others[(i-r+5)%5]
 			}
 			pairs = append(pairs,
