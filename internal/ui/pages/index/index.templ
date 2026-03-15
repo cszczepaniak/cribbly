@@ -2,50 +2,125 @@ package index
 
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 
 templ index() {
 	@components.Shell() {
-		<div class="text-center mt-8">
+		<main class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
 			if !middleware.HasRoomAccess(ctx) {
-				<h1 class="text-4xl font-semibold text-foreground">
-					Enter Room Code
-				</h1>
-				<p class="mt-4 text-muted-foreground">
-					Ask your organizer for the room code to view divisions, standings, and more.
-				</p>
-				<form
-					method="POST"
-					action="/room-code"
-					class="mt-8 flex flex-col items-center gap-y-4 max-w-xs mx-auto"
-				>
-					@input.Input(input.Props{
-						Name: "room_code",
-					})
-					@button.Button(button.Props{
-						Type: button.TypeSubmit,
+				<div class="max-w-md mx-auto px-4 py-16 sm:py-24">
+					@card.Card(card.Props{
+						Class: "shadow-lg border-0",
 					}) {
-						Continue
-					}
-				</form>
-			} else {
-				<h1 class="text-7xl font-semibold text-foreground">
-					Welcome to Cribbly
-				</h1>
-				<div class="mt-10 flex items-center justify-center gap-x-6">
-					@button.Button(button.Props{
-						Href: "/divisions",
-					}) {
-						View Divisions
-					}
-					@button.Button(button.Props{
-						Href: "/standings",
-					}) {
-						View Standings
+						@card.Header(card.HeaderProps{
+							Class: "p-8 pb-2 text-center",
+						}) {
+							<h1 class="text-2xl font-semibold text-foreground">
+								Enter room code
+							</h1>
+							@card.Description(card.DescriptionProps{
+								Class: "mt-2",
+							}) {
+								Ask your organizer for the code to view divisions, standings, and the tournament.
+							}
+						}
+						@card.Content(card.ContentProps{
+							Class: "pt-4 pb-8 px-8",
+						}) {
+							<form
+								method="POST"
+								action="/room-code"
+								class="flex flex-col gap-4"
+							>
+								@input.Input(input.Props{
+									Name: "room_code",
+								})
+								@button.Button(button.Props{
+									Type:  button.TypeSubmit,
+									Class: "w-full",
+								}) {
+									Continue
+								}
+							</form>
+						}
 					}
 				</div>
+			} else {
+				<div class="max-w-4xl mx-auto px-4 py-12 sm:py-16">
+					<header class="text-center mb-14">
+						<h1 class="text-4xl sm:text-5xl font-semibold text-foreground tracking-tight">
+							Welcome to Cribbly
+						</h1>
+					</header>
+					<section class="mb-4">
+						<h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+							Go to
+						</h2>
+					</section>
+					<div class="grid gap-4 sm:grid-cols-3">
+						<a
+							href="/divisions"
+							class="group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						>
+							<div class="p-6 flex flex-col flex-1">
+								<div class="flex items-center justify-between gap-3">
+									<span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+										@icon.LayoutGrid(icon.Props{Size: 22, Class: "shrink-0"})
+									</span>
+									@icon.ChevronRight(icon.Props{Size: 18, Class: "text-muted-foreground group-hover:text-foreground transition-colors shrink-0"})
+								</div>
+								<h3 class="mt-4 text-lg font-semibold leading-tight">
+									Divisions
+								</h3>
+								<p class="mt-1.5 text-sm text-muted-foreground">
+									View your division and prelim games
+								</p>
+							</div>
+						</a>
+						<a
+							href="/standings"
+							class="group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						>
+							<div class="p-6 flex flex-col flex-1">
+								<div class="flex items-center justify-between gap-3">
+									<span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+										@icon.ListOrdered(icon.Props{Size: 22, Class: "shrink-0"})
+									</span>
+									@icon.ChevronRight(icon.Props{Size: 18, Class: "text-muted-foreground group-hover:text-foreground transition-colors shrink-0"})
+								</div>
+								<h3 class="mt-4 text-lg font-semibold leading-tight">
+									Standings
+								</h3>
+								<p class="mt-1.5 text-sm text-muted-foreground">
+									Scores and rankings
+								</p>
+							</div>
+						</a>
+						<a
+							href="/tournament"
+							class="group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						>
+							<div class="p-6 flex flex-col flex-1">
+								<div class="flex items-center justify-between gap-3">
+									<span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+										@icon.Trophy(icon.Props{Size: 22, Class: "shrink-0"})
+									</span>
+									@icon.ChevronRight(icon.Props{Size: 18, Class: "text-muted-foreground group-hover:text-foreground transition-colors shrink-0"})
+								</div>
+								<h3 class="mt-4 text-lg font-semibold leading-tight">
+									Tournament
+								</h3>
+								<p class="mt-1.5 text-sm text-muted-foreground">
+									Tournament bracket
+								</p>
+							</div>
+						</a>
+					</div>
+				</div>
 			}
-		</div>
+		</main>
 	}
 }
