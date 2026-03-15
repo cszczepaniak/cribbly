@@ -118,7 +118,6 @@ func TestShouldBypassRoomCode(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
 			req, err := http.NewRequest(tc.method, tc.path, nil)
 			assert.NoError(t, err)

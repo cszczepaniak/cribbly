@@ -50,7 +50,7 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 	expiresAt := time.Now().Add(24 * time.Hour)
 
 	// Best-effort to avoid collisions by retrying a few times.
-	for i := 0; i < maxAttempts; i++ {
+	for range maxAttempts {
 		err = h.RoomCodeRepo.Create(r.Context(), code, expiresAt)
 		if err == nil {
 			http.Redirect(w, r, "/admin/room-codes", http.StatusFound)
