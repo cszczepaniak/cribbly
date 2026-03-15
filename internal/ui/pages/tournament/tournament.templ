@@ -43,6 +43,7 @@ templ tournamentPage(rounds []round, teamCount int) {
 				}
 			} else {
 				@roundDisplay(rounds, 0)
+				@roundSwipeScript()
 			}
 			@components.DevTools() {
 				@devTools()
@@ -79,7 +80,7 @@ templ roundDisplay(rounds []round, idx int) {
 				@icon.ChevronRight()
 			}
 		</div>
-		<div class="p-4 sm:p-6 overflow-x-hidden">
+		<div class="p-4 sm:p-6 overflow-x-hidden touch-pan-y">
 			<ul class="flex flex-row">
 				for i, round := range rounds {
 					<li
@@ -105,6 +106,39 @@ templ roundDisplay(rounds []round, idx int) {
 			</ul>
 		</div>
 	</div>
+}
+
+templ roundSwipeScript() {
+	<script type="text/javascript">
+		(function () {
+			function init() {
+				var el = document.getElementById("rounds");
+				if (!el) return;
+				var nav = el.firstElementChild;
+				var buttons = nav && nav.querySelectorAll("button");
+				if (!buttons || buttons.length < 2) return;
+				var prevBtn = buttons[0], nextBtn = buttons[1];
+				var swipeArea = el.querySelector(".overflow-x-hidden");
+				if (!swipeArea) return;
+				var startX;
+				swipeArea.addEventListener("touchstart", function (e) {
+					startX = e.touches[0].clientX;
+				}, { passive: true });
+				swipeArea.addEventListener("touchend", function (e) {
+					if (startX == null) return;
+					var deltaX = e.changedTouches[0].clientX - startX;
+					if (deltaX < -50) nextBtn.click();
+					else if (deltaX > 50) prevBtn.click();
+					startX = null;
+				}, { passive: true });
+			}
+			if (document.readyState === "loading") {
+				document.addEventListener("DOMContentLoaded", init);
+			} else {
+				init();
+			}
+		})();
+	</script>
 }
 
 templ game(g row, round, idx int) {
