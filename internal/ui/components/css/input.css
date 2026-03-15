@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Tell Tailwind where to find class names so --watch picks up changes in templ/go files */
+@source "../../../**/*.templ";
+@source "../../../**/*.go";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
