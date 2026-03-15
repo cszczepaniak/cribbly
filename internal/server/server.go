@@ -20,10 +20,25 @@ import (
 	pubtournament "github.com/cszczepaniak/cribbly/internal/ui/pages/tournament"
 )
 
+// noCacheStatic wraps a handler to set Cache-Control headers so the browser
+// does not cache static assets. Use in development so CSS/JS changes are visible immediately.
+func noCacheStatic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func Setup(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
+	publicFiles := http.StripPrefix("/public", http.FileServer(http.Dir("public")))
+	if !cfg.IsProd {
+		publicFiles = noCacheStatic(publicFiles)
+	}
+	mux.Handle("GET /public/", publicFiles)
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
