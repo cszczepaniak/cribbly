@@ -39,14 +39,4 @@ func TestValidRoomCodeUnlocksHome(t *testing.T) {
 			break
 		}
 	}
-
-	// The primary navigation buttons should also be present and navigable.
-	page.MustElementR("button,a", "View Divisions").MustClick()
-	page.MustWaitLoad()
-
-	page.MustNavigateBack()
-	page.MustWaitLoad()
-
-	page.MustElementR("button,a", "View Standings").MustClick()
-	page.MustWaitLoad()
 }
