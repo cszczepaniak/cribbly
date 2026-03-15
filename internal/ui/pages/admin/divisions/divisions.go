@@ -19,7 +19,6 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 	divisionservice "github.com/cszczepaniak/cribbly/internal/service/divisions"
-	"github.com/cszczepaniak/cribbly/internal/ui/components"
 )
 
 type DivisionsHandler struct {
@@ -159,10 +158,6 @@ func (h DivisionsHandler) Generate(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	if len(allTeams)%2 != 0 {
-		return components.ShowErrorToast(w, r, "Cannot generate divisions with an odd number of teams.")
-	}
-
 	fake := faker.New()
 	for len(allTeams) > 0 {
 		division, err := h.DivisionRepo.Create(r.Context())
@@ -175,9 +170,15 @@ func (h DivisionsHandler) Generate(w http.ResponseWriter, r *http.Request) error
 			return err
 		}
 
+		// Greedily take 4; use 3, 5, or 6 for the last division to avoid leaving 1 or 2 teams
 		nForThisDivision := 4
-		if len(allTeams) == 6 {
+		switch len(allTeams) {
+		case 6:
 			nForThisDivision = 6
+		case 5:
+			nForThisDivision = 5
+		case 3:
+			nForThisDivision = 3
 		}
 
 		forDivision := allTeams[:nForThisDivision]
@@ -185,6 +186,13 @@ func (h DivisionsHandler) Generate(w http.ResponseWriter, r *http.Request) error
 
 		for _, team := range forDivision {
 			err := h.TeamRepo.AssignToDivision(r.Context(), team.ID, division.ID)
+			if err != nil {
+				return err
+			}
+		}
+
+		if nForThisDivision != 4 {
+			err = h.DivisionRepo.UpdateSize(r.Context(), division.ID, nForThisDivision)
 			if err != nil {
 				return err
 			}

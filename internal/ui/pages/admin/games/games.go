@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"errors"
-	"iter"
 	"net/http"
 	"slices"
 	"strconv"
@@ -201,63 +200,46 @@ func (h Handler) generatePrelimGames(ctx context.Context) error {
 	})
 }
 
-func cycle[T any](in []T) iter.Seq[T] {
-	return func(yield func(T) bool) {
-		i := 0
-		for {
-			idx := i % len(in)
-			if !yield(in[idx]) {
-				return
-			}
-			i++
-		}
-	}
-}
-
+// generateMatchups returns pairings so every team plays the same number of games (fair for
+// standings). 3 teams → 2 games each; 4 → 3 each; 5 → 4 each; 6 → 3 each. Only 3–6 teams allowed.
 func generateMatchups(allTeams []teams.Team) ([][2]teams.Team, error) {
-	if len(allTeams) != 4 && len(allTeams) != 6 {
-		return nil, errors.New("can only generate matchups with 4 or 6 teams")
-	}
-
-	s1, done1 := iter.Pull(cycle(allTeams))
-	defer done1()
-	s2, done2 := iter.Pull(cycle(allTeams))
-	defer done2()
-
-	nByTeam := make(map[string]int, len(allTeams))
-
-	var allPairs [][2]teams.Team
-	for {
-		_, _ = s2()
-
-		// Advance each cycle in lock step to generate a matchup for each team. Initially, t1 vs.
-		// t2, t2 vs. t3, etc. (note that these games obviously don't happen in a single round).
+	switch n := len(allTeams); n {
+	case 3, 4, 5:
+		// Full round robin: all pairs once. 2, 3, or 4 games per team.
+		var pairs [][2]teams.Team
+		for i := range n {
+			for j := i + 1; j < n; j++ {
+				pairs = append(pairs, [2]teams.Team{allTeams[i], allTeams[j]})
+			}
+		}
+		return pairs, nil
+	case 6:
+		// Circle method: 3 games per team = 9 games, no duplicate pairings.
 		//
-		// The next outer loop will yield t1 vs. t3, t2 vs. t4, etc.
-		for range len(allTeams) {
-			t1, _ := s1()
-			t2, _ := s2()
-
-			if nByTeam[t1.ID] == 3 || nByTeam[t2.ID] == 3 {
-				// We can't add this game because then at least one team would have more than 3.
-				continue
+		// Imagine 6 teams sitting in a circle. Team 0 stays fixed; teams 1–5 sit in order around
+		// the rest. Each round we pair "across": (0,5), (1,4), (2,3). Then we rotate teams 1–5
+		// one position (e.g. 1->2->3->4->5->1) and repeat. After 3 rounds every team has played 3 games
+		// and no pair has met twice.
+		others := []int{1, 2, 3, 4, 5} // indices of the rotating teams (0 is fixed)
+		var pairs [][2]teams.Team
+		for r := range 3 {
+			// Build this round's seating order: 0 fixed, then others rotated by r positions.
+			// Round 0: [0,1,2,3,4,5]. Round 1: [0,5,1,2,3,4]. Round 2: [0,4,5,1,2,3].
+			order := make([]int, 6)
+			order[0] = 0
+			for i := range 5 {
+				order[i+1] = others[(i-r+5)%5]
 			}
-
-			allPairs = append(allPairs, [2]teams.Team{t1, t2})
-			nByTeam[t1.ID]++
-			nByTeam[t2.ID]++
+			// Pair across the circle: first with last, second with second-last, third with third-last.
+			pairs = append(pairs,
+				[2]teams.Team{allTeams[order[0]], allTeams[order[5]]},
+				[2]teams.Team{allTeams[order[1]], allTeams[order[4]]},
+				[2]teams.Team{allTeams[order[2]], allTeams[order[3]]},
+			)
 		}
-
-		done := true
-		for _, count := range nByTeam {
-			if count != 3 {
-				done = false
-				break
-			}
-		}
-		if done {
-			return allPairs, nil
-		}
+		return pairs, nil
+	default:
+		return nil, errors.New("can only generate matchups for 3, 4, 5, or 6 teams")
 	}
 }
 

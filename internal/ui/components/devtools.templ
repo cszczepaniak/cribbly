@@ -3,7 +3,7 @@ package components
 import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 
 templ DevTools() {
-	if !middleware.IsProd(ctx) {
+	if !middleware.IsProd(ctx) && middleware.IsAdmin(ctx) {
 		{ children... }
 	}
 }

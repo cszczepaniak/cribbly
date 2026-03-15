@@ -1,109 +1,121 @@
 package games
 
+import "fmt"
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/radio"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
-import "fmt"
 import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 
 templ Game(props getGameProps) {
 	@components.Shell() {
-		<div class="w-full max-w-md mx-auto flex flex-col space-y-2 p-4">
-			if props.complete && !middleware.IsAdmin(ctx) {
-				<h1 class="text-xl font-semibold">Game Completed</h1>
-				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
-				@table.Table() {
-					@table.Header() {
-						@table.Head() {
-							Team
-						}
-						@table.Head() {
-							Score
-						}
-					}
-					@table.Body() {
-						@table.Row() {
-							@table.Cell() {
-								{ props.getWinningTeam() }
-							}
-							@table.Cell() {
-								{ fmt.Sprint(props.getWinningScore()) }
-							}
-						}
-						@table.Row() {
-							@table.Cell() {
-								{ props.getLosingTeam() }
-							}
-							@table.Cell() {
-								{ fmt.Sprint(props.getLosingScore()) }
-							}
-						}
-					}
+		<main class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
+			<div class="max-w-lg mx-auto px-4 py-12 sm:py-16">
+				if props.fromID != "" {
+					<a
+						href={ templ.URL(fmt.Sprintf("/teams/%s/games", props.fromID)) }
+						class="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+					>
+						← Back to games
+					</a>
 				}
-			} else {
-				<h1 class="text-xl font-semibold">
-					if props.complete && middleware.IsAdmin(ctx) {
-						Record Game Score (Admin Editing Completed Game)
-					} else {
-						Record Game Score
-					}
-				</h1>
-				<h2 class="text-lg">{ props.team1.Name } vs. { props.team2.Name }</h2>
-				@form.Item(form.ItemProps{
-					ID: "team-input",
-				}) {
-					@form.Label(form.LabelProps{
-						Class: "text-lg",
+				if props.complete && !middleware.IsAdmin(ctx) {
+					<header class="mb-8">
+						<h1 class="text-4xl font-semibold text-foreground tracking-tight">
+							Game completed
+						</h1>
+						<p class="mt-2 text-lg text-muted-foreground">
+							{ props.team1.Name } vs. { props.team2.Name }
+						</p>
+					</header>
+					@card.Card(card.Props{
+						Class: "shadow-sm",
 					}) {
-						Who won?
-					}
-					@form.ItemFlex() {
-						@radio.Radio(radio.Props{
-							Name:  "winner",
-							ID:    "r1",
-							Value: props.team1.ID,
-							Attributes: map[string]any{
-								"data-bind": "winner",
-							},
-						})
-						@form.Label(form.LabelProps{
-							For:   "r1",
-							Class: "text-md",
+						@card.Content(card.ContentProps{
+							Class: "p-6",
 						}) {
-							{ props.team1.Name }
+							<dl class="space-y-4">
+								<div class="flex justify-between items-baseline gap-4">
+									<dt class="font-medium text-foreground">{ props.getWinningTeam() }</dt>
+									<dd class="text-muted-foreground tabular-nums">{ fmt.Sprint(props.getWinningScore()) }</dd>
+								</div>
+								<div class="flex justify-between items-baseline gap-4">
+									<dt class="font-medium text-foreground">{ props.getLosingTeam() }</dt>
+									<dd class="text-muted-foreground tabular-nums">{ fmt.Sprint(props.getLosingScore()) }</dd>
+								</div>
+							</dl>
 						}
 					}
-					@form.ItemFlex() {
-						@radio.Radio(radio.Props{
-							Name:  "winner",
-							ID:    "r2",
-							Value: props.team2.ID,
-							Attributes: map[string]any{
-								"data-bind": "winner",
-							},
-						})
-						@form.Label(form.LabelProps{
-							For:   "r2",
-							Class: "text-md",
+				} else {
+					<header class="mb-8">
+						<h1 class="text-4xl font-semibold text-foreground tracking-tight">
+							if props.complete && middleware.IsAdmin(ctx) {
+								Edit game score
+							} else {
+								Record game score
+							}
+						</h1>
+						<p class="mt-2 text-lg text-muted-foreground">
+							{ props.team1.Name } vs. { props.team2.Name }
+						</p>
+					</header>
+					@card.Card(card.Props{
+						Class: "shadow-sm",
+					}) {
+						@card.Content(card.ContentProps{
+							Class: "p-6 sm:p-8",
 						}) {
-							{ props.team2.Name }
+							<div class="flex flex-col gap-6">
+								@form.Item(form.ItemProps{
+									ID: "team-input",
+								}) {
+									@form.Label(form.LabelProps{
+										Class: "text-base font-medium",
+									}) {
+										Who won?
+									}
+									<div class="mt-3 flex flex-col sm:flex-row gap-4 sm:gap-6">
+										<label class="flex items-center gap-3 cursor-pointer">
+											@radio.Radio(radio.Props{
+												Name:  "winner",
+												ID:    "r1",
+												Value: props.team1.ID,
+												Attributes: map[string]any{
+													"data-bind": "winner",
+												},
+											})
+											<span class="text-foreground">{ props.team1.Name }</span>
+										</label>
+										<label class="flex items-center gap-3 cursor-pointer">
+											@radio.Radio(radio.Props{
+												Name:  "winner",
+												ID:    "r2",
+												Value: props.team2.ID,
+												Attributes: map[string]any{
+													"data-bind": "winner",
+												},
+											})
+											<span class="text-foreground">{ props.team2.Name }</span>
+										</label>
+									</div>
+								}
+								@scoreInput("")
+								@button.Button(button.Props{
+									Attributes: map[string]any{
+										"data-on:click": dstar.SendPutf("/games/%s?fromID=%s", props.gameID, props.fromID),
+									},
+								}) {
+									Submit score
+								}
+							</div>
 						}
 					}
 				}
-				@scoreInput("")
-				@button.Button(button.Props{
-					Attributes: map[string]any{
-						"data-on:click": dstar.SendPutf("/games/%s?fromID=%s", props.gameID, props.fromID),
-					},
-				}) {
-					Submit Score
-				}
-			}
-		</div>
+			</div>
+		</main>
 	}
 }
 
