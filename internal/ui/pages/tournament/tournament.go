@@ -69,12 +69,12 @@ type round struct {
 }
 
 func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
-	rounds, err := h.loadRounds(r.Context())
+	rounds, teamCount, err := h.loadRounds(r.Context())
 	if err != nil {
 		return err
 	}
 
-	return index(rounds).Render(r.Context(), w)
+	return index(rounds, teamCount).Render(r.Context(), w)
 }
 
 func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
@@ -87,7 +87,7 @@ func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
 		case <-r.Context().Done():
 			return nil
 		case <-sub:
-			rounds, err := h.loadRounds(r.Context())
+			rounds, _, err := h.loadRounds(r.Context())
 			if err != nil {
 				return err
 			}
@@ -128,7 +128,7 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	rounds, err := h.loadRounds(r.Context())
+	rounds, _, err := h.loadRounds(r.Context())
 	if err != nil {
 		return err
 	}
@@ -174,12 +174,12 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	rounds, err := h.loadRounds(r.Context())
+	rounds, _, err := h.loadRounds(r.Context())
 	if err != nil {
 		return err
 	}
 
-	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds))
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds, 0))
 }
 
 func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -188,18 +188,24 @@ func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil))
+	allTeams, err := h.TeamRepo.GetAll(r.Context())
+	if err != nil {
+		return err
+	}
+	teamCount := len(allTeams)
+
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil, teamCount))
 }
 
-func (h Handler) loadRounds(ctx context.Context) ([]round, error) {
+func (h Handler) loadRounds(ctx context.Context) ([]round, int, error) {
 	tourney, err := h.GameRepo.LoadTournament(ctx)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	ts, err := h.TeamRepo.GetAll(ctx)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	teamNamesByID := make(map[string]string, len(ts))
 	for _, t := range ts {
@@ -226,5 +232,5 @@ func (h Handler) loadRounds(ctx context.Context) ([]round, error) {
 		})
 	}
 
-	return rounds, nil
+	return rounds, len(ts), nil
 }
