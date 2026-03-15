@@ -212,6 +212,10 @@ func generateMatchups(allTeams []teams.Team) ([][2]teams.Team, error) {
 				pairs = append(pairs, [2]teams.Team{allTeams[i], allTeams[j]})
 			}
 		}
+		if n == 3 {
+			// For 3-team divisions, double the games so everyone plays 4.
+			pairs = slices.Concat(pairs, pairs)
+		}
 		return pairs, nil
 	case 6:
 		// Circle method: 3 games per team = 9 games, no duplicate pairings.
