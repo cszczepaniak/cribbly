@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"errors"
-	"iter"
 	"net/http"
 	"slices"
 	"strconv"
@@ -201,64 +200,43 @@ func (h Handler) generatePrelimGames(ctx context.Context) error {
 	})
 }
 
-func cycle[T any](in []T) iter.Seq[T] {
-	return func(yield func(T) bool) {
-		i := 0
-		for {
-			idx := i % len(in)
-			if !yield(in[idx]) {
-				return
-			}
-			i++
-		}
-	}
-}
-
+// generateMatchups returns pairings so every team plays the same number of games (fair for
+// standings). 3 teams → 2 games each; 4 → 3 each; 5 → 4 each; 6 → 3 each. Only 3–6 teams allowed.
 func generateMatchups(allTeams []teams.Team) ([][2]teams.Team, error) {
-	if len(allTeams) != 4 && len(allTeams) != 6 {
-		return nil, errors.New("can only generate matchups with 4 or 6 teams")
+	n := len(allTeams)
+	if n < 3 || n > 6 {
+		return nil, errors.New("can only generate matchups for 3, 4, 5, or 6 teams")
 	}
 
-	s1, done1 := iter.Pull(cycle(allTeams))
-	defer done1()
-	s2, done2 := iter.Pull(cycle(allTeams))
-	defer done2()
-
-	nByTeam := make(map[string]int, len(allTeams))
-
-	var allPairs [][2]teams.Team
-	for {
-		_, _ = s2()
-
-		// Advance each cycle in lock step to generate a matchup for each team. Initially, t1 vs.
-		// t2, t2 vs. t3, etc. (note that these games obviously don't happen in a single round).
-		//
-		// The next outer loop will yield t1 vs. t3, t2 vs. t4, etc.
-		for range len(allTeams) {
-			t1, _ := s1()
-			t2, _ := s2()
-
-			if nByTeam[t1.ID] == 3 || nByTeam[t2.ID] == 3 {
-				// We can't add this game because then at least one team would have more than 3.
-				continue
-			}
-
-			allPairs = append(allPairs, [2]teams.Team{t1, t2})
-			nByTeam[t1.ID]++
-			nByTeam[t2.ID]++
-		}
-
-		done := true
-		for _, count := range nByTeam {
-			if count != 3 {
-				done = false
-				break
+	switch n {
+	case 3, 4, 5:
+		// Full round robin: all pairs once. 2, 3, or 4 games per team.
+		var pairs [][2]teams.Team
+		for i := 0; i < n; i++ {
+			for j := i + 1; j < n; j++ {
+				pairs = append(pairs, [2]teams.Team{allTeams[i], allTeams[j]})
 			}
 		}
-		if done {
-			return allPairs, nil
+		return pairs, nil
+	case 6:
+		// 3 games per team = 9 games. Use 3 rounds of circle method (no duplicate pairings).
+		others := []int{1, 2, 3, 4, 5}
+		var pairs [][2]teams.Team
+		for r := 0; r < 3; r++ {
+			order := make([]int, 6)
+			order[0] = 0
+			for i := 0; i < 5; i++ {
+				order[i+1] = others[(i-r+5)%5]
+			}
+			pairs = append(pairs,
+				[2]teams.Team{allTeams[order[0]], allTeams[order[5]]},
+				[2]teams.Team{allTeams[order[1]], allTeams[order[4]]},
+				[2]teams.Team{allTeams[order[2]], allTeams[order[3]]},
+			)
 		}
+		return pairs, nil
 	}
+	return nil, nil // unreachable
 }
 
 func (h Handler) getAllGames(ctx context.Context) ([]game, error) {

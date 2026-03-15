@@ -34,20 +34,25 @@ func TestGeneratePairs_4(t *testing.T) {
 	}, pairsToStrings(pairs))
 }
 
+func TestGeneratePairs_3(t *testing.T) {
+	allTeams := []teams.Team{{ID: "1"}, {ID: "2"}, {ID: "3"}}
+	pairs, err := generateMatchups(allTeams)
+	assert.NoError(t, err)
+	// Full round robin: 3 games total, 2 per team.
+	assert.Equal(t, []string{"1,2", "1,3", "2,3"}, pairsToStrings(pairs))
+}
+
 func TestGeneratePairs_5(t *testing.T) {
-	allTeams := []teams.Team{{
-		ID: "1",
-	}, {
-		ID: "2",
-	}, {
-		ID: "3",
-	}, {
-		ID: "4",
-	}, {
-		ID: "5",
-	}}
-	_, err := generateMatchups(allTeams)
-	assert.Error(t, err)
+	allTeams := []teams.Team{{ID: "1"}, {ID: "2"}, {ID: "3"}, {ID: "4"}, {ID: "5"}}
+	pairs, err := generateMatchups(allTeams)
+	assert.NoError(t, err)
+	// Full round robin: 10 games, 4 per team.
+	assert.Equal(t, []string{
+		"1,2", "1,3", "1,4", "1,5",
+		"2,3", "2,4", "2,5",
+		"3,4", "3,5",
+		"4,5",
+	}, pairsToStrings(pairs))
 }
 
 func TestGeneratePairs_6(t *testing.T) {
@@ -67,18 +72,12 @@ func TestGeneratePairs_6(t *testing.T) {
 	pairs, err := generateMatchups(allTeams)
 	assert.NoError(t, err)
 
+	// 3 games per team via 3 rounds of circle method (no duplicate pairings).
 	assert.Equal(t, []string{
-		"1,2",
-		"1,3",
-		"1,6",
-		"2,3",
-		"2,4",
-		"3,4",
-		"4,5",
-		// Note: with 6 teams, these two teams must either play a duplicate game, or one of the
-		// other teams in the division would need to play 4 games.
-		"5,6",
-		"5,6",
+		"1,4", "1,5", "1,6",
+		"2,3", "2,5", "2,6",
+		"3,4", "3,5",
+		"4,6",
 	}, pairsToStrings(pairs))
 }
 

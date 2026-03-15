@@ -5,6 +5,7 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components"
 import "github.com/cszczepaniak/cribbly/internal/persistence/games"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/utils"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/switch"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
 
 templ standings(ss []games.Standing) {
@@ -14,8 +15,23 @@ templ standings(ss []games.Standing) {
 			animation-duration: 1000ms;
 		}
 		</style>
-		<div class="px-0 md:px-4 py-4">
-			<h1 class="text-3xl font-semibold">Prelim Standings</h1>
+		<div
+			id="standings-container"
+			class="px-0 md:px-4 py-4"
+			data-signals:standings-verbose="false"
+			data-init="$standingsVerbose = localStorage.getItem('standings-verbose') === 'true'"
+			data-effect="localStorage.setItem('standings-verbose', String($standingsVerbose))"
+		>
+			<div class="flex items-center gap-4 flex-wrap">
+				<h1 class="text-3xl font-semibold">Prelim Standings</h1>
+				<label class="flex items-center gap-2 text-sm text-muted-foreground">
+					@switchcomp.Switch(switchcomp.Props{
+						ID: "standings-verbose-switch",
+						Attributes: templ.Attributes{"data-bind:standings-verbose": ""},
+					})
+					Verbose
+				</label>
+			</div>
 			@table.Table(table.Props{
 				Class: "mt-6",
 				Attributes: map[string]any{
@@ -35,8 +51,11 @@ templ standings(ss []games.Standing) {
 					@table.Head() {
 						Losses
 					}
-					@table.Head() {
-						Total Score
+					@table.Head(table.HeadProps{Attributes: templ.Attributes{"data-class:hidden": "!$standingsVerbose"}}) {
+						Win rate
+					}
+					@table.Head(table.HeadProps{Attributes: templ.Attributes{"data-class:hidden": "!$standingsVerbose"}}) {
+						PPG
 					}
 				}
 				@table.Body(table.BodyProps{
@@ -80,8 +99,19 @@ templ standingsItems(ss []games.Standing) {
 			@table.Cell() {
 				{ fmt.Sprint(s.Losses) }
 			}
-			@table.Cell() {
-				{ fmt.Sprint(s.TotalScore) }
+			@table.Cell(table.CellProps{Attributes: templ.Attributes{"data-class:hidden": "!$standingsVerbose"}}) {
+				if s.GamesPlayed() == 0 {
+					—
+				} else {
+					{ fmt.Sprintf("%.0f%%", s.WinRate()*100) }
+				}
+			}
+			@table.Cell(table.CellProps{Attributes: templ.Attributes{"data-class:hidden": "!$standingsVerbose"}}) {
+				if s.GamesPlayed() == 0 {
+					—
+				} else {
+					{ fmt.Sprintf("%.1f", s.PointsPerGame()) }
+				}
 			}
 		}
 	}

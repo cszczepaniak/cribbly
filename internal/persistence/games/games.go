@@ -1,9 +1,11 @@
 package games
 
 import (
+	"cmp"
 	"context"
 	"database/sql"
 	"errors"
+	"slices"
 
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder"
 	"github.com/cszczepaniak/go-sqlbuilder/sqlbuilder/filter"
@@ -367,19 +369,40 @@ type Standing struct {
 	TeamName   string
 	Wins       int
 	Losses     int
-	TotalScore int
+	totalScore int
 }
 
+// GamesPlayed returns the number of games this team has played.
+func (s Standing) GamesPlayed() int {
+	return s.Wins + s.Losses
+}
+
+// WinRate returns wins per game (0–1). Returns 0 when the team has played no games.
+func (s Standing) WinRate() float64 {
+	g := s.GamesPlayed()
+	if g == 0 {
+		return 0
+	}
+	return float64(s.Wins) / float64(g)
+}
+
+// PointsPerGame returns points per game. Returns 0 when the team has played no games.
+func (s Standing) PointsPerGame() float64 {
+	g := s.GamesPlayed()
+	if g == 0 {
+		return 0
+	}
+	return float64(s.totalScore) / float64(g)
+}
+
+// GetStandings returns all teams ordered by standings. Ranking uses win rate, then loss rate,
+// then points per game so that teams in divisions with different game counts (e.g. 3 vs 4 teams)
+// are comparable: 2-0 and 3-0 both rank as undefeated.
 func (s Repository) GetStandings(ctx context.Context) ([]Standing, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT
-			TeamID,
-			t.Name,
-			SUM(s.Score) as totalScore,
-			SUM(s.Score >= 121) as wins,
-			SUM(s.Score > 0 AND s.Score < 121) as losses
+		SELECT s.TeamID, t.Name, SUM(s.Score), SUM(s.Score >= 121), SUM(s.Score > 0 AND s.Score < 121)
 		FROM Scores s INNER JOIN Teams t ON s.TeamID = t.ID
-		GROUP BY TeamID ORDER BY wins DESC, losses ASC, totalScore DESC
+		GROUP BY s.TeamID, t.Name
 	`)
 	if err != nil {
 		return nil, err
@@ -388,13 +411,36 @@ func (s Repository) GetStandings(ctx context.Context) ([]Standing, error) {
 
 	var res []Standing
 	for rows.Next() {
-		var s Standing
-		err := rows.Scan(&s.TeamID, &s.TeamName, &s.TotalScore, &s.Wins, &s.Losses)
+		var st Standing
+		err := rows.Scan(&st.TeamID, &st.TeamName, &st.totalScore, &st.Wins, &st.Losses)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, s)
+		res = append(res, st)
 	}
 
+	sortStandingsByRate(res)
 	return res, nil
+}
+
+// sortStandingsByRate orders by win rate DESC, loss rate ASC, points per game DESC.
+// Teams with zero games are ordered last.
+func sortStandingsByRate(ss []Standing) {
+	slices.SortFunc(ss, func(a, b Standing) int {
+		ga, gb := a.GamesPlayed(), b.GamesPlayed()
+		if ga == 0 && gb == 0 {
+			return 0
+		}
+		if ga == 0 {
+			return 1
+		}
+		if gb == 0 {
+			return -1
+		}
+		if c := cmp.Compare(b.WinRate(), a.WinRate()); c != 0 {
+			return c
+		}
+		// Same win rate → same loss rate (loss rate = 1 - win rate), so tiebreak on PPG
+		return cmp.Compare(b.PointsPerGame(), a.PointsPerGame())
+	})
 }
