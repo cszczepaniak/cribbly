@@ -218,7 +218,7 @@ func generateMatchups(allTeams []teams.Team) ([][2]teams.Team, error) {
 		//
 		// Imagine 6 teams sitting in a circle. Team 0 stays fixed; teams 1–5 sit in order around
 		// the rest. Each round we pair "across": (0,5), (1,4), (2,3). Then we rotate teams 1–5
-		// one position (e.g. 1→2→3→4→5→1) and repeat. After 3 rounds every team has played 3 games
+		// one position (e.g. 1->2->3->4->5->1) and repeat. After 3 rounds every team has played 3 games
 		// and no pair has met twice.
 		others := []int{1, 2, 3, 4, 5} // indices of the rotating teams (0 is fixed)
 		var pairs [][2]teams.Team
