@@ -113,7 +113,7 @@ func tournamentPage(rounds []round, teamCount int) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"min-h-[calc(100vh-4.5rem)] bg-muted/30\"><div id=\"tournament\" class=\"max-w-7xl mx-auto px-4 py-12 sm:py-16\"><header class=\"mb-8 sm:mb-10\"><h1 class=\"text-4xl font-semibold text-foreground tracking-tight\">Tournament</h1><p class=\"mt-2 text-lg text-muted-foreground\">View the bracket and follow the playoffs.</p></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main id=\"tournament-page\" class=\"min-h-[calc(100vh-4.5rem)] bg-muted/30\"><div id=\"tournament\" class=\"max-w-7xl mx-auto px-4 py-12 sm:py-16\"><header class=\"mb-8 sm:mb-10\"><h1 class=\"text-4xl font-semibold text-foreground tracking-tight\">Tournament</h1><p class=\"mt-2 text-lg text-muted-foreground\">View the bracket and follow the playoffs.</p></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
