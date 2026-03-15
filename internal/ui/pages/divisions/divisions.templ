@@ -2,56 +2,82 @@ package divisions
 
 import "fmt"
 import "github.com/cszczepaniak/cribbly/internal/ui/components"
-import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 import "github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 import "github.com/cszczepaniak/cribbly/internal/persistence/teams"
 
 templ Index(divisions []divisions.Division) {
 	@components.Shell() {
-		<div class="w-full max-w-md my-4 mx-auto p-4">
-			<h1 class="text-3xl font-semibold text-foreground">Divisions</h1>
-			<p class="text-muted-foreground">Click on your division to view prelim games.</p>
-			<div class="flex flex-col space-y-4 my-4">
-				for _, d := range divisions {
-					<a href={ templ.URL(fmt.Sprintf("/divisions/%s", d.ID)) }>
-						@card.Card(card.Props{
-							Class: "hover:cursor-pointer hover:bg-accent",
-						}) {
-							@card.Header() {
-								@card.Title() {
-									{ d.Name }
-								}
-							}
-							@card.Footer()
-						}
-					</a>
-				}
+		<main class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
+			<div class="max-w-2xl mx-auto px-4 py-12 sm:py-16">
+				<header class="mb-10">
+					<h1 class="text-4xl font-semibold text-foreground tracking-tight">
+						Divisions
+					</h1>
+					<p class="mt-2 text-lg text-muted-foreground">
+						Select your division to view prelim games and standings.
+					</p>
+				</header>
+				<section class="mb-4">
+					<h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+						Select a division
+					</h2>
+				</section>
+				<div class="flex flex-col gap-3">
+					for _, d := range divisions {
+						<a
+							href={ templ.URL(fmt.Sprintf("/divisions/%s", d.ID)) }
+							class="group flex items-center gap-4 rounded-lg border bg-card px-5 py-4 text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						>
+							<span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+								@icon.LayoutGrid(icon.Props{Size: 22, Class: "shrink-0"})
+							</span>
+							<span class="min-w-0 flex-1 font-medium">
+								{ d.Name }
+							</span>
+							@icon.ChevronRight(icon.Props{Size: 18, Class: "shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"})
+						</a>
+					}
+				</div>
 			</div>
-		</div>
+		</main>
 	}
 }
 
 templ Division(d divisions.Division, teams []teams.Team) {
 	@components.Shell() {
-		<div class="w-full max-w-md my-4 mx-auto p-4">
-			<h1 class="text-3xl font-semibold text-foreground">Division { d.Name }</h1>
-			<p class="text-muted-foreground">Click on your team to view prelim games.</p>
-			<div class="flex flex-col space-y-4 my-4">
-				for _, t := range teams {
-					<a href={ templ.URL(fmt.Sprintf("/teams/%s/games", t.ID)) }>
-						@card.Card(card.Props{
-							Class: "hover:cursor-pointer hover:bg-accent",
-						}) {
-							@card.Header() {
-								@card.Title() {
-									{ t.Name }
-								}
-							}
-							@card.Footer()
-						}
-					</a>
-				}
+		<main class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
+			<div class="max-w-2xl mx-auto px-4 py-12 sm:py-16">
+				<header class="mb-10">
+					<h1 class="text-4xl font-semibold text-foreground tracking-tight">
+						{ d.Name }
+					</h1>
+					<p class="mt-2 text-lg text-muted-foreground">
+						Select your team to view and report prelim games.
+					</p>
+				</header>
+				<section class="mb-4">
+					<h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+						Select your team
+					</h2>
+				</section>
+				<div class="flex flex-col gap-3">
+					for _, t := range teams {
+						<a
+							href={ templ.URL(fmt.Sprintf("/teams/%s/games", t.ID)) }
+							class="group flex items-center gap-4 rounded-lg border bg-card px-5 py-4 text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						>
+							<span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+								@icon.Users(icon.Props{Size: 22, Class: "shrink-0"})
+							</span>
+							<span class="min-w-0 flex-1 font-medium">
+								{ t.Name }
+							</span>
+							@icon.ChevronRight(icon.Props{Size: 18, Class: "shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"})
+						</a>
+					}
+				</div>
 			</div>
-		</div>
+		</main>
 	}
 }
