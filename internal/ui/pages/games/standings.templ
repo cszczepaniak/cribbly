@@ -77,11 +77,19 @@ templ standingsTable(ss []games.Standing) {
 }
 
 templ standingsItems(ss []games.Standing) {
+	{{
+		cutoff := 32
+		if len(ss) < 16 {
+			cutoff = 8
+		} else if len(ss) < 32 {
+			cutoff = 16
+		}
+	}}
 	for i, s := range ss {
 		@table.Row(table.RowProps{
 			Class: utils.TwMerge(
 				"text-lg text-foreground",
-				utils.IfElse(i < 16, "bg-green-100", "bg-red-100"),
+				utils.IfElse(i < cutoff, "bg-green-100", "bg-red-100"),
 			),
 			Attributes: map[string]any{
 				"style": fmt.Sprintf("view-transition-name:%s", s.TeamID),
