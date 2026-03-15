@@ -17,16 +17,16 @@ templ standings(ss []games.Standing) {
 		</style>
 		<div
 			id="standings-container"
-			class="px-0 md:px-4 py-4"
+			class="px-0 py-4"
 			data-signals:standings-verbose="false"
 			data-init="$standingsVerbose = localStorage.getItem('standings-verbose') === 'true'"
 			data-effect="localStorage.setItem('standings-verbose', String($standingsVerbose))"
 		>
-			<div class="flex items-center gap-4 flex-wrap">
+			<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 p-4 flex-wrap">
 				<h1 class="text-3xl font-semibold">Prelim Standings</h1>
 				<label class="flex items-center gap-2 text-sm text-muted-foreground">
 					@switchcomp.Switch(switchcomp.Props{
-						ID: "standings-verbose-switch",
+						ID:         "standings-verbose-switch",
 						Attributes: templ.Attributes{"data-bind:standings-verbose": ""},
 					})
 					Verbose

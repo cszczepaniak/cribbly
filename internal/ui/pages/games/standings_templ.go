@@ -49,7 +49,7 @@ func standings(ss []games.Standing) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t::view-transition-group(*) {\n\t\t\tanimation-duration: 1000ms;\n\t\t}\n\t\t</style> <div id=\"standings-container\" class=\"px-0 md:px-4 py-4\" data-signals:standings-verbose=\"false\" data-init=\"$standingsVerbose = localStorage.getItem(&#39;standings-verbose&#39;) === &#39;true&#39;\" data-effect=\"localStorage.setItem(&#39;standings-verbose&#39;, String($standingsVerbose))\"><div class=\"flex items-center gap-4 flex-wrap\"><h1 class=\"text-3xl font-semibold\">Prelim Standings</h1><label class=\"flex items-center gap-2 text-sm text-muted-foreground\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t::view-transition-group(*) {\n\t\t\tanimation-duration: 1000ms;\n\t\t}\n\t\t</style> <div id=\"standings-container\" class=\"px-0 py-4\" data-signals:standings-verbose=\"false\" data-init=\"$standingsVerbose = localStorage.getItem(&#39;standings-verbose&#39;) === &#39;true&#39;\" data-effect=\"localStorage.setItem(&#39;standings-verbose&#39;, String($standingsVerbose))\"><div class=\"flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 p-4 flex-wrap\"><h1 class=\"text-3xl font-semibold\">Prelim Standings</h1><label class=\"flex items-center gap-2 text-sm text-muted-foreground\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
