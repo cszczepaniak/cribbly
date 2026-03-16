@@ -36,6 +36,7 @@
     --container-lg: 32rem;
     --container-2xl: 42rem;
     --container-4xl: 56rem;
+    --container-7xl: 80rem;
     --text-xs: 0.75rem;
     --text-xs--line-height: calc(1 / 0.75);
     --text-sm: 0.875rem;
@@ -594,6 +595,9 @@
   .max-w-4xl {
     max-width: var(--container-4xl);
   }
+  .max-w-7xl {
+    max-width: var(--container-7xl);
+  }
   .max-w-16 {
     max-width: calc(var(--spacing) * 16);
   }
@@ -602,9 +606,6 @@
   }
   .max-w-\[calc\(100\%-2rem\)\] {
     max-width: calc(100% - 2rem);
-  }
-  .max-w-full {
-    max-width: 100%;
   }
   .max-w-lg {
     max-width: var(--container-lg);
@@ -702,6 +703,10 @@
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .touch-pan-y {
+    --tw-pan-y: pan-y;
+    touch-action: var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,);
   }
   .resize {
     resize: both;
@@ -870,13 +875,13 @@
   .rounded-xs {
     border-radius: var(--radius-xs);
   }
-  .rounded-t-sm {
-    border-top-left-radius: calc(var(--radius) - 4px);
-    border-top-right-radius: calc(var(--radius) - 4px);
+  .rounded-t-lg {
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
   }
-  .rounded-b-sm {
-    border-bottom-right-radius: calc(var(--radius) - 4px);
-    border-bottom-left-radius: calc(var(--radius) - 4px);
+  .rounded-b-lg {
+    border-bottom-right-radius: var(--radius);
+    border-bottom-left-radius: var(--radius);
   }
   .border {
     border-style: var(--tw-border-style);
@@ -1057,9 +1062,6 @@
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
-  .p-3 {
-    padding: calc(var(--spacing) * 3);
-  }
   .p-4 {
     padding: calc(var(--spacing) * 4);
   }
@@ -1105,6 +1107,9 @@
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
   }
+  .py-2\.5 {
+    padding-block: calc(var(--spacing) * 2.5);
+  }
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
   }
@@ -1132,9 +1137,6 @@
   .pb-0 {
     padding-bottom: calc(var(--spacing) * 0);
   }
-  .pb-1 {
-    padding-bottom: calc(var(--spacing) * 1);
-  }
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
   }
@@ -1144,8 +1146,8 @@
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
   }
-  .pl-2 {
-    padding-left: calc(var(--spacing) * 2);
+  .pl-1 {
+    padding-left: calc(var(--spacing) * 1);
   }
   .pl-8 {
     padding-left: calc(var(--spacing) * 8);
@@ -2251,9 +2253,19 @@
       background-color: var(--color-yellow-500);
     }
   }
+  .sm\:mb-10 {
+    @media (width >= 40rem) {
+      margin-bottom: calc(var(--spacing) * 10);
+    }
+  }
   .sm\:w-auto {
     @media (width >= 40rem) {
       width: auto;
+    }
+  }
+  .sm\:w-fit {
+    @media (width >= 40rem) {
+      width: fit-content;
     }
   }
   .sm\:max-w-lg {
@@ -2301,9 +2313,24 @@
       gap: calc(var(--spacing) * 8);
     }
   }
+  .sm\:p-6 {
+    @media (width >= 40rem) {
+      padding: calc(var(--spacing) * 6);
+    }
+  }
   .sm\:p-8 {
     @media (width >= 40rem) {
       padding: calc(var(--spacing) * 8);
+    }
+  }
+  .sm\:px-4 {
+    @media (width >= 40rem) {
+      padding-inline: calc(var(--spacing) * 4);
+    }
+  }
+  .sm\:py-3 {
+    @media (width >= 40rem) {
+      padding-block: calc(var(--spacing) * 3);
     }
   }
   .sm\:py-16 {
@@ -2330,6 +2357,12 @@
     @media (width >= 40rem) {
       font-size: var(--text-5xl);
       line-height: var(--tw-leading, var(--text-5xl--line-height));
+    }
+  }
+  .sm\:text-base {
+    @media (width >= 40rem) {
+      font-size: var(--text-base);
+      line-height: var(--tw-leading, var(--text-base--line-height));
     }
   }
   .md\:block {
@@ -2665,6 +2698,18 @@
   syntax: "*";
   inherits: false;
 }
+@property --tw-pan-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-pan-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-pinch-zoom {
+  syntax: "*";
+  inherits: false;
+}
 @property --tw-space-y-reverse {
   syntax: "*";
   inherits: false;
@@ -2862,6 +2907,9 @@
       --tw-rotate-z: initial;
       --tw-skew-x: initial;
       --tw-skew-y: initial;
+      --tw-pan-x: initial;
+      --tw-pan-y: initial;
+      --tw-pinch-zoom: initial;
       --tw-space-y-reverse: 0;
       --tw-space-x-reverse: 0;
       --tw-border-style: solid;

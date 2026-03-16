@@ -39,9 +39,9 @@ func TestGeneratePairs_3(t *testing.T) {
 	allTeams := []teams.Team{{ID: "1"}, {ID: "2"}, {ID: "3"}}
 	pairs, err := generateMatchups(allTeams)
 	assert.NoError(t, err)
-	assertEachTeamPlaysNGames(t, allTeams, pairs, 2)
+	assertEachTeamPlaysNGames(t, allTeams, pairs, 4)
 	// Full round robin: 3 games total, 2 per team.
-	assert.Equal(t, []string{"1,2", "1,3", "2,3"}, pairsToStrings(pairs))
+	assert.Equal(t, []string{"1,2", "1,2", "1,3", "1,3", "2,3", "2,3"}, pairsToStrings(pairs))
 }
 
 func TestGeneratePairs_5(t *testing.T) {

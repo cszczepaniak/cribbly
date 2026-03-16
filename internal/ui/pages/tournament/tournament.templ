@@ -7,6 +7,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/card"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/selectbox"
@@ -24,36 +25,54 @@ templ index(rounds []round, teamCount int) {
 }
 
 templ tournamentPage(rounds []round, teamCount int) {
-	<div id="tournament" class="p-4">
-		<h1 class="text-3xl font-semibold text-foreground">Tournament</h1>
-		if len(rounds) == 0 {
-			if middleware.IsAdmin(ctx) {
-				@tournamentControls(teamCount)
+	<main id="tournament-page" class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
+		<div id="tournament" class="max-w-7xl mx-auto px-4 py-12 sm:py-16">
+			<header class="mb-8 sm:mb-10">
+				<h1 class="text-4xl font-semibold text-foreground tracking-tight">
+					Tournament
+				</h1>
+				<p class="mt-2 text-lg text-muted-foreground">
+					View the bracket and follow the playoffs.
+				</p>
+			</header>
+			if len(rounds) == 0 {
+				if middleware.IsAdmin(ctx) {
+					@tournamentControls(teamCount)
+				} else {
+					<p class="text-muted-foreground">The tournament hasn't started yet.</p>
+				}
 			} else {
-				<p>The tournament hasn't started yet.</p>
+				@roundDisplay(rounds, 0)
+				@roundSwipeScript()
 			}
-		} else {
-			@roundDisplay(rounds, 0)
-		}
-		@components.DevTools() {
-			@devTools()
-		}
-	</div>
+			@components.DevTools() {
+				@devTools()
+			}
+		</div>
+	</main>
 }
 
 templ roundDisplay(rounds []round, idx int) {
-	<div id="rounds" class="flex flex-col items-stretch max-w-full" data-signals:round="0">
-		<div class="flex flex-row">
+	<section class="mb-4">
+		<h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+			Bracket
+		</h2>
+	</section>
+	<div id="rounds" class="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden" data-signals:round="0">
+		<div class="flex flex-row items-center justify-between gap-2 border-b bg-muted/30 px-3 py-2 sm:px-4">
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
+				Size:    button.SizeSm,
 				Attributes: utils.Attrs(
 					utils.DataOnClick("$round = $round === 0 ? 0 : $round - 1"),
 				),
 			}) {
 				@icon.ChevronLeft()
 			}
+			<span class="text-sm font-medium text-muted-foreground">Round</span>
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
+				Size:    button.SizeSm,
 				Attributes: utils.Attrs(
 					utils.DataOnClick(fmt.Sprintf("$round = $round === %d ? %d : $round + 1", len(rounds)-1, len(rounds)-1)),
 				),
@@ -61,28 +80,65 @@ templ roundDisplay(rounds []round, idx int) {
 				@icon.ChevronRight()
 			}
 		</div>
-		<ul class="flex flex-row overflow-x-hidden">
-			for i, round := range rounds {
-				<li
-					class={ utils.TwMerge(
-					"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4",
-					utils.If(len(rounds) == 5, "2xl:flex-[0_0_20%]"),
-					) }
-					data-style:translate="`-${$round*100}% 0`"
-				>
-					<p class="pl-2 pb-1 text-muted-foreground italic">Round { fmt.Sprint(i+1) }</p>
-					<div
-						class="min-w-2xs space-y-4 flex flex-col grow justify-around"
-						data-style:display={ fmt.Sprintf("$round > %d ? 'none' : 'flex'", i) }
+		<div class="p-4 sm:p-6 overflow-x-hidden touch-pan-y">
+			<ul class="flex flex-row">
+				for i, round := range rounds {
+					<li
+						class={ utils.TwMerge(
+						"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4 min-w-0",
+						utils.If(len(rounds) == 5, "2xl:flex-[0_0_20%]"),
+						) }
+						data-style:translate="`-${$round*100}% 0`"
 					>
-						for j, g := range round.games {
-							@game(g, i, j)
-						}
-					</div>
-				</li>
-			}
-		</ul>
+						<p class="pl-1 pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+							Round { fmt.Sprint(i+1) }
+						</p>
+						<div
+							class="min-w-2xs space-y-4 flex flex-col grow justify-around"
+							data-style:display={ fmt.Sprintf("$round > %d ? 'none' : 'flex'", i) }
+						>
+							for j, g := range round.games {
+								@game(g, i, j)
+							}
+						</div>
+					</li>
+				}
+			</ul>
+		</div>
 	</div>
+}
+
+templ roundSwipeScript() {
+	<script type="text/javascript">
+		(function () {
+			function init() {
+				var el = document.getElementById("rounds");
+				if (!el) return;
+				var nav = el.firstElementChild;
+				var buttons = nav && nav.querySelectorAll("button");
+				if (!buttons || buttons.length < 2) return;
+				var prevBtn = buttons[0], nextBtn = buttons[1];
+				var swipeArea = el.querySelector(".overflow-x-hidden");
+				if (!swipeArea) return;
+				var startX;
+				swipeArea.addEventListener("touchstart", function (e) {
+					startX = e.touches[0].clientX;
+				}, { passive: true });
+				swipeArea.addEventListener("touchend", function (e) {
+					if (startX == null) return;
+					var deltaX = e.changedTouches[0].clientX - startX;
+					if (deltaX < -50) nextBtn.click();
+					else if (deltaX > 50) prevBtn.click();
+					startX = null;
+				}, { passive: true });
+			}
+			if (document.readyState === "loading") {
+				document.addEventListener("DOMContentLoaded", init);
+			} else {
+				init();
+			}
+		})();
+	</script>
 }
 
 templ game(g row, round, idx int) {
@@ -111,21 +167,22 @@ templ game(g row, round, idx int) {
 templ teamArea(props teamAreaProps) {
 	<div
 		class={ utils.TwMerge(
-		"p-3 border-x flex flex-row justify-between items-center",
-		utils.IfElse(props.top, "border-t rounded-t-sm", "border rounded-b-sm"),
+		"px-3 py-2.5 sm:px-4 sm:py-3 flex flex-row justify-between items-center border-border bg-card",
+		utils.IfElse(props.top, "border-x border-t rounded-t-lg", "border rounded-b-lg border-t-0"),
 		utils.If(props.isLoser(), "text-muted-foreground"),
-		utils.If(props.isWinner(), "font-semibold"),
+		utils.If(props.isWinner(), "font-semibold text-foreground"),
 		) }
 		if props.winnerName == "" {
 			style={ fmt.Sprintf("view-transition-name:%s", props.id) }
 		}
 	>
-		<p class={ utils.If(props.name == "", "invisible") }>
+		<p class={ utils.TwMerge("text-sm sm:text-base truncate min-w-0", utils.If(props.name == "", "invisible")) }>
 			{ cmp.Or(props.name, "x") }
 		</p>
 		@button.Button(button.Props{
 			Class:   utils.If(props.winnerName != "" || !props.gameReady || !middleware.IsAdmin(ctx), "invisible"),
 			Variant: button.VariantGhost,
+			Size:    button.SizeSm,
 			Attributes: utils.Attrs(
 				utils.DataOnClick(dstar.SendPostf(
 					"/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
@@ -189,57 +246,75 @@ templ tournamentTable(rows []row) {
 }
 
 templ tournamentControls(teamCount int) {
-	@form.Item(form.ItemProps{
-		Class: "mb-4",
+	@card.Card(card.Props{
+		Class: "shadow-sm max-w-md",
 	}) {
-		@form.Label() {
-			Number of Tournament Teams
-		}
-		@selectbox.SelectBox(selectbox.Props{
-			Multiple: false,
+		@card.Header(card.HeaderProps{
+			Class: "pb-2",
 		}) {
-			@selectbox.Trigger(selectbox.TriggerProps{
-				Attributes: utils.Attrs(
-					utils.DataBind("size"),
-				),
-				Class: "w-fit",
-			}) {
-				@selectbox.Value()
+			@card.Title(card.TitleProps{}) {
+				Generate bracket
 			}
-			@selectbox.Content(selectbox.ContentProps{
-				NoSearch: true,
-			}) {
-				if teamCount >= 8 {
-					@selectbox.Item(selectbox.ItemProps{
-						Value: "8",
-					}) {
-						8
-					}
-				}
-				if teamCount >= 16 {
-					@selectbox.Item(selectbox.ItemProps{
-						Value: "16",
-					}) {
-						16
-					}
-				}
-				if teamCount >= 32 {
-					@selectbox.Item(selectbox.ItemProps{
-						Value: "32",
-					}) {
-						32
-					}
-				}
+			@card.Description(card.DescriptionProps{}) {
+				Choose how many teams advance to the tournament.
 			}
 		}
-	}
-	@button.Button(button.Props{
-		Attributes: utils.Attrs(
-			utils.DataOnClick(dstar.SendPostf("/tournament")),
-			utils.Attr("data-attr:disabled", "$size===''"),
-		),
-	}) {
-		Generate Tournament
+		@card.Content(card.ContentProps{
+			Class: "pt-4",
+		}) {
+			@form.Item(form.ItemProps{
+				Class: "mb-4",
+			}) {
+				@form.Label() {
+					Number of tournament teams
+				}
+				@selectbox.SelectBox(selectbox.Props{
+					Multiple: false,
+				}) {
+					@selectbox.Trigger(selectbox.TriggerProps{
+						Attributes: utils.Attrs(
+							utils.DataBind("size"),
+						),
+						Class: "w-full sm:w-fit",
+					}) {
+						@selectbox.Value()
+					}
+					@selectbox.Content(selectbox.ContentProps{
+						NoSearch: true,
+					}) {
+						if teamCount >= 8 {
+							@selectbox.Item(selectbox.ItemProps{
+								Value: "8",
+							}) {
+								8
+							}
+						}
+						if teamCount >= 16 {
+							@selectbox.Item(selectbox.ItemProps{
+								Value: "16",
+							}) {
+								16
+							}
+						}
+						if teamCount >= 32 {
+							@selectbox.Item(selectbox.ItemProps{
+								Value: "32",
+							}) {
+								32
+							}
+						}
+					}
+				}
+			}
+			@button.Button(button.Props{
+				Attributes: utils.Attrs(
+					utils.DataOnClick(dstar.SendPostf("/tournament")),
+					utils.Attr("data-attr:disabled", "$size===''"),
+				),
+			}) {
+				Generate Tournament
+			}
+		}
 	}
 }
 
