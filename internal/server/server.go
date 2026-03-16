@@ -92,6 +92,7 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("POST /tournament", tourneyHandler.Generate, mw.ErrorIfNotAdmin())
 	r.Handle("DELETE /tournament", tourneyHandler.Delete, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
+	r.Handle("POST /tournament/team/{id}/revert", tourneyHandler.RevertAdvance, mw.ErrorIfNotAdmin())
 
 	return mux
 }

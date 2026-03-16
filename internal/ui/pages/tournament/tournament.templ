@@ -16,15 +16,15 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 )
 
-templ index(rounds []round, teamCount int, championName string) {
+templ index(rounds []round, teamCount int, champ champion) {
 	@components.Shell() {
 		<div data-init={ dstar.SendGetf("/tournament/stream") }>
-			@tournamentPage(rounds, teamCount, championName)
+			@tournamentPage(rounds, teamCount, champ)
 		</div>
 	}
 }
 
-templ tournamentPage(rounds []round, teamCount int, championName string) {
+templ tournamentPage(rounds []round, teamCount int, champ champion) {
 	<main id="tournament-page" class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
 		<div id="tournament" class="max-w-7xl mx-auto px-4 py-12 sm:py-16">
 			<header class="mb-8 sm:mb-10">
@@ -42,7 +42,7 @@ templ tournamentPage(rounds []round, teamCount int, championName string) {
 					<p class="text-muted-foreground">The tournament hasn't started yet.</p>
 				}
 			} else {
-				@roundDisplay(rounds, 0, championName)
+				@roundDisplay(rounds, 0, champ)
 				@roundSwipeScript()
 			}
 			@components.DevTools() {
@@ -52,7 +52,7 @@ templ tournamentPage(rounds []round, teamCount int, championName string) {
 	</main>
 }
 
-templ roundDisplay(rounds []round, idx int, championName string) {
+templ roundDisplay(rounds []round, idx int, champ champion) {
 	<section class="mb-4">
 		<h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
 			Bracket
@@ -70,7 +70,7 @@ templ roundDisplay(rounds []round, idx int, championName string) {
 				@icon.ChevronLeft()
 			}
 			<span class="text-sm font-medium text-muted-foreground">Round</span>
-			if championName != "" {
+			if champ.Name != "" {
 				@button.Button(button.Props{
 					Variant: button.VariantGhost,
 					Size:    button.SizeSm,
@@ -98,8 +98,8 @@ templ roundDisplay(rounds []round, idx int, championName string) {
 					<li
 						class={ utils.TwMerge(
 						"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4 min-w-0",
-						utils.If(len(rounds) == 5 && championName == "", "2xl:flex-[0_0_20%]"),
-						utils.If(len(rounds) == 5 && championName != "", "2xl:flex-[0_0_16.666667%]"),
+						utils.If(len(rounds) == 5 && champ.Name == "", "2xl:flex-[0_0_20%]"),
+						utils.If(len(rounds) == 5 && champ.Name != "", "2xl:flex-[0_0_16.666667%]"),
 						) }
 						data-style:translate="`-${$round*100}% 0`"
 					>
@@ -116,7 +116,7 @@ templ roundDisplay(rounds []round, idx int, championName string) {
 						</div>
 					</li>
 				}
-				if championName != "" {
+				if champ.Name != "" {
 					<li
 						class={ utils.TwMerge(
 						"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4 min-w-0",
@@ -128,11 +128,27 @@ templ roundDisplay(rounds []round, idx int, championName string) {
 							Champion
 						</p>
 						<div class="min-w-2xs flex flex-col grow justify-center">
-							<div class="px-3 py-4 sm:px-4 sm:py-6 flex flex-row items-center justify-center gap-2 rounded-lg border border-border bg-primary/10">
-								@icon.Trophy()
-								<p class="text-lg font-semibold text-foreground">
-									{ championName }
-								</p>
+							<div class="px-3 py-4 sm:px-4 sm:py-6 flex flex-col items-center gap-3 rounded-lg border border-border bg-primary/10">
+								<div class="flex flex-row items-center justify-center gap-2">
+									@icon.Trophy()
+									<p class="text-lg font-semibold text-foreground">
+										{ champ.Name }
+									</p>
+								</div>
+								if middleware.IsAdmin(ctx) {
+									@button.Button(button.Props{
+										Variant:  button.VariantGhost,
+										Size:     button.SizeSm,
+										Attributes: utils.Attrs(
+											utils.DataOnClick(dstar.SendPostf(
+												"/tournament/team/%s/revert?fromIdx=0&toRound=%d",
+												champ.ID, len(rounds)),
+											),
+										),
+									}) {
+										Remove champion
+									}
+								}
 							</div>
 						</div>
 					</li>
@@ -178,22 +194,28 @@ templ roundSwipeScript() {
 templ game(g row, round, idx int) {
 	<div id={ fmt.Sprintf("game-%d-%d", round, idx) }>
 		@teamArea(teamAreaProps{
-			id:         g.team1ID,
-			round:      round,
-			idx:        idx,
-			name:       g.team1Name,
-			winnerName: g.winner,
-			top:        true,
-			gameReady:  g.team1ID != "" && g.team2ID != "",
+			id:            g.team1ID,
+			round:         round,
+			idx:           idx,
+			name:          g.team1Name,
+			winnerName:    g.winner,
+			top:           true,
+			gameReady:     g.team1ID != "" && g.team2ID != "",
+			showRevert:    round > 0 && g.winner == "",
+			revertFromIdx: idx * 2,
+			revertToRound: round,
 		})
 		@teamArea(teamAreaProps{
-			id:         g.team2ID,
-			round:      round,
-			idx:        idx,
-			name:       g.team2Name,
-			winnerName: g.winner,
-			top:        false,
-			gameReady:  g.team1ID != "" && g.team2ID != "",
+			id:            g.team2ID,
+			round:         round,
+			idx:           idx,
+			name:          g.team2Name,
+			winnerName:    g.winner,
+			top:           false,
+			gameReady:     g.team1ID != "" && g.team2ID != "",
+			showRevert:    round > 0 && g.winner == "",
+			revertFromIdx: idx*2 + 1,
+			revertToRound: round,
 		})
 	</div>
 }
@@ -213,19 +235,35 @@ templ teamArea(props teamAreaProps) {
 		<p class={ utils.TwMerge("text-sm sm:text-base truncate min-w-0", utils.If(props.name == "", "invisible")) }>
 			{ cmp.Or(props.name, "x") }
 		</p>
-		@button.Button(button.Props{
-			Class:   utils.If(props.winnerName != "" || !props.gameReady || !middleware.IsAdmin(ctx), "invisible"),
-			Variant: button.VariantGhost,
-			Size:    button.SizeSm,
-			Attributes: utils.Attrs(
-				utils.DataOnClick(dstar.SendPostf(
-					"/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
-					props.id, props.idx, props.round+1),
+		<div class="flex flex-row items-center gap-0.5 shrink-0">
+			if middleware.IsAdmin(ctx) && props.showRevert && props.id != "" {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size:    button.SizeSm,
+					Attributes: utils.Attrs(
+						utils.DataOnClick(dstar.SendPostf(
+							"/tournament/team/%s/revert?fromIdx=%d&toRound=%d",
+							props.id, props.revertFromIdx, props.revertToRound),
+						),
+					),
+				}) {
+					@icon.ChevronLeft()
+				}
+			}
+			@button.Button(button.Props{
+				Class:   utils.If(props.winnerName != "" || !props.gameReady || !middleware.IsAdmin(ctx), "invisible"),
+				Variant: button.VariantGhost,
+				Size:    button.SizeSm,
+				Attributes: utils.Attrs(
+					utils.DataOnClick(dstar.SendPostf(
+						"/tournament/team/%s/advance?fromIdx=%d&toRound=%d",
+						props.id, props.idx, props.round+1),
+					),
 				),
-			),
-		}) {
-			@icon.ChevronRight()
-		}
+			}) {
+				@icon.ChevronRight()
+			}
+		</div>
 	</div>
 }
 
