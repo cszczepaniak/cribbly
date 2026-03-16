@@ -137,8 +137,8 @@ templ roundDisplay(rounds []round, idx int, champ champion) {
 								</div>
 								if middleware.IsAdmin(ctx) {
 									@button.Button(button.Props{
-										Variant:  button.VariantGhost,
-										Size:     button.SizeSm,
+										Variant: button.VariantGhost,
+										Size:    button.SizeSm,
 										Attributes: utils.Attrs(
 											utils.DataOnClick(dstar.SendPostf(
 												"/tournament/team/%s/revert?fromIdx=0&toRound=%d",

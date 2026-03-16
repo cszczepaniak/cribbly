@@ -773,6 +773,9 @@
   .justify-center {
     justify-content: center;
   }
+  .gap-0\.5 {
+    gap: calc(var(--spacing) * 0.5);
+  }
   .gap-1 {
     gap: calc(var(--spacing) * 1);
   }
@@ -2331,6 +2334,11 @@
       padding-block: calc(var(--spacing) * 3);
     }
   }
+  .sm\:py-6 {
+    @media (width >= 40rem) {
+      padding-block: calc(var(--spacing) * 6);
+    }
+  }
   .sm\:py-16 {
     @media (width >= 40rem) {
       padding-block: calc(var(--spacing) * 16);
@@ -2413,6 +2421,11 @@
   .xl\:flex-\[0_0_25\%\] {
     @media (width >= 80rem) {
       flex: 0 0 25%;
+    }
+  }
+  .\32 xl\:flex-\[0_0_16\.666667\%\] {
+    @media (width >= 96rem) {
+      flex: 0 0 16.666667%;
     }
   }
   .\32 xl\:flex-\[0_0_20\%\] {
