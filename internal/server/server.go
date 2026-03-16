@@ -86,12 +86,14 @@ func Setup(cfg Config) http.Handler {
 		GameRepo:           cfg.GameRepo,
 		TeamRepo:           cfg.TeamRepo,
 		TournamentNotifier: cfg.TournamentNotifier,
+		Transactor:         cfg.Transactor,
 	}
 	r.Handle("GET /tournament", tourneyHandler.Index)
 	r.Handle("GET /tournament/stream", tourneyHandler.Stream)
 	r.Handle("POST /tournament", tourneyHandler.Generate, mw.ErrorIfNotAdmin())
 	r.Handle("DELETE /tournament", tourneyHandler.Delete, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
+	r.Handle("POST /tournament/team/{id}/revert", tourneyHandler.RevertAdvance, mw.ErrorIfNotAdmin())
 
 	return mux
 }

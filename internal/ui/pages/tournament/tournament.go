@@ -9,19 +9,22 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )
 
 type teamAreaProps struct {
-	id         string
-	round      int
-	idx        int
-	name       string
-	winnerName string
-	top        bool
-	gameReady  bool
+	id            string
+	round         int
+	idx           int
+	name          string
+	winnerName    string
+	top           bool
+	gameReady     bool
+	showRevert    bool
+	revertFromIdx int
+	revertToRound int
 }
 
 func (p teamAreaProps) isWinner() bool {
@@ -33,10 +36,10 @@ func (p teamAreaProps) isLoser() bool {
 }
 
 type Handler struct {
-	DivisionRepo       divisions.Repository
 	TeamRepo           teams.Repository
 	GameRepo           games.Repository
 	TournamentNotifier *notifier.Notifier
+	Transactor         database.Transactor
 }
 
 type signalInt int
@@ -62,6 +65,7 @@ type row struct {
 	team2ID   string
 	team2Name string
 	winner    string
+	winnerID  string
 }
 
 type round struct {
@@ -74,7 +78,7 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return index(rounds, teamCount).Render(r.Context(), w)
+	return index(rounds, teamCount, championFromRounds(rounds)).Render(r.Context(), w)
 }
 
 func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
@@ -91,7 +95,7 @@ func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
 			if err != nil {
 				return err
 			}
-			err = sse.PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
+			err = sse.PatchElementTempl(roundDisplay(rounds, 0, championFromRounds(rounds)), datastar.WithViewTransitions())
 			if err != nil {
 				return err
 			}
@@ -117,13 +121,42 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	// 0,1->0; 2,3->1; etc.
-	newIdx := fromIdx / 2
-	if fromIdx%2 == 0 {
-		err = h.GameRepo.PutTeam1IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
-	} else {
-		err = h.GameRepo.PutTeam2IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+	rounds, _, err := h.loadRounds(r.Context())
+	if err != nil {
+		return err
 	}
+
+	// Only advance team to next round if there is one (skip for final/champion game)
+	if toRound < len(rounds) {
+		newIdx := fromIdx / 2
+		if fromIdx%2 == 0 {
+			err = h.GameRepo.PutTeam1IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+		} else {
+			err = h.GameRepo.PutTeam2IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	rounds, _, err = h.loadRounds(r.Context())
+	if err != nil {
+		return err
+	}
+
+	h.TournamentNotifier.Notify()
+	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0, championFromRounds(rounds)), datastar.WithViewTransitions())
+}
+
+func (h Handler) RevertAdvance(w http.ResponseWriter, r *http.Request) error {
+	teamID := r.PathValue("id")
+
+	fromIdx, err := strconv.Atoi(r.URL.Query().Get("fromIdx"))
+	if err != nil {
+		return err
+	}
+
+	toRound, err := strconv.Atoi(r.URL.Query().Get("toRound"))
 	if err != nil {
 		return err
 	}
@@ -133,8 +166,49 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	// Only allow revert from the team's furthest game: the game they're being removed from must have no winner yet
+	gameIdx := fromIdx / 2
+	if toRound >= len(rounds) {
+		// Final round: clearing champion is always allowed
+	} else {
+		game := rounds[toRound].games[gameIdx]
+		if game.winner != "" {
+			return errors.New("can only revert a team from their furthest game")
+		}
+		// Team must be in this game
+		if game.team1ID != teamID && game.team2ID != teamID {
+			return errors.New("team is not in this game")
+		}
+	}
+
+	err = h.Transactor.WithTx(r.Context(), func(ctx context.Context) error {
+		// Clear winner on the game this team was advanced from
+		err = h.GameRepo.ClearTournamentGameWinner(ctx, toRound-1, fromIdx)
+		if err != nil {
+			return err
+		}
+
+		// If they were advanced into a next round, clear that slot too
+		if toRound < len(rounds) {
+			err = h.GameRepo.ClearTeamFromTournamentGame(ctx, toRound, gameIdx, teamID)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	rounds, _, err = h.loadRounds(r.Context())
+	if err != nil {
+		return err
+	}
+
 	h.TournamentNotifier.Notify()
-	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
+	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0, championFromRounds(rounds)), datastar.WithViewTransitions())
 }
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
@@ -179,7 +253,7 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds, 0))
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds, 0, championFromRounds(rounds)))
 }
 
 func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -194,7 +268,7 @@ func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 	teamCount := len(allTeams)
 
-	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil, teamCount))
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil, teamCount, champion{}))
 }
 
 func (h Handler) loadRounds(ctx context.Context) ([]round, int, error) {
@@ -224,6 +298,7 @@ func (h Handler) loadRounds(ctx context.Context) ([]round, int, error) {
 				team2ID:   game.TeamIDs[1],
 				team2Name: teamNamesByID[game.TeamIDs[1]],
 				winner:    teamNamesByID[game.Winner],
+				winnerID:  game.Winner,
 			})
 		}
 
@@ -233,4 +308,24 @@ func (h Handler) loadRounds(ctx context.Context) ([]round, int, error) {
 	}
 
 	return rounds, len(ts), nil
+}
+
+type champion struct {
+	Name string
+	ID   string
+}
+
+func championFromRounds(rounds []round) champion {
+	if len(rounds) == 0 {
+		return champion{}
+	}
+	last := rounds[len(rounds)-1]
+	if len(last.games) != 1 {
+		return champion{}
+	}
+	g := last.games[0]
+	if g.winner == "" {
+		return champion{}
+	}
+	return champion{Name: g.winner, ID: g.winnerID}
 }

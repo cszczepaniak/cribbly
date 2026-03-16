@@ -188,6 +188,30 @@ func (s Repository) SetTournamentGameWinner(ctx context.Context, round, idx int,
 	)
 }
 
+func (s Repository) ClearTournamentGameWinner(ctx context.Context, round, idx int) error {
+	return s.db.ExecOne(
+		ctx,
+		`UPDATE TournamentGames SET Winner = NULL WHERE Round = ? AND Idx = ?`,
+		round,
+		idx,
+	)
+}
+
+func (s Repository) ClearTeamFromTournamentGame(ctx context.Context, round, idx int, teamID string) error {
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE TournamentGames SET TeamID1 = NULL WHERE Round = ? AND Idx = ? AND TeamID1 = ?`,
+		round, idx, teamID,
+	)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx,
+		`UPDATE TournamentGames SET TeamID2 = NULL WHERE Round = ? AND Idx = ? AND TeamID2 = ?`,
+		round, idx, teamID,
+	)
+	return err
+}
+
 func (s Repository) UpdateScore(ctx context.Context, gameID, teamID string, score int) error {
 	_, err := s.b.UpdateTable("Scores").SetFieldTo("Score", score).WhereAll(
 		filter.Equals("GameID", gameID),
