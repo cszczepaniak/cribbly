@@ -74,7 +74,7 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return index(rounds, teamCount).Render(r.Context(), w)
+	return index(rounds, teamCount, championFromRounds(rounds)).Render(r.Context(), w)
 }
 
 func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
@@ -91,7 +91,7 @@ func (h Handler) Stream(w http.ResponseWriter, r *http.Request) error {
 			if err != nil {
 				return err
 			}
-			err = sse.PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
+			err = sse.PatchElementTempl(roundDisplay(rounds, 0, championFromRounds(rounds)), datastar.WithViewTransitions())
 			if err != nil {
 				return err
 			}
@@ -117,24 +117,31 @@ func (h Handler) AdvanceTeam(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	// 0,1->0; 2,3->1; etc.
-	newIdx := fromIdx / 2
-	if fromIdx%2 == 0 {
-		err = h.GameRepo.PutTeam1IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
-	} else {
-		err = h.GameRepo.PutTeam2IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
-	}
-	if err != nil {
-		return err
-	}
-
 	rounds, _, err := h.loadRounds(r.Context())
 	if err != nil {
 		return err
 	}
 
+	// Only advance team to next round if there is one (skip for final/champion game)
+	if toRound < len(rounds) {
+		newIdx := fromIdx / 2
+		if fromIdx%2 == 0 {
+			err = h.GameRepo.PutTeam1IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+		} else {
+			err = h.GameRepo.PutTeam2IntoTournamentGame(r.Context(), toRound, newIdx, teamID)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	rounds, _, err = h.loadRounds(r.Context())
+	if err != nil {
+		return err
+	}
+
 	h.TournamentNotifier.Notify()
-	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0), datastar.WithViewTransitions())
+	return datastar.NewSSE(w, r).PatchElementTempl(roundDisplay(rounds, 0, championFromRounds(rounds)), datastar.WithViewTransitions())
 }
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
@@ -179,7 +186,7 @@ func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds, 0))
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(rounds, 0, championFromRounds(rounds)))
 }
 
 func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
@@ -194,7 +201,7 @@ func (h Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 	teamCount := len(allTeams)
 
-	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil, teamCount))
+	return datastar.NewSSE(w, r).PatchElementTempl(tournamentPage(nil, teamCount, ""))
 }
 
 func (h Handler) loadRounds(ctx context.Context) ([]round, int, error) {
@@ -233,4 +240,18 @@ func (h Handler) loadRounds(ctx context.Context) ([]round, int, error) {
 	}
 
 	return rounds, len(ts), nil
+}
+
+func championFromRounds(rounds []round) string {
+	if len(rounds) == 0 {
+		return ""
+	}
+	last := rounds[len(rounds)-1]
+	if len(last.games) != 1 {
+		return ""
+	}
+	if last.games[0].winner == "" {
+		return ""
+	}
+	return last.games[0].winner
 }

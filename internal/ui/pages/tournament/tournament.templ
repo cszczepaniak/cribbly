@@ -16,15 +16,15 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 )
 
-templ index(rounds []round, teamCount int) {
+templ index(rounds []round, teamCount int, championName string) {
 	@components.Shell() {
 		<div data-init={ dstar.SendGetf("/tournament/stream") }>
-			@tournamentPage(rounds, teamCount)
+			@tournamentPage(rounds, teamCount, championName)
 		</div>
 	}
 }
 
-templ tournamentPage(rounds []round, teamCount int) {
+templ tournamentPage(rounds []round, teamCount int, championName string) {
 	<main id="tournament-page" class="min-h-[calc(100vh-4.5rem)] bg-muted/30">
 		<div id="tournament" class="max-w-7xl mx-auto px-4 py-12 sm:py-16">
 			<header class="mb-8 sm:mb-10">
@@ -42,7 +42,7 @@ templ tournamentPage(rounds []round, teamCount int) {
 					<p class="text-muted-foreground">The tournament hasn't started yet.</p>
 				}
 			} else {
-				@roundDisplay(rounds, 0)
+				@roundDisplay(rounds, 0, championName)
 				@roundSwipeScript()
 			}
 			@components.DevTools() {
@@ -52,7 +52,7 @@ templ tournamentPage(rounds []round, teamCount int) {
 	</main>
 }
 
-templ roundDisplay(rounds []round, idx int) {
+templ roundDisplay(rounds []round, idx int, championName string) {
 	<section class="mb-4">
 		<h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
 			Bracket
@@ -70,14 +70,26 @@ templ roundDisplay(rounds []round, idx int) {
 				@icon.ChevronLeft()
 			}
 			<span class="text-sm font-medium text-muted-foreground">Round</span>
-			@button.Button(button.Props{
-				Variant: button.VariantGhost,
-				Size:    button.SizeSm,
-				Attributes: utils.Attrs(
-					utils.DataOnClick(fmt.Sprintf("$round = $round === %d ? %d : $round + 1", len(rounds)-1, len(rounds)-1)),
-				),
-			}) {
-				@icon.ChevronRight()
+			if championName != "" {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size:    button.SizeSm,
+					Attributes: utils.Attrs(
+						utils.DataOnClick(fmt.Sprintf("$round = $round === %d ? %d : $round + 1", len(rounds), len(rounds))),
+					),
+				}) {
+					@icon.ChevronRight()
+				}
+			} else {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size:    button.SizeSm,
+					Attributes: utils.Attrs(
+						utils.DataOnClick(fmt.Sprintf("$round = $round === %d ? %d : $round + 1", len(rounds)-1, len(rounds)-1)),
+					),
+				}) {
+					@icon.ChevronRight()
+				}
 			}
 		</div>
 		<div class="p-4 sm:p-6 overflow-x-hidden touch-pan-y">
@@ -86,7 +98,8 @@ templ roundDisplay(rounds []round, idx int) {
 					<li
 						class={ utils.TwMerge(
 						"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4 min-w-0",
-						utils.If(len(rounds) == 5, "2xl:flex-[0_0_20%]"),
+						utils.If(len(rounds) == 5 && championName == "", "2xl:flex-[0_0_20%]"),
+						utils.If(len(rounds) == 5 && championName != "", "2xl:flex-[0_0_16.666667%]"),
 						) }
 						data-style:translate="`-${$round*100}% 0`"
 					>
@@ -100,6 +113,27 @@ templ roundDisplay(rounds []round, idx int) {
 							for j, g := range round.games {
 								@game(g, i, j)
 							}
+						</div>
+					</li>
+				}
+				if championName != "" {
+					<li
+						class={ utils.TwMerge(
+						"flex flex-col flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333333%] xl:flex-[0_0_25%] ease-in-out transition-transform duration-500 pr-4 min-w-0",
+						utils.If(len(rounds) == 5, "2xl:flex-[0_0_16.666667%]"),
+						) }
+						data-style:translate="`-${$round*100}% 0`"
+					>
+						<p class="pl-1 pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+							Champion
+						</p>
+						<div class="min-w-2xs flex flex-col grow justify-center">
+							<div class="px-3 py-4 sm:px-4 sm:py-6 flex flex-row items-center justify-center gap-2 rounded-lg border border-border bg-primary/10">
+								@icon.Trophy()
+								<p class="text-lg font-semibold text-foreground">
+									{ championName }
+								</p>
+							</div>
 						</div>
 					</li>
 				}
