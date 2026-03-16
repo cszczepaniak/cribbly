@@ -9,7 +9,7 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 
 	"github.com/cszczepaniak/cribbly/internal/notifier"
-	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
+	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/games"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
 )
@@ -36,10 +36,10 @@ func (p teamAreaProps) isLoser() bool {
 }
 
 type Handler struct {
-	DivisionRepo       divisions.Repository
 	TeamRepo           teams.Repository
 	GameRepo           games.Repository
 	TournamentNotifier *notifier.Notifier
+	Transactor         database.Transactor
 }
 
 type signalInt int
@@ -181,18 +181,25 @@ func (h Handler) RevertAdvance(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	// Clear winner on the game this team was advanced from
-	err = h.GameRepo.ClearTournamentGameWinner(r.Context(), toRound-1, fromIdx)
-	if err != nil {
-		return err
-	}
-
-	// If they were advanced into a next round, clear that slot too
-	if toRound < len(rounds) {
-		err = h.GameRepo.ClearTeamFromTournamentGame(r.Context(), toRound, gameIdx, teamID)
+	err = h.Transactor.WithTx(r.Context(), func(ctx context.Context) error {
+		// Clear winner on the game this team was advanced from
+		err = h.GameRepo.ClearTournamentGameWinner(ctx, toRound-1, fromIdx)
 		if err != nil {
 			return err
 		}
+
+		// If they were advanced into a next round, clear that slot too
+		if toRound < len(rounds) {
+			err = h.GameRepo.ClearTeamFromTournamentGame(ctx, toRound, gameIdx, teamID)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	rounds, _, err = h.loadRounds(r.Context())

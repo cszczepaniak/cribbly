@@ -86,6 +86,7 @@ func Setup(cfg Config) http.Handler {
 		GameRepo:           cfg.GameRepo,
 		TeamRepo:           cfg.TeamRepo,
 		TournamentNotifier: cfg.TournamentNotifier,
+		Transactor:         cfg.Transactor,
 	}
 	r.Handle("GET /tournament", tourneyHandler.Index)
 	r.Handle("GET /tournament/stream", tourneyHandler.Stream)
