@@ -124,6 +124,7 @@ func setupAdminRoutes(cfg Config, r *router) {
 	playersRouter.Handle("DELETE /{id}", ph.DeletePlayer)
 	playersRouter.Handle("DELETE /", ph.DeleteAllPlayers)
 	playersRouter.Handle("POST /excel", ph.UploadExcel)
+	playersRouter.Handle("POST /excel/import", ph.ImportExcel)
 
 	th := teams.TeamsHandler{
 		PlayerRepo:  cfg.PlayerRepo,

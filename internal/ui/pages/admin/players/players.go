@@ -1,8 +1,11 @@
 package players
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"codeberg.org/tealeg/xlsx/v4"
 	"github.com/jaswdr/faker/v2"
@@ -14,6 +17,22 @@ import (
 
 type PlayersHandler struct {
 	PlayerRepo players.Repository
+}
+
+type excelSheetData struct {
+	Name string     `json:"name"`
+	Rows [][]string `json:"rows"`
+}
+
+type excelPreviewSheet struct {
+	Name    string
+	Rows    [][]string
+	MaxCols int
+}
+
+type excelPreviewPageData struct {
+	WorkbookJSON string
+	Sheets       []excelPreviewSheet
 }
 
 func (h PlayersHandler) RegistrationPage(w http.ResponseWriter, r *http.Request) error {
@@ -133,11 +152,136 @@ func (h PlayersHandler) UploadExcel(w http.ResponseWriter, r *http.Request) erro
 	}
 	defer file.Close()
 
-	f, err := xlsx.OpenReaderAt(file, header.Size)
+	workbook, err := xlsx.OpenReaderAt(file, header.Size)
 	if err != nil {
 		return err
 	}
-	fmt.Println(f.Sheet)
 
+	fullSheets, previewSheets, err := workbookData(workbook)
+	if err != nil {
+		return err
+	}
+	if len(previewSheets) == 0 {
+		return fmt.Errorf("excel file has no sheets")
+	}
+
+	fullSheetsJSON, err := json.Marshal(fullSheets)
+	if err != nil {
+		return err
+	}
+
+	tm := excelImportPreviewPage(excelPreviewPageData{
+		WorkbookJSON: string(fullSheetsJSON),
+		Sheets:       previewSheets,
+	})
+	return tm.Render(r.Context(), w)
+}
+
+func (h PlayersHandler) ImportExcel(w http.ResponseWriter, r *http.Request) error {
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+
+	workbookJSON := r.FormValue("workbook_json")
+	if workbookJSON == "" {
+		return fmt.Errorf("missing workbook payload")
+	}
+
+	var sheets []excelSheetData
+	if err := json.Unmarshal([]byte(workbookJSON), &sheets); err != nil {
+		return err
+	}
+	if len(sheets) == 0 {
+		return fmt.Errorf("workbook has no sheets")
+	}
+
+	sheetIndex, err := strconv.Atoi(r.FormValue("sheet_index"))
+	if err != nil {
+		return err
+	}
+	if sheetIndex < 0 || sheetIndex >= len(sheets) {
+		return fmt.Errorf("sheet index out of range: %d", sheetIndex)
+	}
+
+	nameCol1Based, err := strconv.Atoi(r.FormValue("name_col"))
+	if err != nil {
+		return err
+	}
+	if nameCol1Based < 1 {
+		return fmt.Errorf("name column must be 1-based and >= 1")
+	}
+	nameCol := nameCol1Based - 1
+
+	startRow := 0
+	if r.FormValue("skip_header") == "on" {
+		startRow = 1
+	}
+
+	// TODO: transaction
+	for rowIdx := startRow; rowIdx < len(sheets[sheetIndex].Rows); rowIdx++ {
+		row := sheets[sheetIndex].Rows[rowIdx]
+		if nameCol >= len(row) {
+			continue
+		}
+
+		fullName := strings.TrimSpace(row[nameCol])
+		if fullName == "" {
+			continue
+		}
+
+		firstName, lastName, _ := strings.Cut(fullName, " ")
+		if _, err := h.PlayerRepo.Create(r.Context(), firstName, lastName); err != nil {
+			return err
+		}
+	}
+
+	http.Redirect(w, r, "/admin/players", http.StatusSeeOther)
 	return nil
+}
+
+func workbookData(workbook *xlsx.File) ([]excelSheetData, []excelPreviewSheet, error) {
+	fullSheets := make([]excelSheetData, 0, len(workbook.Sheets))
+	previewSheets := make([]excelPreviewSheet, 0, len(workbook.Sheets))
+
+	for _, sheet := range workbook.Sheets {
+		fullRows := make([][]string, 0, sheet.MaxRow)
+		maxCols := 0
+
+		err := sheet.ForEachRow(func(row *xlsx.Row) error {
+			values := []string{}
+			err := row.ForEachCell(func(cell *xlsx.Cell) error {
+				col, _ := cell.GetCoordinates()
+				for len(values) <= col {
+					values = append(values, "")
+				}
+				values[col] = strings.TrimSpace(cell.String())
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+
+			fullRows = append(fullRows, values)
+			if len(values) > maxCols {
+				maxCols = len(values)
+			}
+			return nil
+		}, xlsx.SkipEmptyRows)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		fullSheets = append(fullSheets, excelSheetData{
+			Name: sheet.Name,
+			Rows: fullRows,
+		})
+
+		previewSheets = append(previewSheets, excelPreviewSheet{
+			Name:    sheet.Name,
+			Rows:    fullRows,
+			MaxCols: maxCols,
+		})
+	}
+
+	return fullSheets, previewSheets, nil
 }

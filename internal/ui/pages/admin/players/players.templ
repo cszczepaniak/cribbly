@@ -1,15 +1,18 @@
 package players
 
 import (
+	"fmt"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 	"github.com/cszczepaniak/cribbly/internal/ui/components"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/accordion"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/button"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/checkbox"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/form"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/icon"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/input"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/table"
+	"github.com/cszczepaniak/cribbly/internal/ui/components/templui/tabs"
 	"github.com/cszczepaniak/cribbly/internal/ui/dstar"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/admincomponents"
 )
@@ -142,5 +145,150 @@ templ devTools() {
 				}
 			}
 		}
+	}
+}
+
+templ excelImportPreviewPage(data excelPreviewPageData) {
+	@admincomponents.Shell(admincomponents.Players) {
+		<div
+			class="flex min-h-0 flex-1 flex-col gap-4"
+			data-signals={ "{active_sheet: 0, sheet_index: 0, name_col: 1, skip_header: true}" }
+			data-effect="$sheet_index = $active_sheet"
+		>
+			<h1 class="mt-4 shrink-0 text-3xl font-semibold text-foreground">Import Players from Excel</h1>
+			<p class="shrink-0 text-sm text-muted-foreground">Pick a sheet tab, then click a column header to choose which column contains full names.</p>
+
+			<div class="shrink-0">
+				@tabs.Tabs() {
+					@tabs.List(tabs.ListProps{Class: "h-auto flex-wrap"}) {
+						for i, sheet := range data.Sheets {
+							@tabs.Trigger(tabs.TriggerProps{
+								Value:    fmt.Sprintf("sheet-%d", i),
+								IsActive: i == 0,
+								Attributes: map[string]any{
+									"data-on:click": fmt.Sprintf("$active_sheet = %d", i),
+								},
+							}) {
+								{ sheet.Name }
+							}
+						}
+					}
+				}
+			</div>
+
+			<div class="shrink-0 text-sm text-muted-foreground">Selected name column: <span data-text="$name_col"></span></div>
+			<div class="flex min-h-0 min-w-0 flex-1 flex-col">
+			for i, sheet := range data.Sheets {
+				<div class="flex min-h-0 min-w-0 flex-1 flex-col" data-show={ fmt.Sprintf("$active_sheet == %d", i) }>
+					<div class="flex min-h-0 flex-1 flex-col" data-show={ "$skip_header" }>
+						<div class="min-h-0 min-w-0 flex-1 overflow-auto rounded-md border">
+							@table.Table() {
+								@table.Header() {
+									@table.Row(table.RowProps{Class: "hover:bg-transparent"}) {
+										for c := range sheet.MaxCols {
+											@table.Head(table.HeadProps{
+												Class: "cursor-pointer hover:bg-muted/50",
+												Attributes: map[string]any{
+													"data-on:click":       fmt.Sprintf("$name_col = %d", c+1),
+													"data-class:bg-muted": fmt.Sprintf("$name_col == %d", c+1),
+												},
+											}) {
+												if len(sheet.Rows) > 0 && c < len(sheet.Rows[0]) && sheet.Rows[0][c] != "" {
+													{ sheet.Rows[0][c] }
+												} else {
+													Column { fmt.Sprintf("%d", c+1) }
+												}
+											}
+										}
+									}
+								}
+								@table.Body() {
+									for r, row := range sheet.Rows {
+										if r > 0 {
+											@table.Row() {
+												for c := range sheet.MaxCols {
+													@table.Cell(table.CellProps{
+														Attributes: map[string]any{
+															"data-class:bg-muted": fmt.Sprintf("$name_col == %d", c+1),
+														},
+													}) {
+														if c < len(row) {
+															{ row[c] }
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						</div>
+					</div>
+
+					<div class="flex min-h-0 flex-1 flex-col" data-show={ "!$skip_header" }>
+						<div class="min-h-0 min-w-0 flex-1 overflow-auto rounded-md border">
+							@table.Table() {
+								@table.Header() {
+									@table.Row(table.RowProps{Class: "hover:bg-transparent"}) {
+										for c := range sheet.MaxCols {
+											@table.Head(table.HeadProps{
+												Class: "cursor-pointer hover:bg-muted/50",
+												Attributes: map[string]any{
+													"data-on:click":       fmt.Sprintf("$name_col = %d", c+1),
+													"data-class:bg-muted": fmt.Sprintf("$name_col == %d", c+1),
+												},
+											}) {
+												Column { fmt.Sprintf("%d", c+1) }
+											}
+										}
+									}
+								}
+								@table.Body() {
+									for _, row := range sheet.Rows {
+										@table.Row() {
+											for c := range sheet.MaxCols {
+												@table.Cell(table.CellProps{
+													Attributes: map[string]any{
+														"data-class:bg-muted": fmt.Sprintf("$name_col == %d", c+1),
+													},
+												}) {
+													if c < len(row) {
+														{ row[c] }
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						</div>
+					</div>
+				</div>
+			}
+			</div>
+
+			<form method="post" action="/admin/players/excel/import" class="shrink-0 space-y-3">
+				<textarea name="workbook_json" class="hidden">{ data.WorkbookJSON }</textarea>
+				<input type="hidden" name="sheet_index" data-bind:sheet_index/>
+				<input type="hidden" name="name_col" data-bind:name_col/>
+
+				<label class="flex items-center gap-2 text-sm">
+					@checkbox.Checkbox(checkbox.Props{
+						Name: "skip_header",
+						Attributes: map[string]any{
+							"data-bind:skip_header": true,
+						},
+					})
+					Skip first row as header
+				</label>
+
+				<div class="flex items-center gap-2">
+					@button.Button(button.Props{Type: button.TypeSubmit}) {
+						Import Players
+					}
+					<a href="/admin/players" class="text-sm underline">Cancel</a>
+				</div>
+			</form>
+		</div>
 	}
 }
