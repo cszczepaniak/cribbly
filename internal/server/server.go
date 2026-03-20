@@ -47,6 +47,7 @@ func Setup(cfg Config) http.Handler {
 		mux,
 		mw.AuthenticationMiddleware(cfg.UserRepo),
 		mw.IsProdMiddleware(cfg.IsProd),
+		mw.DevToolsQueryMiddleware(),
 		mw.RoomCodeMiddleware(cfg.RoomCodeRepo),
 	)
 
