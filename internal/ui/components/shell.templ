@@ -12,10 +12,12 @@ import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/sheet"
 import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/separator"
 import "github.com/cszczepaniak/cribbly/internal/server/middleware"
 import "github.com/cszczepaniak/cribbly/internal/ui/dstar"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/tabs"
+import "github.com/cszczepaniak/cribbly/internal/ui/components/templui/checkbox"
 
 templ Document() {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html lang="en" class="h-dvh">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -28,6 +30,8 @@ templ Document() {
 			@popover.Script()
 			@toast.Script()
 			@carousel.Script()
+			@checkbox.Script()
+			@tabs.Script()
 		</head>
 		{ children... }
 	</html>
@@ -35,10 +39,10 @@ templ Document() {
 
 templ Shell() {
 	@Document() {
-		<body id="body" class="max-w-screen">
+		<body id="body" class="max-w-screen flex h-dvh max-h-dvh flex-col overflow-hidden">
 			<header
 				class="bg-primary text-background py-4 px-6 font-semibold tracking-wide text-2xl flex
-				flex-row justify-between sticky top-0 z-50"
+				flex-shrink-0 flex-row justify-between sticky top-0 z-50"
 			>
 				<a href="/">
 					Crib<span class="text-red-500">b</span><span
@@ -53,7 +57,9 @@ templ Shell() {
 					}
 				}
 			</header>
-			{ children... }
+			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+				{ children... }
+			</div>
 		</body>
 		@sheet.Sheet(sheet.Props{
 			ID:   "menu",

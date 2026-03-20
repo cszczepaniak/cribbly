@@ -47,6 +47,7 @@ func Setup(cfg Config) http.Handler {
 		mux,
 		mw.AuthenticationMiddleware(cfg.UserRepo),
 		mw.IsProdMiddleware(cfg.IsProd),
+		mw.DevToolsQueryMiddleware(),
 		mw.RoomCodeMiddleware(cfg.RoomCodeRepo),
 	)
 
@@ -123,6 +124,8 @@ func setupAdminRoutes(cfg Config, r *router) {
 	playersRouter.Handle("POST /random", ph.GenerateRandomPlayers)
 	playersRouter.Handle("DELETE /{id}", ph.DeletePlayer)
 	playersRouter.Handle("DELETE /", ph.DeleteAllPlayers)
+	playersRouter.Handle("POST /excel", ph.UploadExcel)
+	playersRouter.Handle("POST /excel/import", ph.ImportExcel)
 
 	th := teams.TeamsHandler{
 		PlayerRepo:  cfg.PlayerRepo,
