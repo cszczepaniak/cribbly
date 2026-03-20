@@ -1,8 +1,10 @@
 package players
 
 import (
+	"fmt"
 	"net/http"
 
+	"codeberg.org/tealeg/xlsx/v4"
 	"github.com/jaswdr/faker/v2"
 	"github.com/starfederation/datastar-go/datastar"
 
@@ -122,4 +124,20 @@ func (h PlayersHandler) DeletePlayer(w http.ResponseWriter, r *http.Request) err
 
 	sse := datastar.NewSSE(w, r)
 	return sse.PatchElementTempl(playerTable(players))
+}
+
+func (h PlayersHandler) UploadExcel(w http.ResponseWriter, r *http.Request) error {
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	f, err := xlsx.OpenReaderAt(file, header.Size)
+	if err != nil {
+		return err
+	}
+	fmt.Println(f.Sheet)
+
+	return nil
 }

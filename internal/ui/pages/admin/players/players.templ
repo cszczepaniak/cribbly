@@ -37,14 +37,41 @@ templ playerRegistrationPage(players []players.Player) {
 				},
 			})
 		}
-		@button.Button(button.Props{
-			Class: "my-4",
-			Attributes: map[string]any{
-				"data-on:click": dstar.SendPostf("/admin/players"),
-			},
-		}) {
-			Add
-		}
+		<div class="my-4 flex items-center gap-2">
+			@button.Button(button.Props{
+				Attributes: map[string]any{
+					"data-on:click": dstar.SendPostf("/admin/players"),
+				},
+			}) {
+				Add
+			}
+			<form id="player-excel-upload" enctype="multipart/form-data">
+				@button.Button(button.Props{
+					Type: button.TypeButton,
+					Attributes: map[string]any{
+						"data-on:click": "document.getElementById('player-excel-input').click()",
+					},
+				}) {
+					Import from Excel
+				}
+				<input
+					id="player-excel-input"
+					name="file"
+					type="file"
+					accept=".xlsx"
+					class="hidden"
+					data-on:change={ `
+						if (!evt.target.files?.[0]) return;
+						@post('/admin/players/excel', {
+							contentType: 'form',
+							selector: '#player-excel-upload',
+							requestCancellation: 'disabled'
+						});
+						evt.target.value = '';
+					` }
+				/>
+			</form>
+		</div>
 		@table.Table() {
 			@table.Header() {
 				@table.Row() {
