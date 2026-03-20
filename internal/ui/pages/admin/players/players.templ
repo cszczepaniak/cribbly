@@ -19,67 +19,84 @@ import (
 
 templ playerRegistrationPage(players []players.Player) {
 	@admincomponents.Shell(admincomponents.Players) {
-		<h1 class="my-4 text-3xl font-semibold text-foreground">Player Registration</h1>
-		@form.Item() {
-			@form.Label() {
-				First Name
-			}
-			@input.Input(input.Props{
-				Attributes: map[string]any{
-					"data-bind": "first_name",
-				},
-			})
-		}
-		@form.Item() {
-			@form.Label() {
-				Last Name
-			}
-			@input.Input(input.Props{
-				Attributes: map[string]any{
-					"data-bind": "last_name",
-				},
-			})
-		}
-		<div class="my-4 flex items-center gap-2">
-			@button.Button(button.Props{
-				Attributes: map[string]any{
-					"data-on:click": dstar.SendPostf("/admin/players"),
-				},
-			}) {
-				Add
-			}
-			<form id="player-excel-upload" method="post" action="/admin/players/excel" enctype="multipart/form-data">
-				@button.Button(button.Props{
-					Type: button.TypeButton,
-					Attributes: map[string]any{
-						"data-on:click": "document.getElementById('player-excel-input').click()",
-					},
-				}) {
-					Import from Excel
-				}
-				<input
-					id="player-excel-input"
-					name="file"
-					type="file"
-					accept=".xlsx"
-					class="hidden"
-					onchange="this.files?.length && this.form.requestSubmit()"
-				/>
-			</form>
-		</div>
-		@table.Table() {
-			@table.Header() {
-				@table.Row() {
-					@table.Head() {
-						Name
+		<div class="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+			<div class="shrink-0">
+				<h1 class="mt-4 text-3xl font-semibold text-foreground">Player Registration</h1>
+				@form.Item() {
+					@form.Label() {
+						First Name
 					}
+					@input.Input(input.Props{
+						Attributes: map[string]any{
+							"data-bind": "first_name",
+						},
+					})
 				}
-			}
-			@playerTable(players)
-		}
-		@components.DevTools() {
-			@devTools()
-		}
+				@form.Item() {
+					@form.Label() {
+						Last Name
+					}
+					@input.Input(input.Props{
+						Attributes: map[string]any{
+							"data-bind": "last_name",
+						},
+					})
+				}
+				<div class="my-4 flex items-center gap-2">
+					@button.Button(button.Props{
+						Attributes: map[string]any{
+							"data-on:click": dstar.SendPostf("/admin/players"),
+						},
+					}) {
+						Add
+					}
+					<form id="player-excel-upload" method="post" action="/admin/players/excel" enctype="multipart/form-data">
+						@button.Button(button.Props{
+							Type: button.TypeButton,
+							Attributes: map[string]any{
+								"data-on:click": "document.getElementById('player-excel-input').click()",
+							},
+						}) {
+							Import from Excel
+						}
+						<input
+							id="player-excel-input"
+							name="file"
+							type="file"
+							accept=".xlsx"
+							class="hidden"
+							onchange="this.files?.length && this.form.requestSubmit()"
+						/>
+					</form>
+				</div>
+				<h2 class="text-xl font-semibold text-foreground">
+					if len(players) == 1 {
+						1 player
+					} else {
+						{ fmt.Sprintf("%d players", len(players)) }
+					}
+				</h2>
+			</div>
+			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+				<div class="min-h-0 min-w-0 flex-1 overflow-auto rounded-md border">
+					@table.Table() {
+						@table.Header() {
+							@table.Row() {
+								@table.Head() {
+									Name
+								}
+							}
+						}
+						@playerTable(players)
+					}
+				</div>
+			</div>
+			<div class="shrink-0">
+				@components.DevTools() {
+					@devTools()
+				}
+			</div>
+		</div>
 	}
 }
 
