@@ -45,7 +45,7 @@ templ playerRegistrationPage(players []players.Player) {
 			}) {
 				Add
 			}
-			<form id="player-excel-upload" enctype="multipart/form-data">
+			<form id="player-excel-upload" method="post" action="/admin/players/excel" enctype="multipart/form-data">
 				@button.Button(button.Props{
 					Type: button.TypeButton,
 					Attributes: map[string]any{
@@ -60,15 +60,7 @@ templ playerRegistrationPage(players []players.Player) {
 					type="file"
 					accept=".xlsx"
 					class="hidden"
-					data-on:change={ `
-						if (!evt.target.files?.[0]) return;
-						@post('/admin/players/excel', {
-							contentType: 'form',
-							selector: '#player-excel-upload',
-							requestCancellation: 'disabled'
-						});
-						evt.target.value = '';
-					` }
+					onchange="this.files?.length && this.form.requestSubmit()"
 				/>
 			</form>
 		</div>
