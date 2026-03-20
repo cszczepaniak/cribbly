@@ -43,7 +43,7 @@ func Shell(route Route) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col\"><div class=\"flex flex-row min-h-svh\"><nav class=\"bg-primary hidden md:block\"><ul class=\"flex flex-col space-y-2 mt-8 whitespace-nowrap\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden\"><div class=\"flex min-h-0 min-w-0 flex-1 flex-row overflow-hidden\"><nav class=\"hidden shrink-0 bg-primary md:block\"><ul class=\"mt-8 flex flex-col space-y-2 whitespace-nowrap\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -51,7 +51,7 @@ func Shell(route Route) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</ul></nav><main class=\"py-4 px-4 lg:px-16 mx-auto min-w-0 grow\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</ul></nav><main class=\"mx-auto flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-4 py-4 lg:px-16\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
