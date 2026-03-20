@@ -443,28 +443,12 @@ func (s Repository) GetStandings(ctx context.Context) ([]Standing, error) {
 		res = append(res, st)
 	}
 
-	sortStandingsByRate(res)
-	return res, nil
-}
-
-// sortStandingsByRate orders by win rate DESC, loss rate ASC, points per game DESC.
-// Teams with zero games are ordered last.
-func sortStandingsByRate(ss []Standing) {
-	slices.SortFunc(ss, func(a, b Standing) int {
-		ga, gb := a.GamesPlayed(), b.GamesPlayed()
-		if ga == 0 && gb == 0 {
-			return 0
-		}
-		if ga == 0 {
-			return 1
-		}
-		if gb == 0 {
-			return -1
-		}
-		if c := cmp.Compare(b.WinRate(), a.WinRate()); c != 0 {
-			return c
-		}
-		// Same win rate → same loss rate (loss rate = 1 - win rate), so tiebreak on PPG
-		return cmp.Compare(b.PointsPerGame(), a.PointsPerGame())
+	slices.SortFunc(res, func(a, b Standing) int {
+		return cmp.Or(
+			cmp.Compare(b.GamesPlayed(), a.GamesPlayed()),     // Games played (desc)
+			cmp.Compare(b.WinRate(), a.WinRate()),             // Win rate (desc)
+			cmp.Compare(b.PointsPerGame(), a.PointsPerGame()), // PPG (desc)
+		)
 	})
+	return res, nil
 }
