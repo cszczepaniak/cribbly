@@ -18,6 +18,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
 	pubteam "github.com/cszczepaniak/cribbly/internal/ui/pages/teams"
 	pubtournament "github.com/cszczepaniak/cribbly/internal/ui/pages/tournament"
+	webembed "github.com/cszczepaniak/cribbly/internal/web/embed"
 )
 
 // noCacheStatic wraps a handler to set Cache-Control headers so the browser
@@ -39,6 +40,14 @@ func Setup(cfg Config) http.Handler {
 		publicFiles = noCacheStatic(publicFiles)
 	}
 	mux.Handle("GET /public/", publicFiles)
+
+	reactApp := webembed.Handler()
+	if !cfg.IsProd {
+		reactApp = noCacheStatic(reactApp)
+	}
+	mux.Handle("GET /app", http.RedirectHandler("/app/", http.StatusMovedPermanently))
+	mux.Handle("GET /app/", reactApp)
+
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("unknown route", r.Method, r.URL)
 	}))
