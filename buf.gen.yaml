@@ -12,3 +12,6 @@ plugins:
     opt:
       - paths=source_relative
   - remote: buf.build/bufbuild/es
+    out: frontend/src/gen
+    opt:
+      - target=ts
