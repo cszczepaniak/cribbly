@@ -4,7 +4,20 @@
         "prettier": "^3.6.2",
         "tailwindcss": "^4.1.11"
     },
-	"prettier": {
-		"tabWidth": 2
-	}
+    "prettier": {
+        "tabWidth": 2
+    },
+    "scripts": {
+        "frontend:install": "npm install --prefix frontend",
+        "frontend:dev": "npm run dev --prefix frontend",
+        "frontend:build": "npm run build --prefix frontend",
+        "frontend:preview": "npm run preview --prefix frontend",
+        "frontend:test": "npm run test --prefix frontend",
+        "frontend:test:run": "npm run test:run --prefix frontend",
+        "frontend:typecheck": "npm run typecheck --prefix frontend",
+        "frontend:check": "npm run check --prefix frontend",
+        "frontend:lint": "npm run lint --prefix frontend",
+        "go:build": "go build",
+        "build:all": "npm run frontend:build && go build"
+    }
 }
