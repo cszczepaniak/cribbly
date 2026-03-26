@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/cszczepaniak/cribbly/internal/api/roomcodeconnect"
+	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
 	mw "github.com/cszczepaniak/cribbly/internal/server/middleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
@@ -104,6 +106,19 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("DELETE /tournament", tourneyHandler.Delete, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/revert", tourneyHandler.RevertAdvance, mw.ErrorIfNotAdmin())
+
+	rcConnect := &roomcodeconnect.Server{Repo: cfg.RoomCodeRepo}
+	connectMountPath, roomCodeConnectHandler := cribblyv1connect.NewRoomCodeServiceHandler(rcConnect)
+
+	// The generated Connect HTTP handler expects r.URL.Path to match the procedure path
+	// (e.g. "/cribbly.v1.RoomCodeService/SetRoomCode") exactly. Since we expose it under
+	// our own "/api" prefix, we strip that prefix before invoking the handler.
+	roomCodeConnect := http.StripPrefix("/api", roomCodeConnectHandler)
+	connectRoute := "/api" + connectMountPath
+	r.Handle(connectRoute, func(w http.ResponseWriter, r *http.Request) error {
+		roomCodeConnect.ServeHTTP(w, r)
+		return nil
+	})
 
 	return mw.ReactQueryMiddleware(webembed.MustReadIndexHTML(), cfg.IsProd, mux)
 }

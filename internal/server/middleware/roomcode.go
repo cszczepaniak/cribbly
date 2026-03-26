@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
 	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
 )
 
@@ -80,6 +81,11 @@ func shouldBypassRoomCode(r *http.Request) bool {
 
 	// Endpoint for submitting the room code.
 	if path == "/room-code" && r.Method == http.MethodPost {
+		return true
+	}
+
+	// Connect RPC: validate code and set HttpOnly room_code cookie (same as POST /room-code).
+	if path == "/api"+cribblyv1connect.RoomCodeServiceSetRoomCodeProcedure && r.Method == http.MethodPost {
 		return true
 	}
 
