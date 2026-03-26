@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package cribbly.v1;
+
+option go_package = "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cribblyv1";
+
+// Public API for entering a room code (sets HttpOnly cookie on success, same as POST /room-code).
+service RoomCodeService {
+  // Validates the code and sets the room_code cookie when valid.
+  rpc SetRoomCode(SetRoomCodeRequest) returns (SetRoomCodeResponse) {}
+}
+
+message SetRoomCodeRequest {
+  string code = 1;
+}
+
+message SetRoomCodeResponse {}

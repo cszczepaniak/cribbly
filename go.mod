@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	codeberg.org/tealeg/xlsx/v4 v4.1.0
+	connectrpc.com/connect v1.19.1
 	github.com/Oudwins/tailwind-merge-go v0.2.1
 	github.com/a-h/templ v0.3.857
 	github.com/alexedwards/argon2id v1.0.0
@@ -15,6 +16,7 @@ require (
 	github.com/ncruces/go-sqlite3 v0.30.5
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/starfederation/datastar-go v1.1.0
+	google.golang.org/protobuf v1.36.9
 )
 
 require (
