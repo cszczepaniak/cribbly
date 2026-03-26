@@ -5,5 +5,3 @@ data/
 node_modules
 
 .editorconfig
-
-internal/web/embed/dist/*

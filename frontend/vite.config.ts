@@ -19,7 +19,7 @@ export default defineConfig(({ command, mode }) => {
     },
     build: {
       outDir: '../internal/web/embed/dist',
-      emptyOutDir: true,
+      emptyOutDir: false,
     },
     server: {
       port: 5173,
