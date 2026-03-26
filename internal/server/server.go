@@ -1,9 +1,7 @@
 package server
 
 import (
-	"log"
 	"net/http"
-	"strings"
 
 	"github.com/cszczepaniak/cribbly/internal/api/roomcodeconnect"
 	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
@@ -50,10 +48,6 @@ func Setup(cfg Config) http.Handler {
 	}
 	mux.Handle("GET /app", http.RedirectHandler("/app/", http.StatusMovedPermanently))
 	mux.Handle("GET /app/", reactStatic)
-
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("unknown route", r.Method, r.URL)
-	}))
 
 	r := NewRouter(
 		mux,
@@ -115,18 +109,7 @@ func Setup(cfg Config) http.Handler {
 	// (e.g. "/cribbly.v1.RoomCodeService/SetRoomCode") exactly. Since we expose it under
 	// our own "/api" prefix, we strip that prefix before invoking the handler.
 	roomCodeConnect := http.StripPrefix("/api", roomCodeConnectHandler)
-
-	// router.Handle requires an explicit method + path. The Connect handler itself is mounted
-	// at `connectMountPath` ("/cribbly.v1.RoomCodeService/") but it only serves when
-	// r.URL.Path equals the full procedure path constant. Compute the external path by
-	// appending the procedure suffix to the mount path and prefixing with "/api".
-	procedureSuffix := strings.TrimPrefix(cribblyv1connect.RoomCodeServiceSetRoomCodeProcedure, connectMountPath)
-	connectRoute := "/api" + connectMountPath + procedureSuffix
-
-	r.Handle("POST "+connectRoute, func(w http.ResponseWriter, r *http.Request) error {
-		roomCodeConnect.ServeHTTP(w, r)
-		return nil
-	})
+	mux.Handle("POST /api"+connectMountPath, roomCodeConnect)
 
 	return mw.ReactQueryMiddleware(webembed.MustReadIndexHTML(), cfg.IsProd, mux)
 }
