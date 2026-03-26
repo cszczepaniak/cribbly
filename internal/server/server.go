@@ -41,12 +41,12 @@ func Setup(cfg Config) http.Handler {
 	}
 	mux.Handle("GET /public/", publicFiles)
 
-	reactApp := webembed.Handler()
+	reactStatic := webembed.StaticHandler()
 	if !cfg.IsProd {
-		reactApp = noCacheStatic(reactApp)
+		reactStatic = noCacheStatic(reactStatic)
 	}
 	mux.Handle("GET /app", http.RedirectHandler("/app/", http.StatusMovedPermanently))
-	mux.Handle("GET /app/", reactApp)
+	mux.Handle("GET /app/", reactStatic)
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("unknown route", r.Method, r.URL)
@@ -105,7 +105,7 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/revert", tourneyHandler.RevertAdvance, mw.ErrorIfNotAdmin())
 
-	return mux
+	return mw.ReactQueryMiddleware(webembed.MustReadIndexHTML(), cfg.IsProd, mux)
 }
 
 func setupAdminRoutes(cfg Config, r *router) {
