@@ -12,4 +12,13 @@ describe('router', () => {
     render(<RouterProvider router={router} />)
     expect(screen.getByRole('heading', { name: /cribbly/i })).toBeInTheDocument()
   })
+
+  it('renders room code page', () => {
+    const router = createMemoryRouter(routeObjects, {
+      initialEntries: ['/room?react=true'],
+      basename: '/',
+    })
+    render(<RouterProvider router={router} />)
+    expect(screen.getByRole('heading', { name: /enter room code/i })).toBeInTheDocument()
+  })
 })

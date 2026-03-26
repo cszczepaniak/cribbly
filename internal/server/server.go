@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/cszczepaniak/cribbly/internal/api/roomcodeconnect"
 	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
@@ -114,8 +115,15 @@ func Setup(cfg Config) http.Handler {
 	// (e.g. "/cribbly.v1.RoomCodeService/SetRoomCode") exactly. Since we expose it under
 	// our own "/api" prefix, we strip that prefix before invoking the handler.
 	roomCodeConnect := http.StripPrefix("/api", roomCodeConnectHandler)
-	connectRoute := "/api" + connectMountPath
-	r.Handle(connectRoute, func(w http.ResponseWriter, r *http.Request) error {
+
+	// router.Handle requires an explicit method + path. The Connect handler itself is mounted
+	// at `connectMountPath` ("/cribbly.v1.RoomCodeService/") but it only serves when
+	// r.URL.Path equals the full procedure path constant. Compute the external path by
+	// appending the procedure suffix to the mount path and prefixing with "/api".
+	procedureSuffix := strings.TrimPrefix(cribblyv1connect.RoomCodeServiceSetRoomCodeProcedure, connectMountPath)
+	connectRoute := "/api" + connectMountPath + procedureSuffix
+
+	r.Handle("POST "+connectRoute, func(w http.ResponseWriter, r *http.Request) error {
 		roomCodeConnect.ServeHTTP(w, r)
 		return nil
 	})
