@@ -6,13 +6,16 @@ import (
 	"testing"
 )
 
+func indexHTML() []byte {
+	return []byte("<html></html>")
+}
+
 func TestReactQueryMiddleware_servesReactShell(t *testing.T) {
-	html := []byte("<html></html>")
 	var nextCalled bool
 	next := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		nextCalled = true
 	})
-	h := ReactQueryMiddleware(html, true, next)
+	h := ReactQueryMiddleware(indexHTML, true, next)
 
 	req := httptest.NewRequest(http.MethodGet, "/?react=true", nil)
 	rec := httptest.NewRecorder()
@@ -24,19 +27,18 @@ func TestReactQueryMiddleware_servesReactShell(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("code: got %d want %d", rec.Code, http.StatusOK)
 	}
-	if got := rec.Body.String(); got != string(html) {
-		t.Fatalf("body: got %q want %q", got, string(html))
+	if got := rec.Body.String(); got != string(indexHTML()) {
+		t.Fatalf("body: got %q want %q", got, string(indexHTML()))
 	}
 }
 
 func TestReactQueryMiddleware_delegatesWithoutQuery(t *testing.T) {
-	html := []byte("<html></html>")
 	var nextCalled bool
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		nextCalled = true
 		w.WriteHeader(http.StatusTeapot)
 	})
-	h := ReactQueryMiddleware(html, true, next)
+	h := ReactQueryMiddleware(indexHTML, true, next)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -51,12 +53,11 @@ func TestReactQueryMiddleware_delegatesWithoutQuery(t *testing.T) {
 }
 
 func TestReactQueryMiddleware_delegatesAppAssets(t *testing.T) {
-	html := []byte("<html></html>")
 	var nextCalled bool
 	next := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		nextCalled = true
 	})
-	h := ReactQueryMiddleware(html, true, next)
+	h := ReactQueryMiddleware(indexHTML, true, next)
 
 	req := httptest.NewRequest(http.MethodGet, "/app/assets/foo.js?react=true", nil)
 	rec := httptest.NewRecorder()
@@ -68,12 +69,11 @@ func TestReactQueryMiddleware_delegatesAppAssets(t *testing.T) {
 }
 
 func TestReactQueryMiddleware_delegatesStream(t *testing.T) {
-	html := []byte("<html></html>")
 	var nextCalled bool
 	next := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		nextCalled = true
 	})
-	h := ReactQueryMiddleware(html, true, next)
+	h := ReactQueryMiddleware(indexHTML, true, next)
 
 	req := httptest.NewRequest(http.MethodGet, "/standings/stream?react=true", nil)
 	rec := httptest.NewRecorder()
