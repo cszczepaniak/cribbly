@@ -1,9 +1,11 @@
 package server
 
 import (
-	"log"
 	"net/http"
+	"sync"
 
+	"github.com/cszczepaniak/cribbly/internal/api/roomcodeconnect"
+	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
 	mw "github.com/cszczepaniak/cribbly/internal/server/middleware"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin"
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/admin/divisions"
@@ -18,6 +20,7 @@ import (
 	"github.com/cszczepaniak/cribbly/internal/ui/pages/index"
 	pubteam "github.com/cszczepaniak/cribbly/internal/ui/pages/teams"
 	pubtournament "github.com/cszczepaniak/cribbly/internal/ui/pages/tournament"
+	webembed "github.com/cszczepaniak/cribbly/internal/web/embed"
 )
 
 // noCacheStatic wraps a handler to set Cache-Control headers so the browser
@@ -39,9 +42,13 @@ func Setup(cfg Config) http.Handler {
 		publicFiles = noCacheStatic(publicFiles)
 	}
 	mux.Handle("GET /public/", publicFiles)
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("unknown route", r.Method, r.URL)
-	}))
+
+	reactStatic := webembed.StaticHandler()
+	if !cfg.IsProd {
+		reactStatic = noCacheStatic(reactStatic)
+	}
+	mux.Handle("GET /app", http.RedirectHandler("/app/", http.StatusMovedPermanently))
+	mux.Handle("GET /app/", reactStatic)
 
 	r := NewRouter(
 		mux,
@@ -96,7 +103,16 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/revert", tourneyHandler.RevertAdvance, mw.ErrorIfNotAdmin())
 
-	return mux
+	rcConnect := &roomcodeconnect.Server{Repo: cfg.RoomCodeRepo}
+	connectMountPath, roomCodeConnectHandler := cribblyv1connect.NewRoomCodeServiceHandler(rcConnect)
+
+	// The generated Connect HTTP handler expects r.URL.Path to match the procedure path
+	// (e.g. "/cribbly.v1.RoomCodeService/SetRoomCode") exactly. Since we expose it under
+	// our own "/api" prefix, we strip that prefix before invoking the handler.
+	roomCodeConnect := http.StripPrefix("/api", roomCodeConnectHandler)
+	mux.Handle("POST /api"+connectMountPath, roomCodeConnect)
+
+	return mw.ReactQueryMiddleware(sync.OnceValue(webembed.MustReadIndexHTML), cfg.IsProd, mux)
 }
 
 func setupAdminRoutes(cfg Config, r *router) {
