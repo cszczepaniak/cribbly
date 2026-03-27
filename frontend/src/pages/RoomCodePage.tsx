@@ -1,11 +1,11 @@
 import { Code, ConnectError } from '@connectrpc/connect'
-import { useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useState, type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { setRoomCode } from '@/api/roomCodeClient'
+import { doSomething, setRoomCode } from '@/api/roomCodeClient'
 import { useReactNavigate } from '@/hooks/useReactNavigate'
 
 export function RoomCodePage() {
@@ -15,6 +15,15 @@ export function RoomCodePage() {
   const [value, setValue] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const ac = new AbortController()
+    doSomething({ signal: ac.signal }).catch((err) => {
+      if (err instanceof ConnectError && err.code === Code.Canceled) return
+      console.error(err)
+    })
+    return () => ac.abort()
+  }, [])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -36,6 +45,7 @@ export function RoomCodePage() {
       setLoading(false)
     }
   }
+
 
   return (
     <Card className="mx-auto w-full max-w-md">

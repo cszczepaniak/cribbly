@@ -3,6 +3,8 @@ package roomcodeconnect
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -49,4 +51,29 @@ func (s *Server) SetRoomCode(
 	resp.Header().Add("Set-Cookie", cookie.String())
 
 	return resp, nil
+}
+
+func (s *Server) DoSomething(
+	ctx context.Context,
+	req *connect.Request[cribblyv1.SomethingRequest],
+	stream *connect.ServerStream[cribblyv1.SomethingResponse],
+) error {
+	n := 0
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(time.Second):
+		}
+
+		n++
+		slog.Info("sending stream event", "val", n)
+
+		err := stream.Send(&cribblyv1.SomethingResponse{
+			Data: fmt.Sprint(n),
+		})
+		if err != nil {
+			return err
+		}
+	}
 }
