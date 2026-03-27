@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file cribbly/v1/roomcode.proto.
  */
 export const file_cribbly_v1_roomcode: GenFile = /*@__PURE__*/
-  fileDesc("ChljcmliYmx5L3YxL3Jvb21jb2RlLnByb3RvEgpjcmliYmx5LnYxIiIKElNldFJvb21Db2RlUmVxdWVzdBIMCgRjb2RlGAEgASgJIhUKE1NldFJvb21Db2RlUmVzcG9uc2UyYwoPUm9vbUNvZGVTZXJ2aWNlElAKC1NldFJvb21Db2RlEh4uY3JpYmJseS52MS5TZXRSb29tQ29kZVJlcXVlc3QaHy5jcmliYmx5LnYxLlNldFJvb21Db2RlUmVzcG9uc2UiAEJDWkFnaXRodWIuY29tL2NzemN6ZXBhbmlhay9jcmliYmx5L2ludGVybmFsL2dlbi9jcmliYmx5L3YxO2NyaWJibHl2MWIGcHJvdG8z");
+  fileDesc("ChljcmliYmx5L3YxL3Jvb21jb2RlLnByb3RvEgpjcmliYmx5LnYxIiIKElNldFJvb21Db2RlUmVxdWVzdBIMCgRjb2RlGAEgASgJIhUKE1NldFJvb21Db2RlUmVzcG9uc2UiEgoQU29tZXRoaW5nUmVxdWVzdCIhChFTb21ldGhpbmdSZXNwb25zZRIMCgRkYXRhGAEgASgJMrMBCg9Sb29tQ29kZVNlcnZpY2USUAoLU2V0Um9vbUNvZGUSHi5jcmliYmx5LnYxLlNldFJvb21Db2RlUmVxdWVzdBofLmNyaWJibHkudjEuU2V0Um9vbUNvZGVSZXNwb25zZSIAEk4KC0RvU29tZXRoaW5nEhwuY3JpYmJseS52MS5Tb21ldGhpbmdSZXF1ZXN0Gh0uY3JpYmJseS52MS5Tb21ldGhpbmdSZXNwb25zZSIAMAFCQ1pBZ2l0aHViLmNvbS9jc3pjemVwYW5pYWsvY3JpYmJseS9pbnRlcm5hbC9nZW4vY3JpYmJseS92MTtjcmliYmx5djFiBnByb3RvMw");
 
 /**
  * @generated from message cribbly.v1.SetRoomCodeRequest
@@ -43,6 +43,36 @@ export const SetRoomCodeResponseSchema: GenMessage<SetRoomCodeResponse> = /*@__P
   messageDesc(file_cribbly_v1_roomcode, 1);
 
 /**
+ * @generated from message cribbly.v1.SomethingRequest
+ */
+export type SomethingRequest = Message<"cribbly.v1.SomethingRequest"> & {
+};
+
+/**
+ * Describes the message cribbly.v1.SomethingRequest.
+ * Use `create(SomethingRequestSchema)` to create a new message.
+ */
+export const SomethingRequestSchema: GenMessage<SomethingRequest> = /*@__PURE__*/
+  messageDesc(file_cribbly_v1_roomcode, 2);
+
+/**
+ * @generated from message cribbly.v1.SomethingResponse
+ */
+export type SomethingResponse = Message<"cribbly.v1.SomethingResponse"> & {
+  /**
+   * @generated from field: string data = 1;
+   */
+  data: string;
+};
+
+/**
+ * Describes the message cribbly.v1.SomethingResponse.
+ * Use `create(SomethingResponseSchema)` to create a new message.
+ */
+export const SomethingResponseSchema: GenMessage<SomethingResponse> = /*@__PURE__*/
+  messageDesc(file_cribbly_v1_roomcode, 3);
+
+/**
  * Public API for entering a room code (sets HttpOnly cookie on success, same as POST /room-code).
  *
  * @generated from service cribbly.v1.RoomCodeService
@@ -57,6 +87,14 @@ export const RoomCodeService: GenService<{
     methodKind: "unary";
     input: typeof SetRoomCodeRequestSchema;
     output: typeof SetRoomCodeResponseSchema;
+  },
+  /**
+   * @generated from rpc cribbly.v1.RoomCodeService.DoSomething
+   */
+  doSomething: {
+    methodKind: "server_streaming";
+    input: typeof SomethingRequestSchema;
+    output: typeof SomethingResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_cribbly_v1_roomcode, 0);

@@ -101,6 +101,86 @@ func (*SetRoomCodeResponse) Descriptor() ([]byte, []int) {
 	return file_cribbly_v1_roomcode_proto_rawDescGZIP(), []int{1}
 }
 
+type SomethingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SomethingRequest) Reset() {
+	*x = SomethingRequest{}
+	mi := &file_cribbly_v1_roomcode_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SomethingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SomethingRequest) ProtoMessage() {}
+
+func (x *SomethingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cribbly_v1_roomcode_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SomethingRequest.ProtoReflect.Descriptor instead.
+func (*SomethingRequest) Descriptor() ([]byte, []int) {
+	return file_cribbly_v1_roomcode_proto_rawDescGZIP(), []int{2}
+}
+
+type SomethingResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          string                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SomethingResponse) Reset() {
+	*x = SomethingResponse{}
+	mi := &file_cribbly_v1_roomcode_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SomethingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SomethingResponse) ProtoMessage() {}
+
+func (x *SomethingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_cribbly_v1_roomcode_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SomethingResponse.ProtoReflect.Descriptor instead.
+func (*SomethingResponse) Descriptor() ([]byte, []int) {
+	return file_cribbly_v1_roomcode_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SomethingResponse) GetData() string {
+	if x != nil {
+		return x.Data
+	}
+	return ""
+}
+
 var File_cribbly_v1_roomcode_proto protoreflect.FileDescriptor
 
 const file_cribbly_v1_roomcode_proto_rawDesc = "" +
@@ -109,9 +189,13 @@ const file_cribbly_v1_roomcode_proto_rawDesc = "" +
 	"cribbly.v1\"(\n" +
 	"\x12SetRoomCodeRequest\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\"\x15\n" +
-	"\x13SetRoomCodeResponse2c\n" +
+	"\x13SetRoomCodeResponse\"\x12\n" +
+	"\x10SomethingRequest\"'\n" +
+	"\x11SomethingResponse\x12\x12\n" +
+	"\x04data\x18\x01 \x01(\tR\x04data2\xb3\x01\n" +
 	"\x0fRoomCodeService\x12P\n" +
-	"\vSetRoomCode\x12\x1e.cribbly.v1.SetRoomCodeRequest\x1a\x1f.cribbly.v1.SetRoomCodeResponse\"\x00BCZAgithub.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cribblyv1b\x06proto3"
+	"\vSetRoomCode\x12\x1e.cribbly.v1.SetRoomCodeRequest\x1a\x1f.cribbly.v1.SetRoomCodeResponse\"\x00\x12N\n" +
+	"\vDoSomething\x12\x1c.cribbly.v1.SomethingRequest\x1a\x1d.cribbly.v1.SomethingResponse\"\x000\x01BCZAgithub.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cribblyv1b\x06proto3"
 
 var (
 	file_cribbly_v1_roomcode_proto_rawDescOnce sync.Once
@@ -125,16 +209,20 @@ func file_cribbly_v1_roomcode_proto_rawDescGZIP() []byte {
 	return file_cribbly_v1_roomcode_proto_rawDescData
 }
 
-var file_cribbly_v1_roomcode_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_cribbly_v1_roomcode_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_cribbly_v1_roomcode_proto_goTypes = []any{
 	(*SetRoomCodeRequest)(nil),  // 0: cribbly.v1.SetRoomCodeRequest
 	(*SetRoomCodeResponse)(nil), // 1: cribbly.v1.SetRoomCodeResponse
+	(*SomethingRequest)(nil),    // 2: cribbly.v1.SomethingRequest
+	(*SomethingResponse)(nil),   // 3: cribbly.v1.SomethingResponse
 }
 var file_cribbly_v1_roomcode_proto_depIdxs = []int32{
 	0, // 0: cribbly.v1.RoomCodeService.SetRoomCode:input_type -> cribbly.v1.SetRoomCodeRequest
-	1, // 1: cribbly.v1.RoomCodeService.SetRoomCode:output_type -> cribbly.v1.SetRoomCodeResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: cribbly.v1.RoomCodeService.DoSomething:input_type -> cribbly.v1.SomethingRequest
+	1, // 2: cribbly.v1.RoomCodeService.SetRoomCode:output_type -> cribbly.v1.SetRoomCodeResponse
+	3, // 3: cribbly.v1.RoomCodeService.DoSomething:output_type -> cribbly.v1.SomethingResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -151,7 +239,7 @@ func file_cribbly_v1_roomcode_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_cribbly_v1_roomcode_proto_rawDesc), len(file_cribbly_v1_roomcode_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

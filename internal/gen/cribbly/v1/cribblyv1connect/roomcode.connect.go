@@ -36,12 +36,16 @@ const (
 	// RoomCodeServiceSetRoomCodeProcedure is the fully-qualified name of the RoomCodeService's
 	// SetRoomCode RPC.
 	RoomCodeServiceSetRoomCodeProcedure = "/cribbly.v1.RoomCodeService/SetRoomCode"
+	// RoomCodeServiceDoSomethingProcedure is the fully-qualified name of the RoomCodeService's
+	// DoSomething RPC.
+	RoomCodeServiceDoSomethingProcedure = "/cribbly.v1.RoomCodeService/DoSomething"
 )
 
 // RoomCodeServiceClient is a client for the cribbly.v1.RoomCodeService service.
 type RoomCodeServiceClient interface {
 	// Validates the code and sets the room_code cookie when valid.
 	SetRoomCode(context.Context, *connect.Request[v1.SetRoomCodeRequest]) (*connect.Response[v1.SetRoomCodeResponse], error)
+	DoSomething(context.Context, *connect.Request[v1.SomethingRequest]) (*connect.ServerStreamForClient[v1.SomethingResponse], error)
 }
 
 // NewRoomCodeServiceClient constructs a client for the cribbly.v1.RoomCodeService service. By
@@ -61,12 +65,19 @@ func NewRoomCodeServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(roomCodeServiceMethods.ByName("SetRoomCode")),
 			connect.WithClientOptions(opts...),
 		),
+		doSomething: connect.NewClient[v1.SomethingRequest, v1.SomethingResponse](
+			httpClient,
+			baseURL+RoomCodeServiceDoSomethingProcedure,
+			connect.WithSchema(roomCodeServiceMethods.ByName("DoSomething")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // roomCodeServiceClient implements RoomCodeServiceClient.
 type roomCodeServiceClient struct {
 	setRoomCode *connect.Client[v1.SetRoomCodeRequest, v1.SetRoomCodeResponse]
+	doSomething *connect.Client[v1.SomethingRequest, v1.SomethingResponse]
 }
 
 // SetRoomCode calls cribbly.v1.RoomCodeService.SetRoomCode.
@@ -74,10 +85,16 @@ func (c *roomCodeServiceClient) SetRoomCode(ctx context.Context, req *connect.Re
 	return c.setRoomCode.CallUnary(ctx, req)
 }
 
+// DoSomething calls cribbly.v1.RoomCodeService.DoSomething.
+func (c *roomCodeServiceClient) DoSomething(ctx context.Context, req *connect.Request[v1.SomethingRequest]) (*connect.ServerStreamForClient[v1.SomethingResponse], error) {
+	return c.doSomething.CallServerStream(ctx, req)
+}
+
 // RoomCodeServiceHandler is an implementation of the cribbly.v1.RoomCodeService service.
 type RoomCodeServiceHandler interface {
 	// Validates the code and sets the room_code cookie when valid.
 	SetRoomCode(context.Context, *connect.Request[v1.SetRoomCodeRequest]) (*connect.Response[v1.SetRoomCodeResponse], error)
+	DoSomething(context.Context, *connect.Request[v1.SomethingRequest], *connect.ServerStream[v1.SomethingResponse]) error
 }
 
 // NewRoomCodeServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -93,10 +110,18 @@ func NewRoomCodeServiceHandler(svc RoomCodeServiceHandler, opts ...connect.Handl
 		connect.WithSchema(roomCodeServiceMethods.ByName("SetRoomCode")),
 		connect.WithHandlerOptions(opts...),
 	)
+	roomCodeServiceDoSomethingHandler := connect.NewServerStreamHandler(
+		RoomCodeServiceDoSomethingProcedure,
+		svc.DoSomething,
+		connect.WithSchema(roomCodeServiceMethods.ByName("DoSomething")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/cribbly.v1.RoomCodeService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RoomCodeServiceSetRoomCodeProcedure:
 			roomCodeServiceSetRoomCodeHandler.ServeHTTP(w, r)
+		case RoomCodeServiceDoSomethingProcedure:
+			roomCodeServiceDoSomethingHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -108,4 +133,8 @@ type UnimplementedRoomCodeServiceHandler struct{}
 
 func (UnimplementedRoomCodeServiceHandler) SetRoomCode(context.Context, *connect.Request[v1.SetRoomCodeRequest]) (*connect.Response[v1.SetRoomCodeResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("cribbly.v1.RoomCodeService.SetRoomCode is not implemented"))
+}
+
+func (UnimplementedRoomCodeServiceHandler) DoSomething(context.Context, *connect.Request[v1.SomethingRequest], *connect.ServerStream[v1.SomethingResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("cribbly.v1.RoomCodeService.DoSomething is not implemented"))
 }

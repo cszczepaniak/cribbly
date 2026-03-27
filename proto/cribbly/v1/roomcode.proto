@@ -8,6 +8,7 @@ option go_package = "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cri
 service RoomCodeService {
   // Validates the code and sets the room_code cookie when valid.
   rpc SetRoomCode(SetRoomCodeRequest) returns (SetRoomCodeResponse) {}
+  rpc DoSomething(SomethingRequest) returns (stream SomethingResponse) {}
 }
 
 message SetRoomCodeRequest {
@@ -15,3 +16,9 @@ message SetRoomCodeRequest {
 }
 
 message SetRoomCodeResponse {}
+
+message SomethingRequest{}
+
+message SomethingResponse{
+    string data = 1;
+}
