@@ -8,7 +8,7 @@ import (
 // ReactQueryMiddleware serves the embedded React index.html when the query
 // parameter react=true is present. Otherwise it delegates to the next handler.
 // Static assets under /app/ and legacy files under /public/ always pass through.
-func ReactQueryMiddleware(indexHTML []byte, isProd bool, next http.Handler) http.Handler {
+func ReactQueryMiddleware(indexHTML func() []byte, isProd bool, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			next.ServeHTTP(w, r)
@@ -33,7 +33,7 @@ func ReactQueryMiddleware(indexHTML []byte, isProd bool, next http.Handler) http
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(indexHTML)
+		_, _ = w.Write(indexHTML())
 	})
 }
 

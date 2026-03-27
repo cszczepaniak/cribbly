@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/cszczepaniak/cribbly/internal/api/roomcodeconnect"
 	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
@@ -111,7 +112,7 @@ func Setup(cfg Config) http.Handler {
 	roomCodeConnect := http.StripPrefix("/api", roomCodeConnectHandler)
 	mux.Handle("POST /api"+connectMountPath, roomCodeConnect)
 
-	return mw.ReactQueryMiddleware(webembed.MustReadIndexHTML(), cfg.IsProd, mux)
+	return mw.ReactQueryMiddleware(sync.OnceValue(webembed.MustReadIndexHTML), cfg.IsProd, mux)
 }
 
 func setupAdminRoutes(cfg Config, r *router) {
