@@ -1,27 +1,91 @@
+import { ChevronRight, LayoutGrid, ListOrdered, Trophy } from 'lucide-react'
+import { useId, useState } from 'react'
+
 import { ReactLink } from '@/components/ReactLink'
+import { RoomCodePanel } from '@/components/RoomCodePanel'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+
+const destinationCards = [
+  {
+    to: '/divisions',
+    title: 'Divisions',
+    description: 'View your division and prelim games',
+    Icon: LayoutGrid,
+  },
+  {
+    to: '/standings',
+    title: 'Standings',
+    description: 'Scores and rankings',
+    Icon: ListOrdered,
+  },
+  {
+    to: '/tournament',
+    title: 'Tournament',
+    description: 'Tournament bracket',
+    Icon: Trophy,
+  },
+] as const
+
+function HomeLanding() {
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:py-16">
+      <header className="mb-14 text-center">
+        <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          Welcome to Cribbly
+        </h1>
+      </header>
+      <section className="mb-4">
+        <h2 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">Go to</h2>
+      </section>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {destinationCards.map(({ to, title, description, Icon }) => (
+          <ReactLink
+            key={to}
+            to={to}
+            className="group bg-card text-card-foreground hover:border-border flex flex-col rounded-lg border shadow-sm transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <div className="flex flex-1 flex-col p-6">
+              <div className="flex items-center justify-between gap-3">
+                <span className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    className="size-[22px] shrink-0"
+                    strokeWidth={2}
+                  />
+                </span>
+                <ChevronRight className="text-muted-foreground group-hover:text-foreground size-[18px] shrink-0 transition-colors" />
+              </div>
+              <h3 className="mt-4 text-lg leading-tight font-semibold">{title}</h3>
+              <p className="text-muted-foreground mt-1.5 text-sm">{description}</p>
+            </div>
+          </ReactLink>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export function HomePage() {
+  const [showRoomCode, setShowRoomCode] = useState(false)
+  const switchId = useId()
+
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Cribbly</h1>
-      <p className="text-sm text-muted-foreground">
-        React shell with{' '}
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">?react=true</code>. The Go server serves this
-        app when that query is present; otherwise you get the legacy UI for the same path.
-      </p>
-      <p className="text-sm text-muted-foreground">
-        With the Go server, bundled assets are under{' '}
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">/app/</code>; the Vite dev server serves
-        them from <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">/assets/</code> at the same route
-        paths.
-      </p>
-      <p className="text-sm text-muted-foreground">
-        Try the Connect room-code flow on{' '}
-        <ReactLink to="/room" className="font-medium text-foreground underline-offset-4 hover:underline">
-          room code
-        </ReactLink>{' '}
-        page (sets the same HttpOnly cookie as legacy POST <code className="font-mono text-xs">/room-code</code>).
-      </p>
-    </div>
+    <main className="min-h-[calc(100vh-4.5rem)]">
+      <div className="mx-auto flex max-w-4xl items-center justify-end gap-3 px-4 pt-8">
+        <Label
+          htmlFor={switchId}
+          className="text-muted-foreground text-sm"
+        >
+          Room code entry
+        </Label>
+        <Switch
+          id={switchId}
+          checked={showRoomCode}
+          onCheckedChange={setShowRoomCode}
+          aria-label="Show room code entry instead of the home page"
+        />
+      </div>
+      {showRoomCode ? <RoomCodePanel /> : <HomeLanding />}
+    </main>
   )
 }
