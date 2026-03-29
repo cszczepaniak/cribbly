@@ -103,7 +103,7 @@ func Setup(cfg Config) http.Handler {
 	r.Handle("POST /tournament/team/{id}/advance", tourneyHandler.AdvanceTeam, mw.ErrorIfNotAdmin())
 	r.Handle("POST /tournament/team/{id}/revert", tourneyHandler.RevertAdvance, mw.ErrorIfNotAdmin())
 
-	rcConnect := &roomcodeconnect.Server{Repo: cfg.RoomCodeRepo}
+	rcConnect := &roomcodeconnect.Server{Repo: cfg.RoomCodeRepo, UserRepo: cfg.UserRepo}
 	connectMountPath, roomCodeConnectHandler := cribblyv1connect.NewRoomCodeServiceHandler(rcConnect)
 
 	// The generated Connect HTTP handler expects r.URL.Path to match the procedure path
