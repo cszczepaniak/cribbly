@@ -1,7 +1,6 @@
 package roomcodeconnect
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +30,7 @@ func TestSetRoomCode_SetsCookieHeader(t *testing.T) {
 
 	client := cribblyv1connect.NewRoomCodeServiceClient(http.DefaultClient, ts.URL+"/api")
 	resp, err := client.SetRoomCode(
-		context.Background(),
+		t.Context(),
 		connect.NewRequest(&cribblyv1.SetRoomCodeRequest{Code: "GOODCODE"}),
 	)
 	assert.NoError(t, err)
@@ -55,7 +54,7 @@ func TestSetRoomCode_InvalidCode(t *testing.T) {
 
 	client := cribblyv1connect.NewRoomCodeServiceClient(http.DefaultClient, ts.URL+"/api")
 	_, err := client.SetRoomCode(
-		context.Background(),
+		t.Context(),
 		connect.NewRequest(&cribblyv1.SetRoomCodeRequest{Code: "BADCODE"}),
 	)
 	assert.Error(t, err)
@@ -64,4 +63,43 @@ func TestSetRoomCode_InvalidCode(t *testing.T) {
 		t.Fatalf("expected *connect.Error, got %T: %v", err, err)
 	}
 	assert.Equal(t, connect.CodeInvalidArgument, connectErr.Code())
+}
+
+func TestCheckRoomAccess_NoCookie(t *testing.T) {
+	db := database.NewInMemory(t)
+	repo := roomcodes.NewRepository(db)
+	assert.NoError(t, repo.Init(t.Context()))
+
+	svc := &Server{Repo: repo}
+	_, h := cribblyv1connect.NewRoomCodeServiceHandler(svc)
+	ts := httptest.NewServer(http.StripPrefix("/api", h))
+	defer ts.Close()
+
+	client := cribblyv1connect.NewRoomCodeServiceClient(http.DefaultClient, ts.URL+"/api")
+	resp, err := client.CheckRoomAccess(
+		t.Context(),
+		connect.NewRequest(&cribblyv1.CheckRoomAccessRequest{}),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, false, resp.Msg.GetHasAccess())
+}
+
+func TestCheckRoomAccess_ValidRoomCookie(t *testing.T) {
+	db := database.NewInMemory(t)
+	repo := roomcodes.NewRepository(db)
+	assert.NoError(t, repo.Init(t.Context()))
+	assert.NoError(t, repo.Create(t.Context(), "GOODCODE", time.Now().Add(time.Hour)))
+
+	svc := &Server{Repo: repo}
+	_, h := cribblyv1connect.NewRoomCodeServiceHandler(svc)
+	ts := httptest.NewServer(http.StripPrefix("/api", h))
+	defer ts.Close()
+
+	client := cribblyv1connect.NewRoomCodeServiceClient(http.DefaultClient, ts.URL+"/api")
+	req := connect.NewRequest(&cribblyv1.CheckRoomAccessRequest{})
+	req.Header().Set("Cookie", "room_code=GOODCODE")
+
+	resp, err := client.CheckRoomAccess(t.Context(), req)
+	assert.NoError(t, err)
+	assert.Equal(t, true, resp.Msg.GetHasAccess())
 }

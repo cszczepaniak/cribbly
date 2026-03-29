@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file cribbly/v1/roomcode.proto.
  */
 export const file_cribbly_v1_roomcode: GenFile = /*@__PURE__*/
-  fileDesc("ChljcmliYmx5L3YxL3Jvb21jb2RlLnByb3RvEgpjcmliYmx5LnYxIiIKElNldFJvb21Db2RlUmVxdWVzdBIMCgRjb2RlGAEgASgJIhUKE1NldFJvb21Db2RlUmVzcG9uc2UiEgoQU29tZXRoaW5nUmVxdWVzdCIhChFTb21ldGhpbmdSZXNwb25zZRIMCgRkYXRhGAEgASgJMrMBCg9Sb29tQ29kZVNlcnZpY2USUAoLU2V0Um9vbUNvZGUSHi5jcmliYmx5LnYxLlNldFJvb21Db2RlUmVxdWVzdBofLmNyaWJibHkudjEuU2V0Um9vbUNvZGVSZXNwb25zZSIAEk4KC0RvU29tZXRoaW5nEhwuY3JpYmJseS52MS5Tb21ldGhpbmdSZXF1ZXN0Gh0uY3JpYmJseS52MS5Tb21ldGhpbmdSZXNwb25zZSIAMAFCQ1pBZ2l0aHViLmNvbS9jc3pjemVwYW5pYWsvY3JpYmJseS9pbnRlcm5hbC9nZW4vY3JpYmJseS92MTtjcmliYmx5djFiBnByb3RvMw");
+  fileDesc("ChljcmliYmx5L3YxL3Jvb21jb2RlLnByb3RvEgpjcmliYmx5LnYxIiIKElNldFJvb21Db2RlUmVxdWVzdBIMCgRjb2RlGAEgASgJIhUKE1NldFJvb21Db2RlUmVzcG9uc2UiGAoWQ2hlY2tSb29tQWNjZXNzUmVxdWVzdCItChdDaGVja1Jvb21BY2Nlc3NSZXNwb25zZRISCgpoYXNfYWNjZXNzGAEgASgIIhIKEFNvbWV0aGluZ1JlcXVlc3QiIQoRU29tZXRoaW5nUmVzcG9uc2USDAoEZGF0YRgBIAEoCTKRAgoPUm9vbUNvZGVTZXJ2aWNlElAKC1NldFJvb21Db2RlEh4uY3JpYmJseS52MS5TZXRSb29tQ29kZVJlcXVlc3QaHy5jcmliYmx5LnYxLlNldFJvb21Db2RlUmVzcG9uc2UiABJcCg9DaGVja1Jvb21BY2Nlc3MSIi5jcmliYmx5LnYxLkNoZWNrUm9vbUFjY2Vzc1JlcXVlc3QaIy5jcmliYmx5LnYxLkNoZWNrUm9vbUFjY2Vzc1Jlc3BvbnNlIgASTgoLRG9Tb21ldGhpbmcSHC5jcmliYmx5LnYxLlNvbWV0aGluZ1JlcXVlc3QaHS5jcmliYmx5LnYxLlNvbWV0aGluZ1Jlc3BvbnNlIgAwAUJDWkFnaXRodWIuY29tL2NzemN6ZXBhbmlhay9jcmliYmx5L2ludGVybmFsL2dlbi9jcmliYmx5L3YxO2NyaWJibHl2MWIGcHJvdG8z");
 
 /**
  * @generated from message cribbly.v1.SetRoomCodeRequest
@@ -43,6 +43,36 @@ export const SetRoomCodeResponseSchema: GenMessage<SetRoomCodeResponse> = /*@__P
   messageDesc(file_cribbly_v1_roomcode, 1);
 
 /**
+ * @generated from message cribbly.v1.CheckRoomAccessRequest
+ */
+export type CheckRoomAccessRequest = Message<"cribbly.v1.CheckRoomAccessRequest"> & {
+};
+
+/**
+ * Describes the message cribbly.v1.CheckRoomAccessRequest.
+ * Use `create(CheckRoomAccessRequestSchema)` to create a new message.
+ */
+export const CheckRoomAccessRequestSchema: GenMessage<CheckRoomAccessRequest> = /*@__PURE__*/
+  messageDesc(file_cribbly_v1_roomcode, 2);
+
+/**
+ * @generated from message cribbly.v1.CheckRoomAccessResponse
+ */
+export type CheckRoomAccessResponse = Message<"cribbly.v1.CheckRoomAccessResponse"> & {
+  /**
+   * @generated from field: bool has_access = 1;
+   */
+  hasAccess: boolean;
+};
+
+/**
+ * Describes the message cribbly.v1.CheckRoomAccessResponse.
+ * Use `create(CheckRoomAccessResponseSchema)` to create a new message.
+ */
+export const CheckRoomAccessResponseSchema: GenMessage<CheckRoomAccessResponse> = /*@__PURE__*/
+  messageDesc(file_cribbly_v1_roomcode, 3);
+
+/**
  * @generated from message cribbly.v1.SomethingRequest
  */
 export type SomethingRequest = Message<"cribbly.v1.SomethingRequest"> & {
@@ -53,7 +83,7 @@ export type SomethingRequest = Message<"cribbly.v1.SomethingRequest"> & {
  * Use `create(SomethingRequestSchema)` to create a new message.
  */
 export const SomethingRequestSchema: GenMessage<SomethingRequest> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_roomcode, 2);
+  messageDesc(file_cribbly_v1_roomcode, 4);
 
 /**
  * @generated from message cribbly.v1.SomethingResponse
@@ -70,7 +100,7 @@ export type SomethingResponse = Message<"cribbly.v1.SomethingResponse"> & {
  * Use `create(SomethingResponseSchema)` to create a new message.
  */
 export const SomethingResponseSchema: GenMessage<SomethingResponse> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_roomcode, 3);
+  messageDesc(file_cribbly_v1_roomcode, 5);
 
 /**
  * Public API for entering a room code (sets HttpOnly cookie on success, same as POST /room-code).
@@ -87,6 +117,16 @@ export const RoomCodeService: GenService<{
     methodKind: "unary";
     input: typeof SetRoomCodeRequestSchema;
     output: typeof SetRoomCodeResponseSchema;
+  },
+  /**
+   * Reports whether the current request has room access (valid room_code cookie) or admin session.
+   *
+   * @generated from rpc cribbly.v1.RoomCodeService.CheckRoomAccess
+   */
+  checkRoomAccess: {
+    methodKind: "unary";
+    input: typeof CheckRoomAccessRequestSchema;
+    output: typeof CheckRoomAccessResponseSchema;
   },
   /**
    * @generated from rpc cribbly.v1.RoomCodeService.DoSomething

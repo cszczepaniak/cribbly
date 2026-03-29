@@ -1,10 +1,8 @@
 import { ChevronRight, LayoutGrid, ListOrdered, Trophy } from 'lucide-react'
-import { useId, useState } from 'react'
 
-import { ReactLink } from '@/components/ReactLink'
 import { RoomCodePanel } from '@/components/RoomCodePanel'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import { ReactLink } from '@/components/ReactLink'
+import { useRoomAccess } from '@/contexts/roomAccessContext'
 
 const destinationCards = [
   {
@@ -66,26 +64,27 @@ function HomeLanding() {
 }
 
 export function HomePage() {
-  const [showRoomCode, setShowRoomCode] = useState(false)
-  const switchId = useId()
+  const { hasAccess, isLoading } = useRoomAccess()
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-[calc(100vh-4.5rem)] flex-col items-center justify-center">
+        <p className="text-muted-foreground text-sm">Loading...</p>
+      </main>
+    )
+  }
+
+  if (!hasAccess) {
+    return (
+      <main className="min-h-[calc(100vh-4.5rem)]">
+        {hasAccess ? <HomeLanding/> : <RoomCodePanel />}
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-[calc(100vh-4.5rem)]">
-      <div className="mx-auto flex max-w-4xl items-center justify-end gap-3 px-4 pt-8">
-        <Label
-          htmlFor={switchId}
-          className="text-muted-foreground text-sm"
-        >
-          Room code entry
-        </Label>
-        <Switch
-          id={switchId}
-          checked={showRoomCode}
-          onCheckedChange={setShowRoomCode}
-          aria-label="Show room code entry instead of the home page"
-        />
-      </div>
-      {showRoomCode ? <RoomCodePanel /> : <HomeLanding />}
+      <HomeLanding />
     </main>
   )
 }

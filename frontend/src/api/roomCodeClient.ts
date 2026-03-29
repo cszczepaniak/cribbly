@@ -1,7 +1,11 @@
 import { create } from '@bufbuild/protobuf'
 import { createClient, type CallOptions } from '@connectrpc/connect'
 import { createConnectTransport } from '@connectrpc/connect-web'
-import { RoomCodeService, SetRoomCodeRequestSchema } from '@/gen/cribbly/v1/roomcode_pb'
+import {
+  CheckRoomAccessRequestSchema,
+  RoomCodeService,
+  SetRoomCodeRequestSchema,
+} from '@/gen/cribbly/v1/roomcode_pb'
 
 const transport = createConnectTransport({
   baseUrl: '/api',
@@ -17,6 +21,11 @@ const client = createClient(RoomCodeService, transport)
  */
 export async function setRoomCode(code: string) {
   return client.setRoomCode(create(SetRoomCodeRequestSchema, { code }))
+}
+
+/** Returns whether the current browser has a valid room cookie or admin session (same rules as the Go server). */
+export async function checkRoomAccess() {
+  return client.checkRoomAccess(create(CheckRoomAccessRequestSchema, {}))
 }
 
 export async function doSomething(options?: CallOptions) {

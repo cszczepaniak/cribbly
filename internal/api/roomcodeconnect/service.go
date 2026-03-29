@@ -13,12 +13,14 @@ import (
 
 	cribblyv1 "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1"
 	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
+	"github.com/cszczepaniak/cribbly/internal/persistence/users"
 	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 )
 
 // Server implements cribbly.v1.RoomCodeService (Connect).
 type Server struct {
-	Repo roomcodes.Repository
+	Repo     roomcodes.Repository
+	UserRepo users.Repository
 }
 
 func (s *Server) SetRoomCode(
@@ -51,6 +53,30 @@ func (s *Server) SetRoomCode(
 	resp.Header().Add("Set-Cookie", cookie.String())
 
 	return resp, nil
+}
+
+func (s *Server) CheckRoomAccess(
+	ctx context.Context,
+	req *connect.Request[cribblyv1.CheckRoomAccessRequest],
+) (*connect.Response[cribblyv1.CheckRoomAccessResponse], error) {
+	hr := &http.Request{Header: req.Header()}
+
+	if cookie, err := hr.Cookie("session"); err == nil {
+		sesh, err := s.UserRepo.GetSession(ctx, cookie.Value)
+		if err == nil && !sesh.Expired() {
+			return connect.NewResponse(&cribblyv1.CheckRoomAccessResponse{HasAccess: true}), nil
+		}
+	}
+
+	if cookie, err := hr.Cookie("room_code"); err == nil {
+		valid, err := s.Repo.Validate(ctx, cookie.Value)
+		if err != nil {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+		return connect.NewResponse(&cribblyv1.CheckRoomAccessResponse{HasAccess: valid}), nil
+	}
+
+	return connect.NewResponse(&cribblyv1.CheckRoomAccessResponse{HasAccess: false}), nil
 }
 
 func (s *Server) DoSomething(

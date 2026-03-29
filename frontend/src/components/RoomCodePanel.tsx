@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { setRoomCode } from '@/api/roomCodeClient'
+import { useRoomAccess } from '@/contexts/roomAccessContext'
 import { useReactNavigate } from '@/hooks/useReactNavigate'
 
 export function RoomCodePanel() {
   const id = useId()
   const navigate = useReactNavigate()
+  const { refreshRoomAccess } = useRoomAccess()
 
   const [value, setValue] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,6 +25,7 @@ export function RoomCodePanel() {
 
     try {
       await setRoomCode(value.trim())
+      await refreshRoomAccess()
       navigate('/')
     } catch (err) {
       if (err instanceof ConnectError && err.code === Code.InvalidArgument) {

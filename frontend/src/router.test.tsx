@@ -1,26 +1,43 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEV_ROOM_ACCESS_OVERRIDE_KEY } from '@/lib/devRoomAccessOverride'
 import { routeObjects } from './router'
 
+const roomCodeMocks = vi.hoisted(() => ({
+  checkRoomAccess: vi.fn().mockResolvedValue({ hasAccess: true }),
+  setRoomCode: vi.fn(),
+  doSomething: vi.fn(),
+}))
+
+vi.mock('@/api/roomCodeClient', () => ({
+  checkRoomAccess: roomCodeMocks.checkRoomAccess,
+  setRoomCode: roomCodeMocks.setRoomCode,
+  doSomething: roomCodeMocks.doSomething,
+}))
+
 describe('router', () => {
-  it('renders home', () => {
-    const router = createMemoryRouter(routeObjects, {
-      initialEntries: ['/?react=true'],
-      basename: '/',
-    })
-    render(<RouterProvider router={router} />)
-    expect(screen.getByRole('heading', { name: /welcome to cribbly/i })).toBeInTheDocument()
+  beforeEach(() => {
+    globalThis.localStorage?.removeItem?.(DEV_ROOM_ACCESS_OVERRIDE_KEY)
+    roomCodeMocks.checkRoomAccess.mockResolvedValue({ hasAccess: true })
   })
 
-  it('shows room code entry when the home page switch is toggled', () => {
+  it('renders home', async () => {
     const router = createMemoryRouter(routeObjects, {
       initialEntries: ['/?react=true'],
       basename: '/',
     })
     render(<RouterProvider router={router} />)
-    expect(screen.getByRole('heading', { name: /welcome to cribbly/i })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('switch', { name: /show room code entry instead of the home page/i }))
-    expect(screen.getByRole('heading', { name: /enter room code/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /welcome to cribbly/i })).toBeInTheDocument()
+  })
+
+  it('shows room code entry when the user has no room access', async () => {
+    roomCodeMocks.checkRoomAccess.mockResolvedValue({ hasAccess: false })
+    const router = createMemoryRouter(routeObjects, {
+      initialEntries: ['/?react=true'],
+      basename: '/',
+    })
+    render(<RouterProvider router={router} />)
+    expect(await screen.findByRole('heading', { name: /enter room code/i })).toBeInTheDocument()
   })
 })

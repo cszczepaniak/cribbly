@@ -115,6 +115,7 @@ func TestShouldBypassRoomCode(t *testing.T) {
 		{path: "/room-code", method: http.MethodPost, want: true},
 		{path: "/room-code", method: http.MethodGet, want: false},
 		{path: "/api/cribbly.v1.RoomCodeService/SetRoomCode", method: http.MethodPost, want: true},
+		{path: "/api/cribbly.v1.RoomCodeService/CheckRoomAccess", method: http.MethodPost, want: true},
 		{path: "/divisions", method: http.MethodGet, want: false},
 	}
 

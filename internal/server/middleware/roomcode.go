@@ -89,5 +89,10 @@ func shouldBypassRoomCode(r *http.Request) bool {
 		return true
 	}
 
+	// Connect RPC: room-access probe (must work without a room cookie).
+	if path == "/api"+cribblyv1connect.RoomCodeServiceCheckRoomAccessProcedure && r.Method == http.MethodPost {
+		return true
+	}
+
 	return false
 }
