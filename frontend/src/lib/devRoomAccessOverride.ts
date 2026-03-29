@@ -1,14 +1,14 @@
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useSyncExternalStore } from "react"
 
 /** localStorage key — only honored when `import.meta.env.DEV` is true. */
-export const DEV_ROOM_ACCESS_OVERRIDE_KEY = 'cribbly:devRoomAccessOverride'
+export const DEV_ROOM_ACCESS_OVERRIDE_KEY = "cribbly:devRoomAccessOverride"
 
 function getSnapshot(): boolean {
   if (!import.meta.env.DEV) {
     return false
   }
   try {
-    return localStorage.getItem(DEV_ROOM_ACCESS_OVERRIDE_KEY) === 'true'
+    return localStorage.getItem(DEV_ROOM_ACCESS_OVERRIDE_KEY) === "true"
   } catch {
     return false
   }
@@ -30,11 +30,11 @@ function subscribe(onStoreChange: () => void): () => void {
     }
   }
   const onCustom = () => onStoreChange()
-  window.addEventListener('storage', onStorage)
-  window.addEventListener('cribbly-dev-room-override', onCustom)
+  window.addEventListener("storage", onStorage)
+  window.addEventListener("cribbly-dev-room-override", onCustom)
   return () => {
-    window.removeEventListener('storage', onStorage)
-    window.removeEventListener('cribbly-dev-room-override', onCustom)
+    window.removeEventListener("storage", onStorage)
+    window.removeEventListener("cribbly-dev-room-override", onCustom)
   }
 }
 
@@ -50,11 +50,11 @@ export function setDevRoomAccessOverride(value: boolean): void {
   }
   try {
     if (value) {
-      localStorage.setItem(DEV_ROOM_ACCESS_OVERRIDE_KEY, 'true')
+      localStorage.setItem(DEV_ROOM_ACCESS_OVERRIDE_KEY, "true")
     } else {
       localStorage.removeItem(DEV_ROOM_ACCESS_OVERRIDE_KEY)
     }
-    window.dispatchEvent(new Event('cribbly-dev-room-override'))
+    window.dispatchEvent(new Event("cribbly-dev-room-override"))
   } catch {
     // ignore quota / private mode
   }
@@ -64,7 +64,10 @@ export function setDevRoomAccessOverride(value: boolean): void {
  * Dev-only: pretend the browser has room access (skips probe + redirect to `/`).
  * In production always `[false, no-op]`.
  */
-export function useDevRoomAccessOverride(): [boolean, (value: boolean) => void] {
+export function useDevRoomAccessOverride(): [
+  boolean,
+  (value: boolean) => void,
+] {
   const enabled = import.meta.env.DEV
   const value = useSyncExternalStore(
     enabled ? subscribe : emptySubscribe,

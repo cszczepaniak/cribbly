@@ -1,6 +1,9 @@
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { DEV_ROOM_ACCESS_OVERRIDE_KEY, useDevRoomAccessOverride } from '@/lib/devRoomAccessOverride'
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import {
+  DEV_ROOM_ACCESS_OVERRIDE_KEY,
+  useDevRoomAccessOverride,
+} from "@/lib/devRoomAccessOverride"
 
 /** Dev-only menu row: pretend the SPA has room access (skips probe + `/` redirect). */
 export function DevRoomAccessToggle() {
@@ -28,7 +31,9 @@ export function DevRoomAccessToggle() {
       </div>
       <p className="text-background/55 mt-1.5 text-xs">
         Skips the access probe and home redirect. Persists in localStorage (
-        <code className="font-mono text-[0.65rem]">{DEV_ROOM_ACCESS_OVERRIDE_KEY}</code>
+        <code className="font-mono text-[0.65rem]">
+          {DEV_ROOM_ACCESS_OVERRIDE_KEY}
+        </code>
         ).
       </p>
     </div>

@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+frontend/dist
+internal/web/embed/dist
+frontend/src/gen
+**/src/gen/**
+package-lock.json
+frontend/package-lock.json
+*.min.js
+*.min.css

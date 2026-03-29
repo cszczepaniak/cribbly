@@ -1,26 +1,26 @@
-import { ChevronRight, LayoutGrid, ListOrdered, Trophy } from 'lucide-react'
+import { ChevronRight, LayoutGrid, ListOrdered, Trophy } from "lucide-react"
 
-import { RoomCodePanel } from '@/components/RoomCodePanel'
-import { ReactLink } from '@/components/ReactLink'
-import { useRoomAccess } from '@/contexts/roomAccessContext'
+import { RoomCodePanel } from "@/components/RoomCodePanel"
+import { ReactLink } from "@/components/ReactLink"
+import { useRoomAccess } from "@/contexts/roomAccessContext"
 
 const destinationCards = [
   {
-    to: '/divisions',
-    title: 'Divisions',
-    description: 'View your division and prelim games',
+    to: "/divisions",
+    title: "Divisions",
+    description: "View your division and prelim games",
     Icon: LayoutGrid,
   },
   {
-    to: '/standings',
-    title: 'Standings',
-    description: 'Scores and rankings',
+    to: "/standings",
+    title: "Standings",
+    description: "Scores and rankings",
     Icon: ListOrdered,
   },
   {
-    to: '/tournament',
-    title: 'Tournament',
-    description: 'Tournament bracket',
+    to: "/tournament",
+    title: "Tournament",
+    description: "Tournament bracket",
     Icon: Trophy,
   },
 ] as const
@@ -34,7 +34,9 @@ function HomeLanding() {
         </h1>
       </header>
       <section className="mb-4">
-        <h2 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">Go to</h2>
+        <h2 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+          Go to
+        </h2>
       </section>
       <div className="grid gap-4 sm:grid-cols-3">
         {destinationCards.map(({ to, title, description, Icon }) => (
@@ -46,15 +48,16 @@ function HomeLanding() {
             <div className="flex flex-1 flex-col p-6">
               <div className="flex items-center justify-between gap-3">
                 <span className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    className="size-[22px] shrink-0"
-                    strokeWidth={2}
-                  />
+                  <Icon className="size-[22px] shrink-0" strokeWidth={2} />
                 </span>
                 <ChevronRight className="text-muted-foreground group-hover:text-foreground size-[18px] shrink-0 transition-colors" />
               </div>
-              <h3 className="mt-4 text-lg leading-tight font-semibold">{title}</h3>
-              <p className="text-muted-foreground mt-1.5 text-sm">{description}</p>
+              <h3 className="mt-4 text-lg leading-tight font-semibold">
+                {title}
+              </h3>
+              <p className="text-muted-foreground mt-1.5 text-sm">
+                {description}
+              </p>
             </div>
           </ReactLink>
         ))}
@@ -77,7 +80,7 @@ export function HomePage() {
   if (!hasAccess) {
     return (
       <main className="min-h-[calc(100vh-4.5rem)]">
-        {hasAccess ? <HomeLanding/> : <RoomCodePanel />}
+        {hasAccess ? <HomeLanding /> : <RoomCodePanel />}
       </main>
     )
   }

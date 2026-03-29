@@ -6,11 +6,11 @@ import {
   useEffect,
   useMemo,
   useState,
-} from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+} from "react"
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
 
-import { checkRoomAccess } from '@/api/roomCodeClient'
-import { useDevRoomAccessOverride } from '@/lib/devRoomAccessOverride'
+import { checkRoomAccess } from "@/api/roomCodeClient"
+import { useDevRoomAccessOverride } from "@/lib/devRoomAccessOverride"
 
 type RoomAccessContextValue = {
   /** `null` while the probe is still in flight (never when dev override is on). */
@@ -68,8 +68,8 @@ export function RoomAccessProvider({ children }: { children: ReactNode }) {
     if (isLoading) {
       return
     }
-    if (location.pathname !== '/' && !hasAccess) {
-      navigate('/', { replace: true })
+    if (location.pathname !== "/" && !hasAccess) {
+      navigate("/", { replace: true })
     }
   }, [hasAccess, isLoading, location.pathname, navigate])
 
@@ -82,13 +82,17 @@ export function RoomAccessProvider({ children }: { children: ReactNode }) {
     [hasAccess, isLoading, refreshRoomAccess],
   )
 
-  return <RoomAccessContext.Provider value={value}>{children}</RoomAccessContext.Provider>
+  return (
+    <RoomAccessContext.Provider value={value}>
+      {children}
+    </RoomAccessContext.Provider>
+  )
 }
 
 export function useRoomAccess() {
   const ctx = useContext(RoomAccessContext)
   if (!ctx) {
-    throw new Error('useRoomAccess must be used within RoomAccessProvider')
+    throw new Error("useRoomAccess must be used within RoomAccessProvider")
   }
   return ctx
 }
@@ -98,7 +102,7 @@ export function RoomAccessOutlet() {
   const location = useLocation()
   const { hasAccess, isLoading } = useRoomAccess()
 
-  if (location.pathname !== '/' && isLoading) {
+  if (location.pathname !== "/" && isLoading) {
     return (
       <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center p-8 text-sm">
         Loading…
@@ -106,7 +110,7 @@ export function RoomAccessOutlet() {
     )
   }
 
-  if (location.pathname !== '/' && hasAccess === false) {
+  if (location.pathname !== "/" && hasAccess === false) {
     return null
   }
 

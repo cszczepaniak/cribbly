@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation } from "react-router-dom"
 
 type Props = {
   title?: string
@@ -10,7 +10,7 @@ export function PlaceholderPage({ title }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-xl font-semibold tracking-tight">
-        {title ?? 'Page (not migrated yet)'}
+        {title ?? "Page (not migrated yet)"}
       </h1>
       <p className="break-all font-mono text-sm text-zinc-500 dark:text-zinc-400">
         {pathname}

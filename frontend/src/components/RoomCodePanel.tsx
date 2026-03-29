@@ -1,20 +1,25 @@
-import { Code, ConnectError } from '@connectrpc/connect'
-import { useId, useState, type SubmitEvent } from 'react'
+import { Code, ConnectError } from "@connectrpc/connect"
+import { useId, useState, type SubmitEvent } from "react"
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { setRoomCode } from '@/api/roomCodeClient'
-import { useRoomAccess } from '@/contexts/roomAccessContext'
-import { useReactNavigate } from '@/hooks/useReactNavigate'
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { setRoomCode } from "@/api/roomCodeClient"
+import { useRoomAccess } from "@/contexts/roomAccessContext"
+import { useReactNavigate } from "@/hooks/useReactNavigate"
 
 export function RoomCodePanel() {
   const id = useId()
   const navigate = useReactNavigate()
   const { refreshRoomAccess } = useRoomAccess()
 
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,14 +31,14 @@ export function RoomCodePanel() {
     try {
       await setRoomCode(value.trim())
       await refreshRoomAccess()
-      navigate('/')
+      navigate("/")
     } catch (err) {
       if (err instanceof ConnectError && err.code === Code.InvalidArgument) {
-        setError('That code is not valid or has expired.')
+        setError("That code is not valid or has expired.")
       } else if (err instanceof ConnectError) {
-        setError(err.message || 'Something went wrong.')
+        setError(err.message || "Something went wrong.")
       } else {
-        setError('Something went wrong.')
+        setError("Something went wrong.")
       }
     } finally {
       setLoading(false)
@@ -44,16 +49,16 @@ export function RoomCodePanel() {
     <div className="mx-auto max-w-md px-4 py-16 sm:py-24">
       <Card className="border-0 shadow-lg">
         <CardHeader className="p-8 pb-2 text-center">
-          <h1 className="text-2xl font-semibold text-foreground">Enter room code</h1>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Enter room code
+          </h1>
           <CardDescription className="mt-2">
-            Ask your organizer for the code to view divisions, standings, and the tournament.
+            Ask your organizer for the code to view divisions, standings, and
+            the tournament.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-8 pt-4 pb-8">
-          <form
-            onSubmit={onSubmit}
-            className="flex flex-col gap-4"
-          >
+          <form onSubmit={onSubmit} className="flex flex-col gap-4">
             <div className="space-y-2">
               <Label htmlFor={id}>Room code</Label>
               <Input
@@ -71,20 +76,13 @@ export function RoomCodePanel() {
             </div>
 
             {error ? (
-              <p
-                className="text-sm text-destructive"
-                role="alert"
-              >
+              <p className="text-sm text-destructive" role="alert">
                 {error}
               </p>
             ) : null}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? 'Checking...' : 'Continue'}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Checking..." : "Continue"}
             </Button>
           </form>
         </CardContent>

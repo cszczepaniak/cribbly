@@ -4,6 +4,10 @@ on:
     push:
         branches:
             - main
+
+env:
+    NODE_VERSION: "22"
+
 jobs:
     unit-tests:
         runs-on: ubuntu-latest
@@ -96,3 +100,72 @@ jobs:
               uses: ./.github/actions/verify_code_consistency
               with:
                   cmd: make tailwind
+
+    frontend-quality:
+        runs-on: ubuntu-latest
+        name: Frontend — typecheck, lint, format
+        defaults:
+            run:
+                working-directory: frontend
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
+                  cache-dependency-path: frontend/package-lock.json
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Typecheck
+              run: npm run typecheck
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Prettier
+              run: npm run format:check
+
+    frontend-test:
+        runs-on: ubuntu-latest
+        name: Frontend — tests
+        defaults:
+            run:
+                working-directory: frontend
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
+                  cache-dependency-path: frontend/package-lock.json
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm run test:run
+
+    frontend-build:
+        runs-on: ubuntu-latest
+        name: Frontend — build (Vite + Tailwind)
+        defaults:
+            run:
+                working-directory: frontend
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
+                  cache-dependency-path: frontend/package-lock.json
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build
+              run: npm run build

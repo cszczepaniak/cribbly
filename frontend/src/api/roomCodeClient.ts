@@ -1,15 +1,15 @@
-import { create } from '@bufbuild/protobuf'
-import { createClient, type CallOptions } from '@connectrpc/connect'
-import { createConnectTransport } from '@connectrpc/connect-web'
+import { create } from "@bufbuild/protobuf"
+import { createClient, type CallOptions } from "@connectrpc/connect"
+import { createConnectTransport } from "@connectrpc/connect-web"
 import {
   CheckRoomAccessRequestSchema,
   RoomCodeService,
   SetRoomCodeRequestSchema,
-} from '@/gen/cribbly/v1/roomcode_pb'
+} from "@/gen/cribbly/v1/roomcode_pb"
 
 const transport = createConnectTransport({
-  baseUrl: '/api',
-  fetch: (input, init) => fetch(input, { ...init, credentials: 'include' }),
+  baseUrl: "/api",
+  fetch: (input, init) => fetch(input, { ...init, credentials: "include" }),
 })
 
 const client = createClient(RoomCodeService, transport)
