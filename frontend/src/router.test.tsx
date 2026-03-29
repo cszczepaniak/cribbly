@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { routeObjects } from './router'
@@ -10,15 +10,17 @@ describe('router', () => {
       basename: '/',
     })
     render(<RouterProvider router={router} />)
-    expect(screen.getByRole('heading', { name: /cribbly/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /welcome to cribbly/i })).toBeInTheDocument()
   })
 
-  it('renders room code page', () => {
+  it('shows room code entry when the home page switch is toggled', () => {
     const router = createMemoryRouter(routeObjects, {
-      initialEntries: ['/room?react=true'],
+      initialEntries: ['/?react=true'],
       basename: '/',
     })
     render(<RouterProvider router={router} />)
+    expect(screen.getByRole('heading', { name: /welcome to cribbly/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('switch', { name: /show room code entry instead of the home page/i }))
     expect(screen.getByRole('heading', { name: /enter room code/i })).toBeInTheDocument()
   })
 })

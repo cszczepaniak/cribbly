@@ -127,4 +127,7 @@
   html {
     @apply font-sans;
     }
+  #root {
+    @apply min-h-dvh;
+    }
 }
