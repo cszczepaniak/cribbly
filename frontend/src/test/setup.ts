@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom/vitest'
+import "@testing-library/jest-dom/vitest"
 
 /**
  * Some Node/Vitest setups expose a partial `localStorage` (e.g. missing `removeItem`).
@@ -16,7 +16,9 @@ function createMemoryStorage(): Storage {
       }
     },
     getItem(key: string) {
-      return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : null
+      return Object.prototype.hasOwnProperty.call(memoryStore, key)
+        ? memoryStore[key]
+        : null
     },
     key(index: number) {
       return Object.keys(memoryStore)[index] ?? null
@@ -32,10 +34,10 @@ function createMemoryStorage(): Storage {
 
 const ls = globalThis.localStorage
 if (
-  typeof ls === 'undefined' ||
-  typeof ls.getItem !== 'function' ||
-  typeof ls.setItem !== 'function' ||
-  typeof ls.removeItem !== 'function'
+  typeof ls === "undefined" ||
+  typeof ls.getItem !== "function" ||
+  typeof ls.setItem !== "function" ||
+  typeof ls.removeItem !== "function"
 ) {
   globalThis.localStorage = createMemoryStorage()
 }

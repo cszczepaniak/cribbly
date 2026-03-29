@@ -1,10 +1,13 @@
-import { Menu } from 'lucide-react'
+import { Menu } from "lucide-react"
 
-import { DevRoomAccessToggle } from '@/components/DevRoomAccessToggle'
-import { ReactLink } from '@/components/ReactLink'
-import { RoomAccessOutlet, RoomAccessProvider } from '@/contexts/roomAccessContext'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { DevRoomAccessToggle } from "@/components/DevRoomAccessToggle"
+import { ReactLink } from "@/components/ReactLink"
+import {
+  RoomAccessOutlet,
+  RoomAccessProvider,
+} from "@/contexts/roomAccessContext"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
   SheetContent,
@@ -12,14 +15,11 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
+} from "@/components/ui/sheet"
 
 function CribblyLogoLink({ className }: { className?: string }) {
   return (
-    <ReactLink
-      to="/"
-      className={className}
-    >
+    <ReactLink to="/" className={className}>
       Crib<span className="text-red-500">b</span>
       <span className="text-blue-600">l</span>
       <span className="text-green-500">y</span>
@@ -28,19 +28,19 @@ function CribblyLogoLink({ className }: { className?: string }) {
 }
 
 const playerLinks = [
-  { label: 'Divisions', to: '/divisions' },
-  { label: 'Standings', to: '/standings' },
-  { label: 'Tournament', to: '/tournament' },
+  { label: "Divisions", to: "/divisions" },
+  { label: "Standings", to: "/standings" },
+  { label: "Tournament", to: "/tournament" },
 ] as const
 
 const adminLinks = [
-  { label: 'Players', to: '/admin/players' },
-  { label: 'Teams', to: '/admin/teams' },
-  { label: 'Divisions', to: '/admin/divisions' },
-  { label: 'Games', to: '/admin/games' },
-  { label: 'Users', to: '/admin/users' },
-  { label: 'My Profile', to: '/admin/profile' },
-  { label: 'Room Codes', to: '/admin/room-codes' },
+  { label: "Players", to: "/admin/players" },
+  { label: "Teams", to: "/admin/teams" },
+  { label: "Divisions", to: "/admin/divisions" },
+  { label: "Games", to: "/admin/games" },
+  { label: "Users", to: "/admin/users" },
+  { label: "My Profile", to: "/admin/profile" },
+  { label: "Room Codes", to: "/admin/room-codes" },
 ] as const
 
 export function RootLayout() {
@@ -48,9 +48,7 @@ export function RootLayout() {
     <RoomAccessProvider>
       <Sheet>
         <div className="flex h-dvh max-h-dvh max-w-screen flex-col overflow-hidden">
-          <header
-            className="bg-primary text-background sticky top-0 z-50 flex flex-shrink-0 flex-row items-center justify-between px-6 py-4 text-2xl font-semibold tracking-wide"
-          >
+          <header className="bg-primary text-background sticky top-0 z-50 flex flex-shrink-0 flex-row items-center justify-between px-6 py-4 text-2xl font-semibold tracking-wide">
             <CribblyLogoLink className="text-background hover:opacity-90" />
             <SheetTrigger asChild>
               <Button
@@ -85,10 +83,7 @@ export function RootLayout() {
               <ul className="list-none space-y-2">
                 {playerLinks.map(({ label, to }) => (
                   <li key={to}>
-                    <ReactLink
-                      to={to}
-                      className="hover:underline"
-                    >
+                    <ReactLink to={to} className="hover:underline">
                       {label}
                     </ReactLink>
                   </li>
@@ -103,10 +98,7 @@ export function RootLayout() {
               <ul className="list-none space-y-2">
                 {adminLinks.map(({ label, to }) => (
                   <li key={to}>
-                    <ReactLink
-                      to={to}
-                      className="hover:underline"
-                    >
+                    <ReactLink to={to} className="hover:underline">
                       {label}
                     </ReactLink>
                   </li>
@@ -120,10 +112,7 @@ export function RootLayout() {
                   </button>
                 </li>
                 <li>
-                  <ReactLink
-                    to="/admin/login"
-                    className="hover:underline"
-                  >
+                  <ReactLink to="/admin/login" className="hover:underline">
                     Login
                   </ReactLink>
                 </li>
