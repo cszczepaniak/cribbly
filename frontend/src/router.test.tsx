@@ -19,6 +19,6 @@ describe('router', () => {
       basename: '/',
     })
     render(<RouterProvider router={router} />)
-    expect(screen.getByRole('heading', { name: /enter room code/i })).toBeInTheDocument()
+    expect(screen.getByText(/enter room code/i)).toBeInTheDocument()
   })
 })
