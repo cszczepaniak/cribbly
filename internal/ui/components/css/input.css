@@ -4,6 +4,7 @@
 @source "../../../**/*.templ";
 @source "../../../**/*.go";
 @source not "../../../../frontend/**";
+@source not "../../../../vendor/**";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
