@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	DSN      string `env:"DSN"`
-	SeedUser struct {
+	DSN            string `env:"DSN"`
+	DevAdminSecret string `env:"CRIBBLY_DEV_ADMIN_SECRET"`
+	SeedUser       struct {
 		Username string `env:"SEED_USERNAME"`
 		Password string `env:"SEED_PASSWORD"`
 	}

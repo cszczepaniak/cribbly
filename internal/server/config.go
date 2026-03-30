@@ -24,6 +24,8 @@ type Config struct {
 	ScoreUpdateNotifier *notifier.Notifier
 	TournamentNotifier  *notifier.Notifier
 	IsProd              bool
+	// DevAdminSecret enables X-Cribbly-Dev-Admin header bypass for admin checks (non-prod only).
+	DevAdminSecret string
 }
 
 func (cfg Config) TeamService() teamservice.Service {

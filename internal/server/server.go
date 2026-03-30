@@ -52,6 +52,7 @@ func Setup(cfg Config) http.Handler {
 
 	r := NewRouter(
 		mux,
+		mw.DevAdminBypassMiddleware(cfg.DevAdminSecret, cfg.IsProd),
 		mw.AuthenticationMiddleware(cfg.UserRepo),
 		mw.IsProdMiddleware(cfg.IsProd),
 		mw.DevToolsQueryMiddleware(),
@@ -113,6 +114,13 @@ func Setup(cfg Config) http.Handler {
 	mux.Handle("POST /api"+connectMountPath, roomCodeConnect)
 
 	return mw.ReactQueryMiddleware(sync.OnceValue(webembed.MustReadIndexHTML), cfg.IsProd, mux)
+}
+
+func withDevAdminRequestContext(cfg Config, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r = mw.WithDevAdminBypassIfHeader(r, cfg.DevAdminSecret, cfg.IsProd)
+		h.ServeHTTP(w, r)
+	})
 }
 
 func setupAdminRoutes(cfg Config, r *router) {
