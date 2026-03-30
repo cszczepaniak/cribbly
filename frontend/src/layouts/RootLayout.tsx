@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -83,9 +84,11 @@ export function RootLayout() {
               <ul className="list-none space-y-2">
                 {playerLinks.map(({ label, to }) => (
                   <li key={to}>
-                    <ReactLink to={to} className="hover:underline">
-                      {label}
-                    </ReactLink>
+                    <SheetClose asChild>
+                      <ReactLink to={to} className="hover:underline">
+                        {label}
+                      </ReactLink>
+                    </SheetClose>
                   </li>
                 ))}
               </ul>
@@ -98,23 +101,29 @@ export function RootLayout() {
               <ul className="list-none space-y-2">
                 {adminLinks.map(({ label, to }) => (
                   <li key={to}>
-                    <ReactLink to={to} className="hover:underline">
-                      {label}
-                    </ReactLink>
+                    <SheetClose asChild>
+                      <ReactLink to={to} className="hover:underline">
+                        {label}
+                      </ReactLink>
+                    </SheetClose>
                   </li>
                 ))}
                 <li>
-                  <button
-                    type="button"
-                    className="cursor-pointer hover:underline"
-                  >
-                    Logout
-                  </button>
+                  <SheetClose asChild>
+                    <button
+                      type="button"
+                      className="cursor-pointer hover:underline"
+                    >
+                      Logout
+                    </button>
+                  </SheetClose>
                 </li>
                 <li>
-                  <ReactLink to="/admin/login" className="hover:underline">
-                    Login
-                  </ReactLink>
+                  <SheetClose asChild>
+                    <ReactLink to="/admin/login" className="hover:underline">
+                      Login
+                    </ReactLink>
+                  </SheetClose>
                 </li>
               </ul>
             </nav>
