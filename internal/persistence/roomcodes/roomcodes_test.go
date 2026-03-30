@@ -85,3 +85,20 @@ func TestLatestReturnsMostRecentNonExpired(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "NEW", rc.Code)
 }
+
+func TestCreateRandomCode(t *testing.T) {
+	repo := newTestRepo(t)
+
+	rc, err := repo.CreateRandomCode(t.Context())
+	assert.NoError(t, err)
+	if len(rc.Code) != 6 {
+		t.Fatalf("expected 6-char code, got %q", rc.Code)
+	}
+	if rc.Expires.Before(time.Now()) {
+		t.Fatal("expected future expiry")
+	}
+
+	got, err := repo.Get(t.Context(), rc.Code)
+	assert.NoError(t, err)
+	assert.Equal(t, rc.Code, got.Code)
+}

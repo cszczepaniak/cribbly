@@ -2,6 +2,7 @@ package roomcodes
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"errors"
 	"time"
@@ -41,6 +42,47 @@ type RoomCode struct {
 
 func (rc RoomCode) Expired() bool {
 	return time.Now().After(rc.Expires)
+}
+
+// CreateRandomCode generates a new 6-character code, stores it with a 24-hour TTL, and returns it.
+// Retries a few times if the insert fails (e.g. collision).
+func (r Repository) CreateRandomCode(ctx context.Context) (RoomCode, error) {
+	const (
+		codeLength  = 6
+		maxAttempts = 5
+	)
+	expiresAt := time.Now().Add(24 * time.Hour)
+	code, err := randomRoomCode(codeLength)
+	if err != nil {
+		return RoomCode{}, err
+	}
+	for range maxAttempts {
+		err = r.Create(ctx, code, expiresAt)
+		if err == nil {
+			return RoomCode{Code: code, Expires: expiresAt}, nil
+		}
+		code, err = randomRoomCode(codeLength)
+		if err != nil {
+			return RoomCode{}, err
+		}
+	}
+	return RoomCode{}, err
+}
+
+func randomRoomCode(n int) (string, error) {
+	const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+	buf := make([]byte, n)
+	_, err := rand.Read(buf)
+	if err != nil {
+		return "", err
+	}
+
+	for i := range buf {
+		buf[i] = alphabet[int(buf[i])%len(alphabet)]
+	}
+
+	return string(buf), nil
 }
 
 // Create inserts a new room code that expires at the given time.
