@@ -16,6 +16,11 @@ format: format-go format-templ
 format-go:
 	./scripts/format.sh
 
+.PHONY: vendor
+vendor:
+	go mod tidy
+	go mod vendor
+
 .PHONY: format-templ
 format-templ:
 	go tool templ fmt .

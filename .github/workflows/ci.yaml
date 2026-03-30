@@ -46,9 +46,7 @@ jobs:
             - name: Verify Go Vendor
               uses: ./.github/actions/verify_code_consistency
               with:
-                  cmd: |
-                    go mod tidy
-                    go mod vendor
+                  cmd: make vendor
 
     verify-go:
         runs-on: ubuntu-latest
