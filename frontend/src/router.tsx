@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom"
 import { RootLayout } from "./layouts/RootLayout"
+import { AdminPlayersPage } from "./pages/AdminPlayersPage"
 import { AdminRoomCodesPage } from "./pages/AdminRoomCodesPage"
 import { HomePage } from "./pages/HomePage"
 import { PlaceholderPage } from "./pages/PlaceholderPage"
@@ -16,6 +17,10 @@ export const routeObjects = [
       {
         path: "admin/games",
         element: <PlaceholderPage title="Admin — games" />,
+      },
+      {
+        path: "admin/players",
+        element: <AdminPlayersPage />,
       },
       {
         path: "admin/room-codes",
