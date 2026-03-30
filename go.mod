@@ -10,7 +10,6 @@ require (
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/cszczepaniak/go-sqlbuilder v0.0.7
 	github.com/cszczepaniak/gotest v0.0.2
-	github.com/go-rod/rod v0.116.2
 	github.com/google/uuid v1.6.0
 	github.com/jaswdr/faker/v2 v2.9.1
 	github.com/ncruces/go-sqlite3 v0.30.5
@@ -45,11 +44,6 @@ require (
 	github.com/shabbyrobe/xmlwriter v0.0.0-20200208144257-9fca06d00ffa // indirect
 	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/ysmood/fetchup v0.2.3 // indirect
-	github.com/ysmood/goob v0.4.0 // indirect
-	github.com/ysmood/got v0.40.0 // indirect
-	github.com/ysmood/gson v0.7.3 // indirect
-	github.com/ysmood/leakless v0.9.0 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/mod v0.31.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
