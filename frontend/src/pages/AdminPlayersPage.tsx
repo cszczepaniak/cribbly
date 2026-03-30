@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { type SyntheticEvent, useCallback, useEffect, useState } from "react"
 import { Check, Pencil, Trash2, X } from "lucide-react"
 
 import {
@@ -88,7 +88,7 @@ export function AdminPlayersPage() {
     }
   }
 
-  async function onAdd(e: React.FormEvent) {
+  async function onAdd(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
     await run(async () => {
       const res = await createPlayer(firstName.trim(), lastName.trim())
@@ -139,7 +139,7 @@ export function AdminPlayersPage() {
     setEditLastName("")
   }
 
-  async function onSaveEdit(e: React.FormEvent) {
+  async function onSaveEdit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!editingId) {
       return
