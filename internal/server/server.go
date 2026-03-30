@@ -110,7 +110,7 @@ func Setup(cfg Config) http.Handler {
 	// The generated Connect HTTP handler expects r.URL.Path to match the procedure path
 	// (e.g. "/cribbly.v1.RoomCodeService/SetRoomCode") exactly. Since we expose it under
 	// our own "/api" prefix, we strip that prefix before invoking the handler.
-	roomCodeConnect := http.StripPrefix("/api", roomCodeConnectHandler)
+	roomCodeConnect := http.StripPrefix("/api", withDevAdminRequestContext(cfg, roomCodeConnectHandler))
 	mux.Handle("POST /api"+connectMountPath, roomCodeConnect)
 
 	return mw.ReactQueryMiddleware(sync.OnceValue(webembed.MustReadIndexHTML), cfg.IsProd, mux)

@@ -15,6 +15,7 @@ import (
 
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/roomcodes"
+	"github.com/cszczepaniak/cribbly/internal/server/middleware"
 )
 
 func TestSetRoomCode_SetsCookieHeader(t *testing.T) {
@@ -102,4 +103,42 @@ func TestCheckRoomAccess_ValidRoomCookie(t *testing.T) {
 	resp, err := client.CheckRoomAccess(t.Context(), req)
 	assert.NoError(t, err)
 	assert.Equal(t, true, resp.Msg.GetHasAccess())
+}
+
+func TestGenerateRoomCode_NotAdmin(t *testing.T) {
+	db := database.NewInMemory(t)
+	repo := roomcodes.NewRepository(db)
+	assert.NoError(t, repo.Init(t.Context()))
+
+	svc := &Server{Repo: repo}
+	_, err := svc.GenerateRoomCode(
+		t.Context(),
+		connect.NewRequest(&cribblyv1.GenerateRoomCodeRequest{}),
+	)
+	assert.Error(t, err)
+	var connectErr *connect.Error
+	if !errors.As(err, &connectErr) {
+		t.Fatalf("expected *connect.Error, got %T: %v", err, err)
+	}
+	assert.Equal(t, connect.CodePermissionDenied, connectErr.Code())
+}
+
+func TestGenerateRoomCode_WithDevAdminContext(t *testing.T) {
+	db := database.NewInMemory(t)
+	repo := roomcodes.NewRepository(db)
+	assert.NoError(t, repo.Init(t.Context()))
+
+	svc := &Server{Repo: repo}
+	ctx := middleware.WithDevAdminContext(t.Context())
+	resp, err := svc.GenerateRoomCode(
+		ctx,
+		connect.NewRequest(&cribblyv1.GenerateRoomCodeRequest{}),
+	)
+	assert.NoError(t, err)
+	if len(resp.Msg.GetCode()) != 6 {
+		t.Fatalf("expected 6-char code, got %q", resp.Msg.GetCode())
+	}
+	if resp.Msg.GetExpiresAt() == "" {
+		t.Fatal("expected expires_at")
+	}
 }
