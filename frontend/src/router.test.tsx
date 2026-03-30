@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { createMemoryRouter, RouterProvider } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { DEV_ADMIN_OVERRIDE_KEY } from "@/lib/devAdminOverride"
 import { DEV_ROOM_ACCESS_OVERRIDE_KEY } from "@/lib/devRoomAccessOverride"
 import { routeObjects } from "./router"
 
@@ -19,6 +20,7 @@ vi.mock("@/api/roomCodeClient", () => ({
 describe("router", () => {
   beforeEach(() => {
     globalThis.localStorage?.removeItem?.(DEV_ROOM_ACCESS_OVERRIDE_KEY)
+    globalThis.localStorage?.removeItem?.(DEV_ADMIN_OVERRIDE_KEY)
     roomCodeMocks.checkRoomAccess.mockResolvedValue({ hasAccess: true })
   })
 

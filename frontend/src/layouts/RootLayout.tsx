@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react"
 
+import { DevAdminAccessToggle } from "@/components/DevAdminAccessToggle"
 import { DevRoomAccessToggle } from "@/components/DevRoomAccessToggle"
 import { ReactLink } from "@/components/ReactLink"
 import {
@@ -120,6 +121,7 @@ export function RootLayout() {
             </nav>
           </div>
           <DevRoomAccessToggle />
+          <DevAdminAccessToggle />
           <SheetFooter />
         </SheetContent>
       </Sheet>
