@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/cszczepaniak/cribbly/internal/api/playersconnect"
 	"github.com/cszczepaniak/cribbly/internal/api/roomcodeconnect"
 	cribblyv1connect "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1/cribblyv1connect"
 	mw "github.com/cszczepaniak/cribbly/internal/server/middleware"
@@ -110,10 +111,20 @@ func Setup(cfg Config) http.Handler {
 	// The generated Connect HTTP handler expects r.URL.Path to match the procedure path
 	// (e.g. "/cribbly.v1.RoomCodeService/SetRoomCode") exactly. Since we expose it under
 	// our own "/api" prefix, we strip that prefix before invoking the handler.
-	roomCodeConnect := http.StripPrefix("/api", withDevAdminRequestContext(cfg, roomCodeConnectHandler))
+	roomCodeConnect := http.StripPrefix("/api", connectWithAdminContext(cfg, roomCodeConnectHandler))
 	mux.Handle("POST /api"+connectMountPath, roomCodeConnect)
 
+	plConnect := &playersconnect.Server{PlayerRepo: cfg.PlayerRepo}
+	playerMountPath, playerConnectHandler := cribblyv1connect.NewPlayerServiceHandler(plConnect)
+	mux.Handle("POST /api"+playerMountPath, http.StripPrefix("/api", connectWithAdminContext(cfg, playerConnectHandler)))
+
 	return mw.ReactQueryMiddleware(sync.OnceValue(webembed.MustReadIndexHTML), cfg.IsProd, mux)
+}
+
+// connectWithAdminContext applies dev-admin bypass and session cookie to Connect requests (the
+// mux routes are not wrapped by NewRouter's AuthenticationMiddleware).
+func connectWithAdminContext(cfg Config, h http.Handler) http.Handler {
+	return withDevAdminRequestContext(cfg, mw.ConnectSessionMiddleware(cfg.UserRepo)(h))
 }
 
 func withDevAdminRequestContext(cfg Config, h http.Handler) http.Handler {

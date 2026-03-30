@@ -29,38 +29,64 @@ type (
 	middleware = func(handler) handler
 )
 
+// requestWithSessionIfAny returns r with an admin session in context when a valid session cookie
+// is present; otherwise returns r unchanged. Missing or expired sessions are not errors.
+func requestWithSessionIfAny(r *http.Request, userRepo users.Repository) (*http.Request, error) {
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			return r, nil
+		}
+
+		return nil, fmt.Errorf("get session cookie: %w", err)
+	}
+
+	// TODO: in-memory caching of sessions to avoid a DB call for each request
+	sesh, err := userRepo.GetSession(r.Context(), cookie.Value)
+	if err != nil {
+		if errors.Is(err, users.ErrSessionExpired) {
+			return r, nil
+		}
+
+		return nil, err
+	}
+
+	if sesh.Expired() {
+		return r, nil
+	}
+
+	ctx := context.WithValue(r.Context(), sessionKey{}, sesh)
+	return r.WithContext(ctx), nil
+}
+
 // AuthenticationMiddleware extracts the user's session (if any) and adds it to the request's Go
 // context. It always forwards the request to the next handler regardless of whether the user was
 // successfully authenticated.
 func AuthenticationMiddleware(userRepo users.Repository) middleware {
 	return func(next handler) handler {
 		return func(w http.ResponseWriter, r *http.Request) error {
-			cookie, err := r.Cookie("session")
+			r2, err := requestWithSessionIfAny(r, userRepo)
 			if err != nil {
-				if errors.Is(err, http.ErrNoCookie) {
-					return next(w, r)
-				}
-
-				return fmt.Errorf("get session cookie: %w", err)
-			}
-
-			// TODO: in-memory caching of sessions to avoid a DB call for each request
-			sesh, err := userRepo.GetSession(r.Context(), cookie.Value)
-			if err != nil {
-				if errors.Is(err, users.ErrSessionExpired) {
-					return next(w, r)
-				}
-
 				return err
 			}
 
-			if !sesh.Expired() {
-				ctx := context.WithValue(r.Context(), sessionKey{}, sesh)
-				r = r.WithContext(ctx)
-			}
-
-			return next(w, r)
+			return next(w, r2)
 		}
+	}
+}
+
+// ConnectSessionMiddleware attaches a valid session cookie to the request context (same rules as
+// AuthenticationMiddleware). Use on Connect RPC mounts that are not routed through NewRouter.
+func ConnectSessionMiddleware(userRepo users.Repository) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r2, err := requestWithSessionIfAny(r, userRepo)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			next.ServeHTTP(w, r2)
+		})
 	}
 }
 
