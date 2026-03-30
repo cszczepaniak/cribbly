@@ -1,2 +1,3 @@
 # shadcn/ui (generated via CLI)
 frontend/src/components/ui/** linguist-generated=true
+*_pb.ts linguist-generated=true

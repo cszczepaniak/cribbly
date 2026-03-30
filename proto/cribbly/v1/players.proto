@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package cribbly.v1;
+
+option go_package = "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cribblyv1";
+
+// Admin API for managing registered players (same data as legacy /admin/players).
+service PlayerService {
+  rpc ListPlayers(ListPlayersRequest) returns (ListPlayersResponse) {}
+  rpc CreatePlayer(CreatePlayerRequest) returns (CreatePlayerResponse) {}
+  rpc UpdatePlayer(UpdatePlayerRequest) returns (UpdatePlayerResponse) {}
+  rpc DeletePlayer(DeletePlayerRequest) returns (DeletePlayerResponse) {}
+  rpc DeleteAllPlayers(DeleteAllPlayersRequest) returns (DeleteAllPlayersResponse) {}
+  rpc GenerateRandomPlayers(GenerateRandomPlayersRequest) returns (GenerateRandomPlayersResponse) {}
+}
+
+message Player {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  // Empty when the player is not on a team.
+  string team_id = 4;
+}
+
+message ListPlayersRequest {}
+
+message ListPlayersResponse {
+  repeated Player players = 1;
+}
+
+message CreatePlayerRequest {
+  string first_name = 1;
+  string last_name = 2;
+}
+
+message CreatePlayerResponse {
+  repeated Player players = 1;
+}
+
+message UpdatePlayerRequest {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+message UpdatePlayerResponse {
+  repeated Player players = 1;
+}
+
+message DeletePlayerRequest {
+  string id = 1;
+}
+
+message DeletePlayerResponse {
+  repeated Player players = 1;
+}
+
+message DeleteAllPlayersRequest {}
+
+message DeleteAllPlayersResponse {}
+
+message GenerateRandomPlayersRequest {
+  int32 count = 1;
+}
+
+message GenerateRandomPlayersResponse {
+  repeated Player players = 1;
+}

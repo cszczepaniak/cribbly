@@ -190,6 +190,32 @@ func (s Repository) Create(ctx context.Context, firstName, lastName string) (str
 	return id, nil
 }
 
+// UpdateName sets the player's first and last name. Both must be non-empty.
+func (s Repository) UpdateName(ctx context.Context, id, firstName, lastName string) error {
+	if firstName == "" || lastName == "" {
+		return errors.New("must have a first and last name")
+	}
+
+	res, err := s.b.UpdateTable("Players").
+		SetFieldTo("FirstName", firstName).
+		SetFieldTo("LastName", lastName).
+		Where(filter.Equals("ID", id)).
+		ExecContext(ctx, s.db)
+	if err != nil {
+		return err
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
 func (s Repository) Delete(ctx context.Context, id string) error {
 	_, err := s.b.DeleteFromTable("Players").
 		Where(filter.Equals("ID", id)).
