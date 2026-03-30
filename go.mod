@@ -1,6 +1,6 @@
 module github.com/cszczepaniak/cribbly
 
-go 1.25.0
+go 1.26.1
 
 require (
 	codeberg.org/tealeg/xlsx/v4 v4.1.0
