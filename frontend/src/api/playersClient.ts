@@ -9,6 +9,7 @@ import {
   GenerateRandomPlayersRequestSchema,
   ListPlayersRequestSchema,
   PlayerService,
+  UpdatePlayerRequestSchema,
 } from "@/gen/cribbly/v1/players_pb"
 
 const transport = createConnectTransport({
@@ -29,6 +30,16 @@ export async function listPlayers() {
 export async function createPlayer(firstName: string, lastName: string) {
   return client.createPlayer(
     create(CreatePlayerRequestSchema, { firstName, lastName }),
+  )
+}
+
+export async function updatePlayer(
+  id: string,
+  firstName: string,
+  lastName: string,
+) {
+  return client.updatePlayer(
+    create(UpdatePlayerRequestSchema, { id, firstName, lastName }),
   )
 }
 

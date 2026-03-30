@@ -266,6 +266,110 @@ func (x *CreatePlayerResponse) GetPlayers() []*Player {
 	return nil
 }
 
+type UpdatePlayerRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdatePlayerRequest) Reset() {
+	*x = UpdatePlayerRequest{}
+	mi := &file_cribbly_v1_players_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePlayerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePlayerRequest) ProtoMessage() {}
+
+func (x *UpdatePlayerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cribbly_v1_players_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePlayerRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePlayerRequest) Descriptor() ([]byte, []int) {
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdatePlayerRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdatePlayerRequest) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *UpdatePlayerRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+type UpdatePlayerResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Players       []*Player              `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdatePlayerResponse) Reset() {
+	*x = UpdatePlayerResponse{}
+	mi := &file_cribbly_v1_players_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePlayerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePlayerResponse) ProtoMessage() {}
+
+func (x *UpdatePlayerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_cribbly_v1_players_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePlayerResponse.ProtoReflect.Descriptor instead.
+func (*UpdatePlayerResponse) Descriptor() ([]byte, []int) {
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UpdatePlayerResponse) GetPlayers() []*Player {
+	if x != nil {
+		return x.Players
+	}
+	return nil
+}
+
 type DeletePlayerRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -275,7 +379,7 @@ type DeletePlayerRequest struct {
 
 func (x *DeletePlayerRequest) Reset() {
 	*x = DeletePlayerRequest{}
-	mi := &file_cribbly_v1_players_proto_msgTypes[5]
+	mi := &file_cribbly_v1_players_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -287,7 +391,7 @@ func (x *DeletePlayerRequest) String() string {
 func (*DeletePlayerRequest) ProtoMessage() {}
 
 func (x *DeletePlayerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cribbly_v1_players_proto_msgTypes[5]
+	mi := &file_cribbly_v1_players_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -300,7 +404,7 @@ func (x *DeletePlayerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlayerRequest.ProtoReflect.Descriptor instead.
 func (*DeletePlayerRequest) Descriptor() ([]byte, []int) {
-	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{5}
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeletePlayerRequest) GetId() string {
@@ -319,7 +423,7 @@ type DeletePlayerResponse struct {
 
 func (x *DeletePlayerResponse) Reset() {
 	*x = DeletePlayerResponse{}
-	mi := &file_cribbly_v1_players_proto_msgTypes[6]
+	mi := &file_cribbly_v1_players_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +435,7 @@ func (x *DeletePlayerResponse) String() string {
 func (*DeletePlayerResponse) ProtoMessage() {}
 
 func (x *DeletePlayerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cribbly_v1_players_proto_msgTypes[6]
+	mi := &file_cribbly_v1_players_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +448,7 @@ func (x *DeletePlayerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlayerResponse.ProtoReflect.Descriptor instead.
 func (*DeletePlayerResponse) Descriptor() ([]byte, []int) {
-	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{6}
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeletePlayerResponse) GetPlayers() []*Player {
@@ -362,7 +466,7 @@ type DeleteAllPlayersRequest struct {
 
 func (x *DeleteAllPlayersRequest) Reset() {
 	*x = DeleteAllPlayersRequest{}
-	mi := &file_cribbly_v1_players_proto_msgTypes[7]
+	mi := &file_cribbly_v1_players_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -374,7 +478,7 @@ func (x *DeleteAllPlayersRequest) String() string {
 func (*DeleteAllPlayersRequest) ProtoMessage() {}
 
 func (x *DeleteAllPlayersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cribbly_v1_players_proto_msgTypes[7]
+	mi := &file_cribbly_v1_players_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -387,7 +491,7 @@ func (x *DeleteAllPlayersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAllPlayersRequest.ProtoReflect.Descriptor instead.
 func (*DeleteAllPlayersRequest) Descriptor() ([]byte, []int) {
-	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{7}
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{9}
 }
 
 type DeleteAllPlayersResponse struct {
@@ -398,7 +502,7 @@ type DeleteAllPlayersResponse struct {
 
 func (x *DeleteAllPlayersResponse) Reset() {
 	*x = DeleteAllPlayersResponse{}
-	mi := &file_cribbly_v1_players_proto_msgTypes[8]
+	mi := &file_cribbly_v1_players_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -410,7 +514,7 @@ func (x *DeleteAllPlayersResponse) String() string {
 func (*DeleteAllPlayersResponse) ProtoMessage() {}
 
 func (x *DeleteAllPlayersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cribbly_v1_players_proto_msgTypes[8]
+	mi := &file_cribbly_v1_players_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -423,7 +527,7 @@ func (x *DeleteAllPlayersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAllPlayersResponse.ProtoReflect.Descriptor instead.
 func (*DeleteAllPlayersResponse) Descriptor() ([]byte, []int) {
-	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{8}
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{10}
 }
 
 type GenerateRandomPlayersRequest struct {
@@ -435,7 +539,7 @@ type GenerateRandomPlayersRequest struct {
 
 func (x *GenerateRandomPlayersRequest) Reset() {
 	*x = GenerateRandomPlayersRequest{}
-	mi := &file_cribbly_v1_players_proto_msgTypes[9]
+	mi := &file_cribbly_v1_players_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -447,7 +551,7 @@ func (x *GenerateRandomPlayersRequest) String() string {
 func (*GenerateRandomPlayersRequest) ProtoMessage() {}
 
 func (x *GenerateRandomPlayersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cribbly_v1_players_proto_msgTypes[9]
+	mi := &file_cribbly_v1_players_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -460,7 +564,7 @@ func (x *GenerateRandomPlayersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateRandomPlayersRequest.ProtoReflect.Descriptor instead.
 func (*GenerateRandomPlayersRequest) Descriptor() ([]byte, []int) {
-	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{9}
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GenerateRandomPlayersRequest) GetCount() int32 {
@@ -479,7 +583,7 @@ type GenerateRandomPlayersResponse struct {
 
 func (x *GenerateRandomPlayersResponse) Reset() {
 	*x = GenerateRandomPlayersResponse{}
-	mi := &file_cribbly_v1_players_proto_msgTypes[10]
+	mi := &file_cribbly_v1_players_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -491,7 +595,7 @@ func (x *GenerateRandomPlayersResponse) String() string {
 func (*GenerateRandomPlayersResponse) ProtoMessage() {}
 
 func (x *GenerateRandomPlayersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cribbly_v1_players_proto_msgTypes[10]
+	mi := &file_cribbly_v1_players_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -504,7 +608,7 @@ func (x *GenerateRandomPlayersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateRandomPlayersResponse.ProtoReflect.Descriptor instead.
 func (*GenerateRandomPlayersResponse) Descriptor() ([]byte, []int) {
-	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{10}
+	return file_cribbly_v1_players_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GenerateRandomPlayersResponse) GetPlayers() []*Player {
@@ -534,6 +638,13 @@ const file_cribbly_v1_players_proto_rawDesc = "" +
 	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x02 \x01(\tR\blastName\"D\n" +
 	"\x14CreatePlayerResponse\x12,\n" +
+	"\aplayers\x18\x01 \x03(\v2\x12.cribbly.v1.PlayerR\aplayers\"a\n" +
+	"\x13UpdatePlayerRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\n" +
+	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x03 \x01(\tR\blastName\"D\n" +
+	"\x14UpdatePlayerResponse\x12,\n" +
 	"\aplayers\x18\x01 \x03(\v2\x12.cribbly.v1.PlayerR\aplayers\"%\n" +
 	"\x13DeletePlayerRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"D\n" +
@@ -544,10 +655,11 @@ const file_cribbly_v1_players_proto_rawDesc = "" +
 	"\x1cGenerateRandomPlayersRequest\x12\x14\n" +
 	"\x05count\x18\x01 \x01(\x05R\x05count\"M\n" +
 	"\x1dGenerateRandomPlayersResponse\x12,\n" +
-	"\aplayers\x18\x01 \x03(\v2\x12.cribbly.v1.PlayerR\aplayers2\xdc\x03\n" +
+	"\aplayers\x18\x01 \x03(\v2\x12.cribbly.v1.PlayerR\aplayers2\xb1\x04\n" +
 	"\rPlayerService\x12P\n" +
 	"\vListPlayers\x12\x1e.cribbly.v1.ListPlayersRequest\x1a\x1f.cribbly.v1.ListPlayersResponse\"\x00\x12S\n" +
 	"\fCreatePlayer\x12\x1f.cribbly.v1.CreatePlayerRequest\x1a .cribbly.v1.CreatePlayerResponse\"\x00\x12S\n" +
+	"\fUpdatePlayer\x12\x1f.cribbly.v1.UpdatePlayerRequest\x1a .cribbly.v1.UpdatePlayerResponse\"\x00\x12S\n" +
 	"\fDeletePlayer\x12\x1f.cribbly.v1.DeletePlayerRequest\x1a .cribbly.v1.DeletePlayerResponse\"\x00\x12_\n" +
 	"\x10DeleteAllPlayers\x12#.cribbly.v1.DeleteAllPlayersRequest\x1a$.cribbly.v1.DeleteAllPlayersResponse\"\x00\x12n\n" +
 	"\x15GenerateRandomPlayers\x12(.cribbly.v1.GenerateRandomPlayersRequest\x1a).cribbly.v1.GenerateRandomPlayersResponse\"\x00BCZAgithub.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cribblyv1b\x06proto3"
@@ -564,40 +676,45 @@ func file_cribbly_v1_players_proto_rawDescGZIP() []byte {
 	return file_cribbly_v1_players_proto_rawDescData
 }
 
-var file_cribbly_v1_players_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_cribbly_v1_players_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_cribbly_v1_players_proto_goTypes = []any{
 	(*Player)(nil),                        // 0: cribbly.v1.Player
 	(*ListPlayersRequest)(nil),            // 1: cribbly.v1.ListPlayersRequest
 	(*ListPlayersResponse)(nil),           // 2: cribbly.v1.ListPlayersResponse
 	(*CreatePlayerRequest)(nil),           // 3: cribbly.v1.CreatePlayerRequest
 	(*CreatePlayerResponse)(nil),          // 4: cribbly.v1.CreatePlayerResponse
-	(*DeletePlayerRequest)(nil),           // 5: cribbly.v1.DeletePlayerRequest
-	(*DeletePlayerResponse)(nil),          // 6: cribbly.v1.DeletePlayerResponse
-	(*DeleteAllPlayersRequest)(nil),       // 7: cribbly.v1.DeleteAllPlayersRequest
-	(*DeleteAllPlayersResponse)(nil),      // 8: cribbly.v1.DeleteAllPlayersResponse
-	(*GenerateRandomPlayersRequest)(nil),  // 9: cribbly.v1.GenerateRandomPlayersRequest
-	(*GenerateRandomPlayersResponse)(nil), // 10: cribbly.v1.GenerateRandomPlayersResponse
+	(*UpdatePlayerRequest)(nil),           // 5: cribbly.v1.UpdatePlayerRequest
+	(*UpdatePlayerResponse)(nil),          // 6: cribbly.v1.UpdatePlayerResponse
+	(*DeletePlayerRequest)(nil),           // 7: cribbly.v1.DeletePlayerRequest
+	(*DeletePlayerResponse)(nil),          // 8: cribbly.v1.DeletePlayerResponse
+	(*DeleteAllPlayersRequest)(nil),       // 9: cribbly.v1.DeleteAllPlayersRequest
+	(*DeleteAllPlayersResponse)(nil),      // 10: cribbly.v1.DeleteAllPlayersResponse
+	(*GenerateRandomPlayersRequest)(nil),  // 11: cribbly.v1.GenerateRandomPlayersRequest
+	(*GenerateRandomPlayersResponse)(nil), // 12: cribbly.v1.GenerateRandomPlayersResponse
 }
 var file_cribbly_v1_players_proto_depIdxs = []int32{
 	0,  // 0: cribbly.v1.ListPlayersResponse.players:type_name -> cribbly.v1.Player
 	0,  // 1: cribbly.v1.CreatePlayerResponse.players:type_name -> cribbly.v1.Player
-	0,  // 2: cribbly.v1.DeletePlayerResponse.players:type_name -> cribbly.v1.Player
-	0,  // 3: cribbly.v1.GenerateRandomPlayersResponse.players:type_name -> cribbly.v1.Player
-	1,  // 4: cribbly.v1.PlayerService.ListPlayers:input_type -> cribbly.v1.ListPlayersRequest
-	3,  // 5: cribbly.v1.PlayerService.CreatePlayer:input_type -> cribbly.v1.CreatePlayerRequest
-	5,  // 6: cribbly.v1.PlayerService.DeletePlayer:input_type -> cribbly.v1.DeletePlayerRequest
-	7,  // 7: cribbly.v1.PlayerService.DeleteAllPlayers:input_type -> cribbly.v1.DeleteAllPlayersRequest
-	9,  // 8: cribbly.v1.PlayerService.GenerateRandomPlayers:input_type -> cribbly.v1.GenerateRandomPlayersRequest
-	2,  // 9: cribbly.v1.PlayerService.ListPlayers:output_type -> cribbly.v1.ListPlayersResponse
-	4,  // 10: cribbly.v1.PlayerService.CreatePlayer:output_type -> cribbly.v1.CreatePlayerResponse
-	6,  // 11: cribbly.v1.PlayerService.DeletePlayer:output_type -> cribbly.v1.DeletePlayerResponse
-	8,  // 12: cribbly.v1.PlayerService.DeleteAllPlayers:output_type -> cribbly.v1.DeleteAllPlayersResponse
-	10, // 13: cribbly.v1.PlayerService.GenerateRandomPlayers:output_type -> cribbly.v1.GenerateRandomPlayersResponse
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	0,  // 2: cribbly.v1.UpdatePlayerResponse.players:type_name -> cribbly.v1.Player
+	0,  // 3: cribbly.v1.DeletePlayerResponse.players:type_name -> cribbly.v1.Player
+	0,  // 4: cribbly.v1.GenerateRandomPlayersResponse.players:type_name -> cribbly.v1.Player
+	1,  // 5: cribbly.v1.PlayerService.ListPlayers:input_type -> cribbly.v1.ListPlayersRequest
+	3,  // 6: cribbly.v1.PlayerService.CreatePlayer:input_type -> cribbly.v1.CreatePlayerRequest
+	5,  // 7: cribbly.v1.PlayerService.UpdatePlayer:input_type -> cribbly.v1.UpdatePlayerRequest
+	7,  // 8: cribbly.v1.PlayerService.DeletePlayer:input_type -> cribbly.v1.DeletePlayerRequest
+	9,  // 9: cribbly.v1.PlayerService.DeleteAllPlayers:input_type -> cribbly.v1.DeleteAllPlayersRequest
+	11, // 10: cribbly.v1.PlayerService.GenerateRandomPlayers:input_type -> cribbly.v1.GenerateRandomPlayersRequest
+	2,  // 11: cribbly.v1.PlayerService.ListPlayers:output_type -> cribbly.v1.ListPlayersResponse
+	4,  // 12: cribbly.v1.PlayerService.CreatePlayer:output_type -> cribbly.v1.CreatePlayerResponse
+	6,  // 13: cribbly.v1.PlayerService.UpdatePlayer:output_type -> cribbly.v1.UpdatePlayerResponse
+	8,  // 14: cribbly.v1.PlayerService.DeletePlayer:output_type -> cribbly.v1.DeletePlayerResponse
+	10, // 15: cribbly.v1.PlayerService.DeleteAllPlayers:output_type -> cribbly.v1.DeleteAllPlayersResponse
+	12, // 16: cribbly.v1.PlayerService.GenerateRandomPlayers:output_type -> cribbly.v1.GenerateRandomPlayersResponse
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_cribbly_v1_players_proto_init() }
@@ -611,7 +728,7 @@ func file_cribbly_v1_players_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_cribbly_v1_players_proto_rawDesc), len(file_cribbly_v1_players_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

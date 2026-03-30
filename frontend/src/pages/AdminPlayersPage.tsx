@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Trash2 } from "lucide-react"
+import { Check, Pencil, Trash2, X } from "lucide-react"
 
 import {
   createPlayer,
@@ -7,6 +7,7 @@ import {
   deletePlayer,
   generateRandomPlayers,
   listPlayers,
+  updatePlayer,
 } from "@/api/playersClient"
 import { useDevAdminOverride } from "@/lib/devAdminOverride"
 import { Button } from "@/components/ui/button"
@@ -34,6 +35,9 @@ export function AdminPlayersPage() {
   const [loading, setLoading] = useState(true)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editFirstName, setEditFirstName] = useState("")
+  const [editLastName, setEditLastName] = useState("")
 
   const [devAdminPretend] = useDevAdminOverride()
   const devSecretConfigured =
@@ -41,6 +45,9 @@ export function AdminPlayersPage() {
     typeof import.meta.env.VITE_DEV_ADMIN_SECRET === "string" &&
     import.meta.env.VITE_DEV_ADMIN_SECRET !== ""
   const devAdminApiReady = devSecretConfigured && devAdminPretend
+
+  const apiBlocked =
+    pending || (import.meta.env.DEV && devSecretConfigured && !devAdminApiReady)
 
   const refresh = useCallback(async () => {
     setError(null)
@@ -120,6 +127,49 @@ export function AdminPlayersPage() {
     })
   }
 
+  function beginEdit(p: Player) {
+    setEditingId(p.id)
+    setEditFirstName(p.firstName)
+    setEditLastName(p.lastName)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditFirstName("")
+    setEditLastName("")
+  }
+
+  async function onSaveEdit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingId) {
+      return
+    }
+    await run(async () => {
+      const res = await updatePlayer(
+        editingId,
+        editFirstName.trim(),
+        editLastName.trim(),
+      )
+      setPlayers(res.players)
+      cancelEdit()
+    })
+  }
+
+  useEffect(() => {
+    if (!editingId) {
+      return
+    }
+    function onKeyDown(ev: KeyboardEvent) {
+      if (ev.key === "Escape") {
+        setEditingId(null)
+        setEditFirstName("")
+        setEditLastName("")
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [editingId])
+
   const countLabel =
     players.length === 0
       ? "No players yet"
@@ -194,12 +244,7 @@ export function AdminPlayersPage() {
             <Button
               type="submit"
               className="w-full shrink-0 sm:w-auto"
-              disabled={
-                pending ||
-                (import.meta.env.DEV &&
-                  devSecretConfigured &&
-                  !devAdminApiReady)
-              }
+              disabled={apiBlocked}
             >
               {pending ? "Saving…" : "Add player"}
             </Button>
@@ -225,43 +270,120 @@ export function AdminPlayersPage() {
                   <th className="text-muted-foreground px-4 py-2 font-medium">
                     Name
                   </th>
-                  <th className="text-muted-foreground w-14 px-2 py-2 font-medium">
-                    <span className="sr-only">Remove</span>
+                  <th className="text-muted-foreground w-24 px-2 py-2 text-right font-medium">
+                    <span className="sr-only">Edit or remove</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {players.map((p) => {
                   const onTeam = Boolean(p.teamId)
+                  const isEditing = editingId === p.id
                   return (
                     <tr
                       key={p.id}
                       className="border-b border-foreground/5 last:border-0"
                     >
-                      <td className="px-4 py-2.5">{displayName(p)}</td>
-                      <td className="px-2 py-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive"
-                          disabled={
-                            pending ||
-                            onTeam ||
-                            (import.meta.env.DEV &&
-                              devSecretConfigured &&
-                              !devAdminApiReady)
-                          }
-                          title={
-                            onTeam
-                              ? "Remove from team before deleting"
-                              : "Delete player"
-                          }
-                          onClick={() => void onDelete(p.id)}
-                          aria-label={`Delete ${displayName(p)}`}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
+                      <td className="px-4 py-2.5">
+                        {isEditing ? (
+                          <form
+                            className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+                            onSubmit={(e) => void onSaveEdit(e)}
+                          >
+                            <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-2">
+                              <div className="space-y-1.5">
+                                <Label
+                                  htmlFor={`edit-first-${p.id}`}
+                                  className="text-xs"
+                                >
+                                  First name
+                                </Label>
+                                <Input
+                                  id={`edit-first-${p.id}`}
+                                  value={editFirstName}
+                                  onChange={(e) =>
+                                    setEditFirstName(e.target.value)
+                                  }
+                                  disabled={pending}
+                                  autoComplete="off"
+                                />
+                              </div>
+                              <div className="space-y-1.5">
+                                <Label
+                                  htmlFor={`edit-last-${p.id}`}
+                                  className="text-xs"
+                                >
+                                  Last name
+                                </Label>
+                                <Input
+                                  id={`edit-last-${p.id}`}
+                                  value={editLastName}
+                                  onChange={(e) =>
+                                    setEditLastName(e.target.value)
+                                  }
+                                  disabled={pending}
+                                  autoComplete="off"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 gap-1">
+                              <Button
+                                type="submit"
+                                size="icon"
+                                disabled={apiBlocked}
+                                aria-label="Save name"
+                              >
+                                <Check className="size-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                disabled={pending}
+                                onClick={() => cancelEdit()}
+                                aria-label="Cancel editing"
+                              >
+                                <X className="size-4" />
+                              </Button>
+                            </div>
+                          </form>
+                        ) : (
+                          <span>{displayName(p)}</span>
+                        )}
+                      </td>
+                      <td className="px-2 py-1 text-right whitespace-nowrap">
+                        {isEditing ? null : (
+                          <span className="inline-flex items-center justify-end gap-0.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-foreground"
+                              disabled={apiBlocked}
+                              title="Edit name"
+                              onClick={() => beginEdit(p)}
+                              aria-label={`Edit ${displayName(p)}`}
+                            >
+                              <Pencil className="size-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-destructive"
+                              disabled={apiBlocked || onTeam}
+                              title={
+                                onTeam
+                                  ? "Remove from team before deleting"
+                                  : "Delete player"
+                              }
+                              onClick={() => void onDelete(p.id)}
+                              aria-label={`Delete ${displayName(p)}`}
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </span>
+                        )}
                       </td>
                     </tr>
                   )
@@ -306,12 +428,7 @@ export function AdminPlayersPage() {
             <Button
               type="button"
               variant="secondary"
-              disabled={
-                pending ||
-                (import.meta.env.DEV &&
-                  devSecretConfigured &&
-                  !devAdminApiReady)
-              }
+              disabled={apiBlocked}
               onClick={() => void onGenerateRandom()}
             >
               Generate
@@ -321,11 +438,7 @@ export function AdminPlayersPage() {
           <Button
             type="button"
             variant="destructive"
-            disabled={
-              pending ||
-              players.length === 0 ||
-              (import.meta.env.DEV && devSecretConfigured && !devAdminApiReady)
-            }
+            disabled={apiBlocked || players.length === 0}
             onClick={() => void onDeleteAll()}
           >
             Delete all players

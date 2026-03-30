@@ -2,6 +2,7 @@ package players
 
 import (
 	"cmp"
+	"database/sql"
 	"testing"
 
 	"github.com/google/uuid"
@@ -46,6 +47,24 @@ func TestPlayerRepo(t *testing.T) {
 		players,
 		func(x, y Player) int { return cmp.Compare(x.ID, y.ID) },
 	)
+}
+
+func TestUpdateName(t *testing.T) {
+	db := database.NewInMemory(t)
+	s := NewRepository(db)
+	assert.NoError(t, s.Init(t.Context()))
+
+	id, err := s.Create(t.Context(), "A", "B")
+	assert.NoError(t, err)
+	assert.NoError(t, s.UpdateName(t.Context(), id, "C", "D"))
+
+	p, err := s.Get(t.Context(), id)
+	assert.NoError(t, err)
+	assert.Equal(t, Player{ID: id, FirstName: "C", LastName: "D"}, p)
+
+	assert.ErrorIs(t, s.UpdateName(t.Context(), uuid.NewString(), "X", "Y"), sql.ErrNoRows)
+	assert.Error(t, s.UpdateName(t.Context(), id, "", "Y"))
+	assert.Error(t, s.UpdateName(t.Context(), id, "X", ""))
 }
 
 func TestAssigningPlayers(t *testing.T) {

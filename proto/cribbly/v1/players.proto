@@ -8,6 +8,7 @@ option go_package = "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1;cri
 service PlayerService {
   rpc ListPlayers(ListPlayersRequest) returns (ListPlayersResponse) {}
   rpc CreatePlayer(CreatePlayerRequest) returns (CreatePlayerResponse) {}
+  rpc UpdatePlayer(UpdatePlayerRequest) returns (UpdatePlayerResponse) {}
   rpc DeletePlayer(DeletePlayerRequest) returns (DeletePlayerResponse) {}
   rpc DeleteAllPlayers(DeleteAllPlayersRequest) returns (DeleteAllPlayersResponse) {}
   rpc GenerateRandomPlayers(GenerateRandomPlayersRequest) returns (GenerateRandomPlayersResponse) {}
@@ -33,6 +34,16 @@ message CreatePlayerRequest {
 }
 
 message CreatePlayerResponse {
+  repeated Player players = 1;
+}
+
+message UpdatePlayerRequest {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+message UpdatePlayerResponse {
   repeated Player players = 1;
 }
 

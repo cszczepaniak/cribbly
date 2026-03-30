@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file cribbly/v1/players.proto.
  */
 export const file_cribbly_v1_players: GenFile = /*@__PURE__*/
-  fileDesc("ChhjcmliYmx5L3YxL3BsYXllcnMucHJvdG8SCmNyaWJibHkudjEiTAoGUGxheWVyEgoKAmlkGAEgASgJEhIKCmZpcnN0X25hbWUYAiABKAkSEQoJbGFzdF9uYW1lGAMgASgJEg8KB3RlYW1faWQYBCABKAkiFAoSTGlzdFBsYXllcnNSZXF1ZXN0IjoKE0xpc3RQbGF5ZXJzUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIjwKE0NyZWF0ZVBsYXllclJlcXVlc3QSEgoKZmlyc3RfbmFtZRgBIAEoCRIRCglsYXN0X25hbWUYAiABKAkiOwoUQ3JlYXRlUGxheWVyUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIiEKE0RlbGV0ZVBsYXllclJlcXVlc3QSCgoCaWQYASABKAkiOwoURGVsZXRlUGxheWVyUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIhkKF0RlbGV0ZUFsbFBsYXllcnNSZXF1ZXN0IhoKGERlbGV0ZUFsbFBsYXllcnNSZXNwb25zZSItChxHZW5lcmF0ZVJhbmRvbVBsYXllcnNSZXF1ZXN0Eg0KBWNvdW50GAEgASgFIkQKHUdlbmVyYXRlUmFuZG9tUGxheWVyc1Jlc3BvbnNlEiMKB3BsYXllcnMYASADKAsyEi5jcmliYmx5LnYxLlBsYXllcjLcAwoNUGxheWVyU2VydmljZRJQCgtMaXN0UGxheWVycxIeLmNyaWJibHkudjEuTGlzdFBsYXllcnNSZXF1ZXN0Gh8uY3JpYmJseS52MS5MaXN0UGxheWVyc1Jlc3BvbnNlIgASUwoMQ3JlYXRlUGxheWVyEh8uY3JpYmJseS52MS5DcmVhdGVQbGF5ZXJSZXF1ZXN0GiAuY3JpYmJseS52MS5DcmVhdGVQbGF5ZXJSZXNwb25zZSIAElMKDERlbGV0ZVBsYXllchIfLmNyaWJibHkudjEuRGVsZXRlUGxheWVyUmVxdWVzdBogLmNyaWJibHkudjEuRGVsZXRlUGxheWVyUmVzcG9uc2UiABJfChBEZWxldGVBbGxQbGF5ZXJzEiMuY3JpYmJseS52MS5EZWxldGVBbGxQbGF5ZXJzUmVxdWVzdBokLmNyaWJibHkudjEuRGVsZXRlQWxsUGxheWVyc1Jlc3BvbnNlIgASbgoVR2VuZXJhdGVSYW5kb21QbGF5ZXJzEiguY3JpYmJseS52MS5HZW5lcmF0ZVJhbmRvbVBsYXllcnNSZXF1ZXN0GikuY3JpYmJseS52MS5HZW5lcmF0ZVJhbmRvbVBsYXllcnNSZXNwb25zZSIAQkNaQWdpdGh1Yi5jb20vY3N6Y3plcGFuaWFrL2NyaWJibHkvaW50ZXJuYWwvZ2VuL2NyaWJibHkvdjE7Y3JpYmJseXYxYgZwcm90bzM");
+  fileDesc("ChhjcmliYmx5L3YxL3BsYXllcnMucHJvdG8SCmNyaWJibHkudjEiTAoGUGxheWVyEgoKAmlkGAEgASgJEhIKCmZpcnN0X25hbWUYAiABKAkSEQoJbGFzdF9uYW1lGAMgASgJEg8KB3RlYW1faWQYBCABKAkiFAoSTGlzdFBsYXllcnNSZXF1ZXN0IjoKE0xpc3RQbGF5ZXJzUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIjwKE0NyZWF0ZVBsYXllclJlcXVlc3QSEgoKZmlyc3RfbmFtZRgBIAEoCRIRCglsYXN0X25hbWUYAiABKAkiOwoUQ3JlYXRlUGxheWVyUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIkgKE1VwZGF0ZVBsYXllclJlcXVlc3QSCgoCaWQYASABKAkSEgoKZmlyc3RfbmFtZRgCIAEoCRIRCglsYXN0X25hbWUYAyABKAkiOwoUVXBkYXRlUGxheWVyUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIiEKE0RlbGV0ZVBsYXllclJlcXVlc3QSCgoCaWQYASABKAkiOwoURGVsZXRlUGxheWVyUmVzcG9uc2USIwoHcGxheWVycxgBIAMoCzISLmNyaWJibHkudjEuUGxheWVyIhkKF0RlbGV0ZUFsbFBsYXllcnNSZXF1ZXN0IhoKGERlbGV0ZUFsbFBsYXllcnNSZXNwb25zZSItChxHZW5lcmF0ZVJhbmRvbVBsYXllcnNSZXF1ZXN0Eg0KBWNvdW50GAEgASgFIkQKHUdlbmVyYXRlUmFuZG9tUGxheWVyc1Jlc3BvbnNlEiMKB3BsYXllcnMYASADKAsyEi5jcmliYmx5LnYxLlBsYXllcjKxBAoNUGxheWVyU2VydmljZRJQCgtMaXN0UGxheWVycxIeLmNyaWJibHkudjEuTGlzdFBsYXllcnNSZXF1ZXN0Gh8uY3JpYmJseS52MS5MaXN0UGxheWVyc1Jlc3BvbnNlIgASUwoMQ3JlYXRlUGxheWVyEh8uY3JpYmJseS52MS5DcmVhdGVQbGF5ZXJSZXF1ZXN0GiAuY3JpYmJseS52MS5DcmVhdGVQbGF5ZXJSZXNwb25zZSIAElMKDFVwZGF0ZVBsYXllchIfLmNyaWJibHkudjEuVXBkYXRlUGxheWVyUmVxdWVzdBogLmNyaWJibHkudjEuVXBkYXRlUGxheWVyUmVzcG9uc2UiABJTCgxEZWxldGVQbGF5ZXISHy5jcmliYmx5LnYxLkRlbGV0ZVBsYXllclJlcXVlc3QaIC5jcmliYmx5LnYxLkRlbGV0ZVBsYXllclJlc3BvbnNlIgASXwoQRGVsZXRlQWxsUGxheWVycxIjLmNyaWJibHkudjEuRGVsZXRlQWxsUGxheWVyc1JlcXVlc3QaJC5jcmliYmx5LnYxLkRlbGV0ZUFsbFBsYXllcnNSZXNwb25zZSIAEm4KFUdlbmVyYXRlUmFuZG9tUGxheWVycxIoLmNyaWJibHkudjEuR2VuZXJhdGVSYW5kb21QbGF5ZXJzUmVxdWVzdBopLmNyaWJibHkudjEuR2VuZXJhdGVSYW5kb21QbGF5ZXJzUmVzcG9uc2UiAEJDWkFnaXRodWIuY29tL2NzemN6ZXBhbmlhay9jcmliYmx5L2ludGVybmFsL2dlbi9jcmliYmx5L3YxO2NyaWJibHl2MWIGcHJvdG8z");
 
 /**
  * @generated from message cribbly.v1.Player
@@ -116,6 +116,50 @@ export const CreatePlayerResponseSchema: GenMessage<CreatePlayerResponse> = /*@_
   messageDesc(file_cribbly_v1_players, 4);
 
 /**
+ * @generated from message cribbly.v1.UpdatePlayerRequest
+ */
+export type UpdatePlayerRequest = Message<"cribbly.v1.UpdatePlayerRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string first_name = 2;
+   */
+  firstName: string;
+
+  /**
+   * @generated from field: string last_name = 3;
+   */
+  lastName: string;
+};
+
+/**
+ * Describes the message cribbly.v1.UpdatePlayerRequest.
+ * Use `create(UpdatePlayerRequestSchema)` to create a new message.
+ */
+export const UpdatePlayerRequestSchema: GenMessage<UpdatePlayerRequest> = /*@__PURE__*/
+  messageDesc(file_cribbly_v1_players, 5);
+
+/**
+ * @generated from message cribbly.v1.UpdatePlayerResponse
+ */
+export type UpdatePlayerResponse = Message<"cribbly.v1.UpdatePlayerResponse"> & {
+  /**
+   * @generated from field: repeated cribbly.v1.Player players = 1;
+   */
+  players: Player[];
+};
+
+/**
+ * Describes the message cribbly.v1.UpdatePlayerResponse.
+ * Use `create(UpdatePlayerResponseSchema)` to create a new message.
+ */
+export const UpdatePlayerResponseSchema: GenMessage<UpdatePlayerResponse> = /*@__PURE__*/
+  messageDesc(file_cribbly_v1_players, 6);
+
+/**
  * @generated from message cribbly.v1.DeletePlayerRequest
  */
 export type DeletePlayerRequest = Message<"cribbly.v1.DeletePlayerRequest"> & {
@@ -130,7 +174,7 @@ export type DeletePlayerRequest = Message<"cribbly.v1.DeletePlayerRequest"> & {
  * Use `create(DeletePlayerRequestSchema)` to create a new message.
  */
 export const DeletePlayerRequestSchema: GenMessage<DeletePlayerRequest> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_players, 5);
+  messageDesc(file_cribbly_v1_players, 7);
 
 /**
  * @generated from message cribbly.v1.DeletePlayerResponse
@@ -147,7 +191,7 @@ export type DeletePlayerResponse = Message<"cribbly.v1.DeletePlayerResponse"> & 
  * Use `create(DeletePlayerResponseSchema)` to create a new message.
  */
 export const DeletePlayerResponseSchema: GenMessage<DeletePlayerResponse> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_players, 6);
+  messageDesc(file_cribbly_v1_players, 8);
 
 /**
  * @generated from message cribbly.v1.DeleteAllPlayersRequest
@@ -160,7 +204,7 @@ export type DeleteAllPlayersRequest = Message<"cribbly.v1.DeleteAllPlayersReques
  * Use `create(DeleteAllPlayersRequestSchema)` to create a new message.
  */
 export const DeleteAllPlayersRequestSchema: GenMessage<DeleteAllPlayersRequest> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_players, 7);
+  messageDesc(file_cribbly_v1_players, 9);
 
 /**
  * @generated from message cribbly.v1.DeleteAllPlayersResponse
@@ -173,7 +217,7 @@ export type DeleteAllPlayersResponse = Message<"cribbly.v1.DeleteAllPlayersRespo
  * Use `create(DeleteAllPlayersResponseSchema)` to create a new message.
  */
 export const DeleteAllPlayersResponseSchema: GenMessage<DeleteAllPlayersResponse> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_players, 8);
+  messageDesc(file_cribbly_v1_players, 10);
 
 /**
  * @generated from message cribbly.v1.GenerateRandomPlayersRequest
@@ -190,7 +234,7 @@ export type GenerateRandomPlayersRequest = Message<"cribbly.v1.GenerateRandomPla
  * Use `create(GenerateRandomPlayersRequestSchema)` to create a new message.
  */
 export const GenerateRandomPlayersRequestSchema: GenMessage<GenerateRandomPlayersRequest> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_players, 9);
+  messageDesc(file_cribbly_v1_players, 11);
 
 /**
  * @generated from message cribbly.v1.GenerateRandomPlayersResponse
@@ -207,7 +251,7 @@ export type GenerateRandomPlayersResponse = Message<"cribbly.v1.GenerateRandomPl
  * Use `create(GenerateRandomPlayersResponseSchema)` to create a new message.
  */
 export const GenerateRandomPlayersResponseSchema: GenMessage<GenerateRandomPlayersResponse> = /*@__PURE__*/
-  messageDesc(file_cribbly_v1_players, 10);
+  messageDesc(file_cribbly_v1_players, 12);
 
 /**
  * Admin API for managing registered players (same data as legacy /admin/players).
@@ -230,6 +274,14 @@ export const PlayerService: GenService<{
     methodKind: "unary";
     input: typeof CreatePlayerRequestSchema;
     output: typeof CreatePlayerResponseSchema;
+  },
+  /**
+   * @generated from rpc cribbly.v1.PlayerService.UpdatePlayer
+   */
+  updatePlayer: {
+    methodKind: "unary";
+    input: typeof UpdatePlayerRequestSchema;
+    output: typeof UpdatePlayerResponseSchema;
   },
   /**
    * @generated from rpc cribbly.v1.PlayerService.DeletePlayer

@@ -84,6 +84,42 @@ func (s *Server) CreatePlayer(
 	return connect.NewResponse(&cribblyv1.CreatePlayerResponse{Players: toProto(ps)}), nil
 }
 
+func (s *Server) UpdatePlayer(
+	ctx context.Context,
+	req *connect.Request[cribblyv1.UpdatePlayerRequest],
+) (*connect.Response[cribblyv1.UpdatePlayerResponse], error) {
+	if err := requireAdmin(ctx); err != nil {
+		return nil, err
+	}
+
+	id := strings.TrimSpace(req.Msg.GetId())
+	first := strings.TrimSpace(req.Msg.GetFirstName())
+	last := strings.TrimSpace(req.Msg.GetLastName())
+	if id == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("id is required"))
+	}
+	if first == "" || last == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("first and last name are required"))
+	}
+
+	if err := s.PlayerRepo.UpdateName(ctx, id, first, last); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, errors.New("player not found"))
+		}
+		if strings.Contains(err.Error(), "must have a first and last name") {
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	ps, err := s.PlayerRepo.GetAll(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&cribblyv1.UpdatePlayerResponse{Players: toProto(ps)}), nil
+}
+
 func (s *Server) DeletePlayer(
 	ctx context.Context,
 	req *connect.Request[cribblyv1.DeletePlayerRequest],

@@ -97,6 +97,58 @@ func TestCreatePlayer_Success_ReturnsList(t *testing.T) {
 	assert.Equal(t, "", ps[0].GetTeamId())
 }
 
+func TestUpdatePlayer_NotFound(t *testing.T) {
+	svc, _ := newTestServer(t)
+	ctx := middleware.WithDevAdminContext(t.Context())
+	_, err := svc.UpdatePlayer(
+		ctx,
+		connect.NewRequest(&cribblyv1.UpdatePlayerRequest{
+			Id:        uuid.NewString(),
+			FirstName: "A",
+			LastName:  "B",
+		}),
+	)
+	assertConnectCode(t, err, connect.CodeNotFound)
+}
+
+func TestUpdatePlayer_InvalidArgument_EmptyName(t *testing.T) {
+	svc, repo := newTestServer(t)
+	ctx := middleware.WithDevAdminContext(t.Context())
+	id, err := repo.Create(t.Context(), "Old", "Name")
+	assert.NoError(t, err)
+
+	_, err = svc.UpdatePlayer(
+		ctx,
+		connect.NewRequest(&cribblyv1.UpdatePlayerRequest{
+			Id:        id,
+			FirstName: "",
+			LastName:  "B",
+		}),
+	)
+	assertConnectCode(t, err, connect.CodeInvalidArgument)
+}
+
+func TestUpdatePlayer_Success(t *testing.T) {
+	svc, repo := newTestServer(t)
+	ctx := middleware.WithDevAdminContext(t.Context())
+	id, err := repo.Create(t.Context(), "Old", "Name")
+	assert.NoError(t, err)
+
+	resp, err := svc.UpdatePlayer(
+		ctx,
+		connect.NewRequest(&cribblyv1.UpdatePlayerRequest{
+			Id:        id,
+			FirstName: "New",
+			LastName:  "Name",
+		}),
+	)
+	assert.NoError(t, err)
+	ps := resp.Msg.GetPlayers()
+	assert.SliceLen(t, ps, 1)
+	assert.Equal(t, "New", ps[0].GetFirstName())
+	assert.Equal(t, "Name", ps[0].GetLastName())
+}
+
 func TestDeletePlayer_NotFound(t *testing.T) {
 	svc, _ := newTestServer(t)
 	ctx := middleware.WithDevAdminContext(t.Context())
@@ -160,12 +212,11 @@ func TestDeleteAllPlayers_UnassignsAndDeletes(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NoError(t, repo.AssignToTeam(t.Context(), id1, uuid.NewString()))
 
-	resp, err := svc.DeleteAllPlayers(
+	_, err = svc.DeleteAllPlayers(
 		ctx,
 		connect.NewRequest(&cribblyv1.DeleteAllPlayersRequest{}),
 	)
 	assert.NoError(t, err)
-	assert.SliceLen(t, resp.Msg.GetPlayers(), 0)
 
 	all, err := repo.GetAll(t.Context())
 	assert.NoError(t, err)

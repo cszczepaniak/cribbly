@@ -39,6 +39,9 @@ const (
 	// PlayerServiceCreatePlayerProcedure is the fully-qualified name of the PlayerService's
 	// CreatePlayer RPC.
 	PlayerServiceCreatePlayerProcedure = "/cribbly.v1.PlayerService/CreatePlayer"
+	// PlayerServiceUpdatePlayerProcedure is the fully-qualified name of the PlayerService's
+	// UpdatePlayer RPC.
+	PlayerServiceUpdatePlayerProcedure = "/cribbly.v1.PlayerService/UpdatePlayer"
 	// PlayerServiceDeletePlayerProcedure is the fully-qualified name of the PlayerService's
 	// DeletePlayer RPC.
 	PlayerServiceDeletePlayerProcedure = "/cribbly.v1.PlayerService/DeletePlayer"
@@ -54,6 +57,7 @@ const (
 type PlayerServiceClient interface {
 	ListPlayers(context.Context, *connect.Request[v1.ListPlayersRequest]) (*connect.Response[v1.ListPlayersResponse], error)
 	CreatePlayer(context.Context, *connect.Request[v1.CreatePlayerRequest]) (*connect.Response[v1.CreatePlayerResponse], error)
+	UpdatePlayer(context.Context, *connect.Request[v1.UpdatePlayerRequest]) (*connect.Response[v1.UpdatePlayerResponse], error)
 	DeletePlayer(context.Context, *connect.Request[v1.DeletePlayerRequest]) (*connect.Response[v1.DeletePlayerResponse], error)
 	DeleteAllPlayers(context.Context, *connect.Request[v1.DeleteAllPlayersRequest]) (*connect.Response[v1.DeleteAllPlayersResponse], error)
 	GenerateRandomPlayers(context.Context, *connect.Request[v1.GenerateRandomPlayersRequest]) (*connect.Response[v1.GenerateRandomPlayersResponse], error)
@@ -82,6 +86,12 @@ func NewPlayerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(playerServiceMethods.ByName("CreatePlayer")),
 			connect.WithClientOptions(opts...),
 		),
+		updatePlayer: connect.NewClient[v1.UpdatePlayerRequest, v1.UpdatePlayerResponse](
+			httpClient,
+			baseURL+PlayerServiceUpdatePlayerProcedure,
+			connect.WithSchema(playerServiceMethods.ByName("UpdatePlayer")),
+			connect.WithClientOptions(opts...),
+		),
 		deletePlayer: connect.NewClient[v1.DeletePlayerRequest, v1.DeletePlayerResponse](
 			httpClient,
 			baseURL+PlayerServiceDeletePlayerProcedure,
@@ -107,6 +117,7 @@ func NewPlayerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 type playerServiceClient struct {
 	listPlayers           *connect.Client[v1.ListPlayersRequest, v1.ListPlayersResponse]
 	createPlayer          *connect.Client[v1.CreatePlayerRequest, v1.CreatePlayerResponse]
+	updatePlayer          *connect.Client[v1.UpdatePlayerRequest, v1.UpdatePlayerResponse]
 	deletePlayer          *connect.Client[v1.DeletePlayerRequest, v1.DeletePlayerResponse]
 	deleteAllPlayers      *connect.Client[v1.DeleteAllPlayersRequest, v1.DeleteAllPlayersResponse]
 	generateRandomPlayers *connect.Client[v1.GenerateRandomPlayersRequest, v1.GenerateRandomPlayersResponse]
@@ -120,6 +131,11 @@ func (c *playerServiceClient) ListPlayers(ctx context.Context, req *connect.Requ
 // CreatePlayer calls cribbly.v1.PlayerService.CreatePlayer.
 func (c *playerServiceClient) CreatePlayer(ctx context.Context, req *connect.Request[v1.CreatePlayerRequest]) (*connect.Response[v1.CreatePlayerResponse], error) {
 	return c.createPlayer.CallUnary(ctx, req)
+}
+
+// UpdatePlayer calls cribbly.v1.PlayerService.UpdatePlayer.
+func (c *playerServiceClient) UpdatePlayer(ctx context.Context, req *connect.Request[v1.UpdatePlayerRequest]) (*connect.Response[v1.UpdatePlayerResponse], error) {
+	return c.updatePlayer.CallUnary(ctx, req)
 }
 
 // DeletePlayer calls cribbly.v1.PlayerService.DeletePlayer.
@@ -141,6 +157,7 @@ func (c *playerServiceClient) GenerateRandomPlayers(ctx context.Context, req *co
 type PlayerServiceHandler interface {
 	ListPlayers(context.Context, *connect.Request[v1.ListPlayersRequest]) (*connect.Response[v1.ListPlayersResponse], error)
 	CreatePlayer(context.Context, *connect.Request[v1.CreatePlayerRequest]) (*connect.Response[v1.CreatePlayerResponse], error)
+	UpdatePlayer(context.Context, *connect.Request[v1.UpdatePlayerRequest]) (*connect.Response[v1.UpdatePlayerResponse], error)
 	DeletePlayer(context.Context, *connect.Request[v1.DeletePlayerRequest]) (*connect.Response[v1.DeletePlayerResponse], error)
 	DeleteAllPlayers(context.Context, *connect.Request[v1.DeleteAllPlayersRequest]) (*connect.Response[v1.DeleteAllPlayersResponse], error)
 	GenerateRandomPlayers(context.Context, *connect.Request[v1.GenerateRandomPlayersRequest]) (*connect.Response[v1.GenerateRandomPlayersResponse], error)
@@ -163,6 +180,12 @@ func NewPlayerServiceHandler(svc PlayerServiceHandler, opts ...connect.HandlerOp
 		PlayerServiceCreatePlayerProcedure,
 		svc.CreatePlayer,
 		connect.WithSchema(playerServiceMethods.ByName("CreatePlayer")),
+		connect.WithHandlerOptions(opts...),
+	)
+	playerServiceUpdatePlayerHandler := connect.NewUnaryHandler(
+		PlayerServiceUpdatePlayerProcedure,
+		svc.UpdatePlayer,
+		connect.WithSchema(playerServiceMethods.ByName("UpdatePlayer")),
 		connect.WithHandlerOptions(opts...),
 	)
 	playerServiceDeletePlayerHandler := connect.NewUnaryHandler(
@@ -189,6 +212,8 @@ func NewPlayerServiceHandler(svc PlayerServiceHandler, opts ...connect.HandlerOp
 			playerServiceListPlayersHandler.ServeHTTP(w, r)
 		case PlayerServiceCreatePlayerProcedure:
 			playerServiceCreatePlayerHandler.ServeHTTP(w, r)
+		case PlayerServiceUpdatePlayerProcedure:
+			playerServiceUpdatePlayerHandler.ServeHTTP(w, r)
 		case PlayerServiceDeletePlayerProcedure:
 			playerServiceDeletePlayerHandler.ServeHTTP(w, r)
 		case PlayerServiceDeleteAllPlayersProcedure:
@@ -210,6 +235,10 @@ func (UnimplementedPlayerServiceHandler) ListPlayers(context.Context, *connect.R
 
 func (UnimplementedPlayerServiceHandler) CreatePlayer(context.Context, *connect.Request[v1.CreatePlayerRequest]) (*connect.Response[v1.CreatePlayerResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("cribbly.v1.PlayerService.CreatePlayer is not implemented"))
+}
+
+func (UnimplementedPlayerServiceHandler) UpdatePlayer(context.Context, *connect.Request[v1.UpdatePlayerRequest]) (*connect.Response[v1.UpdatePlayerResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("cribbly.v1.PlayerService.UpdatePlayer is not implemented"))
 }
 
 func (UnimplementedPlayerServiceHandler) DeletePlayer(context.Context, *connect.Request[v1.DeletePlayerRequest]) (*connect.Response[v1.DeletePlayerResponse], error) {
