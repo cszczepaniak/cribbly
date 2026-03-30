@@ -35,7 +35,7 @@ jobs:
 
     verify-go-mod:
         runs-on: ubuntu-latest
-        name: Verify go mod tidy
+        name: Verify Go Vendor
         steps:
             - uses: actions/checkout@v3
 
@@ -43,10 +43,12 @@ jobs:
               with:
                   go-version: stable
 
-            - name: Verify go mod tidy
+            - name: Verify Go Vendor
               uses: ./.github/actions/verify_code_consistency
               with:
-                  cmd: go mod tidy
+                  cmd: |
+                    go mod tidy
+                    go mod vendor
 
     verify-go:
         runs-on: ubuntu-latest
