@@ -33,7 +33,9 @@ export function DevAdminAccessToggle() {
         Sends the dev admin header on API calls when{" "}
         <code className="font-mono text-[0.65rem]">VITE_DEV_ADMIN_SECRET</code>{" "}
         is set. Persists in localStorage (
-        <code className="font-mono text-[0.65rem]">{DEV_ADMIN_OVERRIDE_KEY}</code>
+        <code className="font-mono text-[0.65rem]">
+          {DEV_ADMIN_OVERRIDE_KEY}
+        </code>
         ).
       </p>
     </div>

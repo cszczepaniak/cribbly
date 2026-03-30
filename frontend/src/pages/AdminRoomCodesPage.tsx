@@ -56,21 +56,16 @@ export function AdminRoomCodesPage() {
 
       {import.meta.env.DEV && !devSecretConfigured ? (
         <p className="text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 rounded-md border border-amber-200/80 p-3 text-sm dark:border-amber-800/60">
-          Set{" "}
-          <span className="font-mono">
-            CRIBBLY_DEV_ADMIN_SECRET
-          </span>{" "}
-          on the Go server and{" "}
-          <span className="font-mono">VITE_DEV_ADMIN_SECRET</span> in{" "}
-          <span className="font-mono">frontend/.env.development.local</span>{" "}
+          Set <span className="font-mono">CRIBBLY_DEV_ADMIN_SECRET</span> on the
+          Go server and <span className="font-mono">VITE_DEV_ADMIN_SECRET</span>{" "}
+          in <span className="font-mono">frontend/.env.development.local</span>{" "}
           to the same value so API calls can bypass admin login in local dev.
         </p>
       ) : null}
       {import.meta.env.DEV && devSecretConfigured && !devAdminPretend ? (
         <p className="text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 rounded-md border border-amber-200/80 p-3 text-sm dark:border-amber-800/60">
-          Turn on{" "}
-          <span className="font-medium">Pretend logged-in admin</span> in the
-          menu so dev API calls include the admin bypass header.
+          Turn on <span className="font-medium">Pretend logged-in admin</span>{" "}
+          in the menu so dev API calls include the admin bypass header.
         </p>
       ) : null}
 
@@ -86,7 +81,8 @@ export function AdminRoomCodesPage() {
             type="button"
             onClick={() => void onGenerate()}
             disabled={
-              pending || (import.meta.env.DEV && devSecretConfigured && !devAdminApiReady)
+              pending ||
+              (import.meta.env.DEV && devSecretConfigured && !devAdminApiReady)
             }
           >
             {pending ? "Generating…" : "Generate room code"}
