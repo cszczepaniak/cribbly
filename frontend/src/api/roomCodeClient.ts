@@ -1,15 +1,21 @@
 import { create } from "@bufbuild/protobuf"
 import { createClient, type CallOptions } from "@connectrpc/connect"
 import { createConnectTransport } from "@connectrpc/connect-web"
+import { applyDevAdminHeaders } from "@/api/devAdmin"
 import {
   CheckRoomAccessRequestSchema,
+  GenerateRoomCodeRequestSchema,
   RoomCodeService,
   SetRoomCodeRequestSchema,
 } from "@/gen/cribbly/v1/roomcode_pb"
 
 const transport = createConnectTransport({
   baseUrl: "/api",
-  fetch: (input, init) => fetch(input, { ...init, credentials: "include" }),
+  fetch: (input, init) => {
+    const headers = new Headers(init?.headers)
+    applyDevAdminHeaders(headers)
+    return fetch(input, { ...init, headers, credentials: "include" })
+  },
 })
 
 const client = createClient(RoomCodeService, transport)
@@ -26,6 +32,11 @@ export async function setRoomCode(code: string) {
 /** Returns whether the current browser has a valid room cookie or admin session (same rules as the Go server). */
 export async function checkRoomAccess() {
   return client.checkRoomAccess(create(CheckRoomAccessRequestSchema, {}))
+}
+
+/** Admin only: creates a new random room code (Connect RPC). */
+export async function generateAdminRoomCode() {
+  return client.generateRoomCode(create(GenerateRoomCodeRequestSchema, {}))
 }
 
 export async function doSomething(options?: CallOptions) {

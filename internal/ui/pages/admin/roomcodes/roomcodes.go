@@ -1,7 +1,6 @@
 package roomcodes
 
 import (
-	"crypto/rand"
 	"errors"
 	"net/http"
 	"time"
@@ -37,48 +36,10 @@ func (h Handler) Index(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h Handler) Generate(w http.ResponseWriter, r *http.Request) error {
-	const (
-		codeLength  = 6
-		maxAttempts = 5
-	)
-
-	code, err := generateCode(codeLength)
+	_, err := h.RoomCodeRepo.CreateRandomCode(r.Context())
 	if err != nil {
 		return err
 	}
-
-	expiresAt := time.Now().Add(24 * time.Hour)
-
-	// Best-effort to avoid collisions by retrying a few times.
-	for range maxAttempts {
-		err = h.RoomCodeRepo.Create(r.Context(), code, expiresAt)
-		if err == nil {
-			http.Redirect(w, r, "/admin/room-codes", http.StatusFound)
-			return nil
-		}
-
-		// Generate a new code and try again.
-		code, err = generateCode(codeLength)
-		if err != nil {
-			return err
-		}
-	}
-
-	return err
-}
-
-func generateCode(n int) (string, error) {
-	const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-
-	buf := make([]byte, n)
-	_, err := rand.Read(buf)
-	if err != nil {
-		return "", err
-	}
-
-	for i := range buf {
-		buf[i] = alphabet[int(buf[i])%len(alphabet)]
-	}
-
-	return string(buf), nil
+	http.Redirect(w, r, "/admin/room-codes", http.StatusFound)
+	return nil
 }

@@ -10,6 +10,8 @@ service RoomCodeService {
   rpc SetRoomCode(SetRoomCodeRequest) returns (SetRoomCodeResponse) {}
   // Reports whether the current request has room access (valid room_code cookie) or admin session.
   rpc CheckRoomAccess(CheckRoomAccessRequest) returns (CheckRoomAccessResponse) {}
+  // Creates a new random room code (24h TTL). Admin session or dev bypass only.
+  rpc GenerateRoomCode(GenerateRoomCodeRequest) returns (GenerateRoomCodeResponse) {}
   rpc DoSomething(SomethingRequest) returns (stream SomethingResponse) {}
 }
 
@@ -23,6 +25,14 @@ message CheckRoomAccessRequest {}
 
 message CheckRoomAccessResponse {
   bool has_access = 1;
+}
+
+message GenerateRoomCodeRequest {}
+
+message GenerateRoomCodeResponse {
+  string code = 1;
+  // Expiration time in RFC3339 (UTC recommended).
+  string expires_at = 2;
 }
 
 message SomethingRequest{}

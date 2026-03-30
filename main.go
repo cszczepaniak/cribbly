@@ -44,6 +44,7 @@ func runMain() error {
 	if err != nil {
 		return err
 	}
+	serverCfg.DevAdminSecret = cfg.DevAdminSecret
 
 	if cfg.SeedUser.Username != "" && cfg.SeedUser.Password != "" {
 		passwordHash, err := argon2id.CreateHash(cfg.SeedUser.Password, argon2id.DefaultParams)

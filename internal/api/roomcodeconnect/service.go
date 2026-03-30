@@ -59,6 +59,10 @@ func (s *Server) CheckRoomAccess(
 	ctx context.Context,
 	req *connect.Request[cribblyv1.CheckRoomAccessRequest],
 ) (*connect.Response[cribblyv1.CheckRoomAccessResponse], error) {
+	if middleware.IsAdmin(ctx) {
+		return connect.NewResponse(&cribblyv1.CheckRoomAccessResponse{HasAccess: true}), nil
+	}
+
 	hr := &http.Request{Header: req.Header()}
 
 	if cookie, err := hr.Cookie("session"); err == nil {
@@ -77,6 +81,25 @@ func (s *Server) CheckRoomAccess(
 	}
 
 	return connect.NewResponse(&cribblyv1.CheckRoomAccessResponse{HasAccess: false}), nil
+}
+
+func (s *Server) GenerateRoomCode(
+	ctx context.Context,
+	_ *connect.Request[cribblyv1.GenerateRoomCodeRequest],
+) (*connect.Response[cribblyv1.GenerateRoomCodeResponse], error) {
+	if !middleware.IsAdmin(ctx) {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("must be an admin"))
+	}
+
+	rc, err := s.Repo.CreateRandomCode(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&cribblyv1.GenerateRoomCodeResponse{
+		Code:      rc.Code,
+		ExpiresAt: rc.Expires.UTC().Format(time.RFC3339Nano),
+	}), nil
 }
 
 func (s *Server) DoSomething(

@@ -39,6 +39,9 @@ const (
 	// RoomCodeServiceCheckRoomAccessProcedure is the fully-qualified name of the RoomCodeService's
 	// CheckRoomAccess RPC.
 	RoomCodeServiceCheckRoomAccessProcedure = "/cribbly.v1.RoomCodeService/CheckRoomAccess"
+	// RoomCodeServiceGenerateRoomCodeProcedure is the fully-qualified name of the RoomCodeService's
+	// GenerateRoomCode RPC.
+	RoomCodeServiceGenerateRoomCodeProcedure = "/cribbly.v1.RoomCodeService/GenerateRoomCode"
 	// RoomCodeServiceDoSomethingProcedure is the fully-qualified name of the RoomCodeService's
 	// DoSomething RPC.
 	RoomCodeServiceDoSomethingProcedure = "/cribbly.v1.RoomCodeService/DoSomething"
@@ -50,6 +53,8 @@ type RoomCodeServiceClient interface {
 	SetRoomCode(context.Context, *connect.Request[v1.SetRoomCodeRequest]) (*connect.Response[v1.SetRoomCodeResponse], error)
 	// Reports whether the current request has room access (valid room_code cookie) or admin session.
 	CheckRoomAccess(context.Context, *connect.Request[v1.CheckRoomAccessRequest]) (*connect.Response[v1.CheckRoomAccessResponse], error)
+	// Creates a new random room code (24h TTL). Admin session or dev bypass only.
+	GenerateRoomCode(context.Context, *connect.Request[v1.GenerateRoomCodeRequest]) (*connect.Response[v1.GenerateRoomCodeResponse], error)
 	DoSomething(context.Context, *connect.Request[v1.SomethingRequest]) (*connect.ServerStreamForClient[v1.SomethingResponse], error)
 }
 
@@ -76,6 +81,12 @@ func NewRoomCodeServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(roomCodeServiceMethods.ByName("CheckRoomAccess")),
 			connect.WithClientOptions(opts...),
 		),
+		generateRoomCode: connect.NewClient[v1.GenerateRoomCodeRequest, v1.GenerateRoomCodeResponse](
+			httpClient,
+			baseURL+RoomCodeServiceGenerateRoomCodeProcedure,
+			connect.WithSchema(roomCodeServiceMethods.ByName("GenerateRoomCode")),
+			connect.WithClientOptions(opts...),
+		),
 		doSomething: connect.NewClient[v1.SomethingRequest, v1.SomethingResponse](
 			httpClient,
 			baseURL+RoomCodeServiceDoSomethingProcedure,
@@ -87,9 +98,10 @@ func NewRoomCodeServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // roomCodeServiceClient implements RoomCodeServiceClient.
 type roomCodeServiceClient struct {
-	setRoomCode     *connect.Client[v1.SetRoomCodeRequest, v1.SetRoomCodeResponse]
-	checkRoomAccess *connect.Client[v1.CheckRoomAccessRequest, v1.CheckRoomAccessResponse]
-	doSomething     *connect.Client[v1.SomethingRequest, v1.SomethingResponse]
+	setRoomCode      *connect.Client[v1.SetRoomCodeRequest, v1.SetRoomCodeResponse]
+	checkRoomAccess  *connect.Client[v1.CheckRoomAccessRequest, v1.CheckRoomAccessResponse]
+	generateRoomCode *connect.Client[v1.GenerateRoomCodeRequest, v1.GenerateRoomCodeResponse]
+	doSomething      *connect.Client[v1.SomethingRequest, v1.SomethingResponse]
 }
 
 // SetRoomCode calls cribbly.v1.RoomCodeService.SetRoomCode.
@@ -100,6 +112,11 @@ func (c *roomCodeServiceClient) SetRoomCode(ctx context.Context, req *connect.Re
 // CheckRoomAccess calls cribbly.v1.RoomCodeService.CheckRoomAccess.
 func (c *roomCodeServiceClient) CheckRoomAccess(ctx context.Context, req *connect.Request[v1.CheckRoomAccessRequest]) (*connect.Response[v1.CheckRoomAccessResponse], error) {
 	return c.checkRoomAccess.CallUnary(ctx, req)
+}
+
+// GenerateRoomCode calls cribbly.v1.RoomCodeService.GenerateRoomCode.
+func (c *roomCodeServiceClient) GenerateRoomCode(ctx context.Context, req *connect.Request[v1.GenerateRoomCodeRequest]) (*connect.Response[v1.GenerateRoomCodeResponse], error) {
+	return c.generateRoomCode.CallUnary(ctx, req)
 }
 
 // DoSomething calls cribbly.v1.RoomCodeService.DoSomething.
@@ -113,6 +130,8 @@ type RoomCodeServiceHandler interface {
 	SetRoomCode(context.Context, *connect.Request[v1.SetRoomCodeRequest]) (*connect.Response[v1.SetRoomCodeResponse], error)
 	// Reports whether the current request has room access (valid room_code cookie) or admin session.
 	CheckRoomAccess(context.Context, *connect.Request[v1.CheckRoomAccessRequest]) (*connect.Response[v1.CheckRoomAccessResponse], error)
+	// Creates a new random room code (24h TTL). Admin session or dev bypass only.
+	GenerateRoomCode(context.Context, *connect.Request[v1.GenerateRoomCodeRequest]) (*connect.Response[v1.GenerateRoomCodeResponse], error)
 	DoSomething(context.Context, *connect.Request[v1.SomethingRequest], *connect.ServerStream[v1.SomethingResponse]) error
 }
 
@@ -135,6 +154,12 @@ func NewRoomCodeServiceHandler(svc RoomCodeServiceHandler, opts ...connect.Handl
 		connect.WithSchema(roomCodeServiceMethods.ByName("CheckRoomAccess")),
 		connect.WithHandlerOptions(opts...),
 	)
+	roomCodeServiceGenerateRoomCodeHandler := connect.NewUnaryHandler(
+		RoomCodeServiceGenerateRoomCodeProcedure,
+		svc.GenerateRoomCode,
+		connect.WithSchema(roomCodeServiceMethods.ByName("GenerateRoomCode")),
+		connect.WithHandlerOptions(opts...),
+	)
 	roomCodeServiceDoSomethingHandler := connect.NewServerStreamHandler(
 		RoomCodeServiceDoSomethingProcedure,
 		svc.DoSomething,
@@ -147,6 +172,8 @@ func NewRoomCodeServiceHandler(svc RoomCodeServiceHandler, opts ...connect.Handl
 			roomCodeServiceSetRoomCodeHandler.ServeHTTP(w, r)
 		case RoomCodeServiceCheckRoomAccessProcedure:
 			roomCodeServiceCheckRoomAccessHandler.ServeHTTP(w, r)
+		case RoomCodeServiceGenerateRoomCodeProcedure:
+			roomCodeServiceGenerateRoomCodeHandler.ServeHTTP(w, r)
 		case RoomCodeServiceDoSomethingProcedure:
 			roomCodeServiceDoSomethingHandler.ServeHTTP(w, r)
 		default:
@@ -164,6 +191,10 @@ func (UnimplementedRoomCodeServiceHandler) SetRoomCode(context.Context, *connect
 
 func (UnimplementedRoomCodeServiceHandler) CheckRoomAccess(context.Context, *connect.Request[v1.CheckRoomAccessRequest]) (*connect.Response[v1.CheckRoomAccessResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("cribbly.v1.RoomCodeService.CheckRoomAccess is not implemented"))
+}
+
+func (UnimplementedRoomCodeServiceHandler) GenerateRoomCode(context.Context, *connect.Request[v1.GenerateRoomCodeRequest]) (*connect.Response[v1.GenerateRoomCodeResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("cribbly.v1.RoomCodeService.GenerateRoomCode is not implemented"))
 }
 
 func (UnimplementedRoomCodeServiceHandler) DoSomething(context.Context, *connect.Request[v1.SomethingRequest], *connect.ServerStream[v1.SomethingResponse]) error {
