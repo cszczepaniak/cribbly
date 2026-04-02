@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/jaswdr/faker/v2"
 	qrcode "github.com/skip2/go-qrcode"
 	"github.com/starfederation/datastar-go/datastar"
 
+	"github.com/cszczepaniak/cribbly/internal/fake"
 	"github.com/cszczepaniak/cribbly/internal/persistence/database"
 	"github.com/cszczepaniak/cribbly/internal/persistence/divisions"
 	"github.com/cszczepaniak/cribbly/internal/persistence/teams"
@@ -158,14 +158,13 @@ func (h DivisionsHandler) Generate(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	fake := faker.New()
 	for len(allTeams) > 0 {
 		division, err := h.DivisionRepo.Create(r.Context())
 		if err != nil {
 			return err
 		}
 
-		err = h.DivisionRepo.Rename(r.Context(), division.ID, fake.ProgrammingLanguage().Name())
+		err = h.DivisionRepo.Rename(r.Context(), division.ID, fake.USState())
 		if err != nil {
 			return err
 		}

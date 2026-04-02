@@ -11,7 +11,6 @@ require (
 	github.com/cszczepaniak/go-sqlbuilder v0.0.7
 	github.com/cszczepaniak/gotest v0.0.2
 	github.com/google/uuid v1.6.0
-	github.com/jaswdr/faker/v2 v2.9.1
 	github.com/ncruces/go-sqlite3 v0.30.5
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/starfederation/datastar-go v1.1.0

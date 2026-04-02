@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/jaswdr/faker/v2"
 
+	"github.com/cszczepaniak/cribbly/internal/fake"
 	cribblyv1 "github.com/cszczepaniak/cribbly/internal/gen/cribbly/v1"
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
@@ -198,10 +198,9 @@ func (s *Server) GenerateRandomPlayers(
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("count must be between 1 and 500"))
 	}
 
-	fake := faker.New()
 	for range n {
-		firstName := fake.Person().FirstName()
-		lastName := fake.Person().LastName()
+		firstName := fake.FirstName()
+		lastName := fake.LastName()
 		if _, err := s.PlayerRepo.Create(ctx, firstName, lastName); err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
