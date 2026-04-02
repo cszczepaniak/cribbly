@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"codeberg.org/tealeg/xlsx/v4"
-	"github.com/jaswdr/faker/v2"
 	"github.com/starfederation/datastar-go/datastar"
 
+	"github.com/cszczepaniak/cribbly/internal/fake"
 	"github.com/cszczepaniak/cribbly/internal/moreiter"
 	"github.com/cszczepaniak/cribbly/internal/persistence/players"
 )
@@ -84,11 +84,9 @@ func (h PlayersHandler) GenerateRandomPlayers(w http.ResponseWriter, r *http.Req
 		return err
 	}
 
-	fake := faker.New()
-
 	for range signals.Num {
-		firstName := fake.Person().FirstName()
-		lastName := fake.Person().LastName()
+		firstName := fake.FirstName()
+		lastName := fake.LastName()
 		_, err := h.PlayerRepo.Create(r.Context(), firstName, lastName)
 		if err != nil {
 			return err
